@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}TauxChange{% endblock %}
+
+{% block body %}
+    <h1>TauxChange</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ taux_change.id }}</td>
+            </tr>
+            <tr>
+                <th>TauxAchat</th>
+                <td>{{ taux_change.tauxAchat }}</td>
+            </tr>
+            <tr>
+                <th>TauxVente</th>
+                <td>{{ taux_change.tauxVente }}</td>
+            </tr>
+            <tr>
+                <th>DateDebut</th>
+                <td>{{ taux_change.dateDebut ? taux_change.dateDebut|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>IsActif</th>
+                <td>{{ taux_change.isActif ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>DateFin</th>
+                <td>{{ taux_change.dateFin ? taux_change.dateFin|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_taux_change_index') }}">back to list</a>
+
+    <a href="{{ path('app_taux_change_edit', {'id': taux_change.id}) }}">edit</a>
+
+    {{ include('taux_change/_delete_form.html.twig') }}
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+{% block title %}New Agence{% endblock %}
+
+{% block button %}
+    <a href="{{ path('app_agence_index') }}" class="btn btn-outline-primary">Retour</a>
+
+{% endblock %}
+
+{% block body %}
+
+
+    {{ include('agence/_form.html.twig') }}
+
+{% endblock %}

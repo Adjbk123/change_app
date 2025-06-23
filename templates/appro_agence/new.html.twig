@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New ApproAgence{% endblock %}
+
+{% block body %}
+    <h1>Create new ApproAgence</h1>
+
+    {{ include('appro_agence/_form.html.twig') }}
+
+    <a href="{{ path('app_appro_agence_index') }}">back to list</a>
+{% endblock %}

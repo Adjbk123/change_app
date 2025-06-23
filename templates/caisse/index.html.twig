@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Caisse index{% endblock %}
+
+{% block body %}
+    <h1>Caisse index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>IsActive</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for caisse in caisses %}
+            <tr>
+                <td>{{ caisse.id }}</td>
+                <td>{{ caisse.isActive ? 'Yes' : 'No' }}</td>
+                <td>
+                    <a href="{{ path('app_caisse_show', {'id': caisse.id}) }}">show</a>
+                    <a href="{{ path('app_caisse_edit', {'id': caisse.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_caisse_new') }}">Create new</a>
+{% endblock %}

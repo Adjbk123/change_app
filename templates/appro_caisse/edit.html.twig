@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit ApproCaisse{% endblock %}
+
+{% block body %}
+    <h1>Edit ApproCaisse</h1>
+
+    {{ include('appro_caisse/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_appro_caisse_index') }}">back to list</a>
+
+    {{ include('appro_caisse/_delete_form.html.twig') }}
+{% endblock %}

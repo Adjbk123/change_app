@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ApproCompteGeneral index{% endblock %}
+
+{% block body %}
+    <h1>ApproCompteGeneral index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Montant</th>
+                <th>DateAppro</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for appro_compte_general in appro_compte_generals %}
+            <tr>
+                <td>{{ appro_compte_general.id }}</td>
+                <td>{{ appro_compte_general.montant }}</td>
+                <td>{{ appro_compte_general.dateAppro ? appro_compte_general.dateAppro|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_appro_compte_general_show', {'id': appro_compte_general.id}) }}">show</a>
+                    <a href="{{ path('app_appro_compte_general_edit', {'id': appro_compte_general.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_appro_compte_general_new') }}">Create new</a>
+{% endblock %}

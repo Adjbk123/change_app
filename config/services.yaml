@@ -6,6 +6,14 @@
 parameters:
 
 services:
+    acme.custom_mailer_service:
+        class: App\Service\Custom2FAMailer
+        tags: [ 'scheb_two_factor.email_auth_code_mailer' ]
+
+    acme.custom_form_renderer_service:
+        class: App\Service\Custom2FAFormRenderer
+        tags: [ 'scheb_two_factor.form_renderer' ]
+
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.

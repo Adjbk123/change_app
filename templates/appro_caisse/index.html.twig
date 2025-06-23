@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ApproCaisse index{% endblock %}
+{% block button %}
+    <a href="{{ path('app_appro_caisse_new') }}" class="btn btn-outline-primary">Nouvelle demande</a>
+
+{% endblock %}
+
+{% block body %}
+    <table class="table datatable">
+        <thead class="table-secondary">
+        <tr>
+            <th></th>
+            <th>Montant</th>
+            <th>Statut</th>
+            <th>DateDemande</th>
+            <th>DateTraitement</th>
+            <th>actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for appro_caisse in appro_caisses %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ appro_caisse.montant | number_format(0, ',', ' ') }} {{ appro_caisse.devise.codeIso }}</td>
+                <td>
+                    {% if appro_caisse.statut == 'en_attente' %}
+                        <span class="badge bg-warning text-dark">En attente</span>
+                    {% elseif appro_caisse.statut == 'approuve' %}
+                        <span class="badge bg-success">Approuvé</span>
+                    {% elseif appro_caisse.statut == 'rejete' %}
+                        <span class="badge bg-danger">Rejeté</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ appro_caisse.statut }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ appro_caisse.dateDemande ? appro_caisse.dateDemande|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ appro_caisse.dateTraitement ? appro_caisse.dateTraitement|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    {# Remplacer les liens 'show' et 'edit' par un bouton 'Détail' qui ouvre la modal #}
+                    <button type="button" class="btn btn-info" title="Voir les détails"
+                            data-bs-toggle="modal" data-bs-target="#detailApproCaisseModal{{ appro_caisse.id }}">
+                        <i class="bx bx-show"></i> Détail
+                    </button>
+                    {# Vous pouvez garder un lien edit séparé ou le mettre dans la modal si nécessaire #}
+                    {# <a href="{{ path('app_appro_caisse_edit', {'id': appro_caisse.id}) }}" class="btn btn-sm btn-warning">Edit</a> #}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {# Incluez TOUTES les modals de détail après la table. Chaque modal doit être présente dans le DOM. #}
+    {% for appro_caisse in appro_caisses %}
+        {{ include('appro_caisse/_appro_caisse_detail_modal.html.twig', {'appro': appro_caisse}) }}
+    {% endfor %}
+
+{% endblock %}

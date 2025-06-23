@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ApproAgence{% endblock %}
+
+{% block body %}
+    <h1>ApproAgence</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ appro_agence.id }}</td>
+            </tr>
+            <tr>
+                <th>Montant</th>
+                <td>{{ appro_agence.montant }}</td>
+            </tr>
+            <tr>
+                <th>Statut</th>
+                <td>{{ appro_agence.statut }}</td>
+            </tr>
+            <tr>
+                <th>DateDemande</th>
+                <td>{{ appro_agence.dateDemande ? appro_agence.dateDemande|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>DateTraitement</th>
+                <td>{{ appro_agence.dateTraitement ? appro_agence.dateTraitement|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_appro_agence_index') }}">back to list</a>
+
+    <a href="{{ path('app_appro_agence_edit', {'id': appro_agence.id}) }}">edit</a>
+
+    {{ include('appro_agence/_delete_form.html.twig') }}
+{% endblock %}

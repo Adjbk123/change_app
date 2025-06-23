@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique des taux de change{% endblock %}
+
+{% block button %}
+    <a href="{{ path('app_taux_change_new') }}" class="btn btn-outline-primary">
+        <i class="bx bx-plus-circle"></i> Nouveau taux
+    </a>
+{% endblock %}
+
+{% block body %}
+    <div class="card mt-3">
+        <div class="card-body">
+            <table class="table table-hover datatable">
+                <thead class="table-secondary">
+                <tr>
+                    <th>#</th>
+                    <th>Devise source</th>
+                    <th>Devise cible</th>
+                    <th>Taux Achat</th>
+                    <th>Taux Vente</th>
+                    <th>Date Début</th>
+                    <th>Date Fin</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for taux_change in taux_changes %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td> {{ taux_change.deviseSource.nom }} {{ taux_change.deviseSource.codeIso }}</td>
+                        <td>{{ taux_change.deviseCible.nom }} {{ taux_change.deviseCible.codeIso }}</td>
+                        <td>{{ taux_change.tauxAchat }}</td>
+                        <td>{{ taux_change.tauxVente }}</td>
+                        <td>
+                            {{ taux_change.dateDebut ? taux_change.dateDebut|date('Y-m-d H:i') : '-' }}
+                        </td>
+                        <td>
+                            {{ taux_change.dateFin ? taux_change.dateFin|date('Y-m-d H:i') : '-' }}
+                        </td>
+                        <td>
+                            {% if taux_change.isActif %}
+                                <span class="badge bg-success">Actif</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactif</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ path('app_taux_change_show', {'id': taux_change.id}) }}" class="btn btn-sm btn-outline-primary">
+                                Détails
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

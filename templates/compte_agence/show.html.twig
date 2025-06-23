@@ -1,0 +1,225 @@
+{% extends 'base.html.twig' %}
+{% block title %}Compte Agence - {{ compte_agence.devise.nom }}{% endblock %}
+{% block button %}
+    <a href="{{ path('app_agence_show', {'id': compte_agence.agence.id}) }}" class="btn btn-outline-primary">Retour</a>
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addApproAgenceModal">
+        Faire une demande d'approvisionnement
+    </button>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        {# Carte 1 - Devise #}
+        <div class="col-md-4">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Devise</p>
+                            <h4 class="mb-0">{{ compte_agence.devise.nom }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-info">
+                                <span class="avatar-title">
+                                    <i class="bx bx-money"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Carte 2 - Solde Initial #}
+        <div class="col-md-4">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Solde Initial</p>
+                            <h4 class="mb-0">{{ compte_agence.soldeInitial|number_format(0, '.', ' ') }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-primary">
+                                <span class="avatar-title">
+                                    <i class="bx bx-wallet"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Carte 3 - Solde Restant #}
+        <div class="col-md-4">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Solde Restant</p>
+                            <h4 class="mb-0">{{ compte_agence.soldeRestant|number_format(0, '.', ' ') }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-warning">
+                                <span class="avatar-title">
+                                    <i class="bx bx-bar-chart-alt"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="ps-3 border-start border-primary border-4">
+        <h3 class="mt-4 mb-4">Historique des approvisionnements</h3>
+    </div>
+    <hr>
+    {% if compte_agence.approAgences is defined and compte_agence.approAgences is not empty %}
+        <table class="table table-hover datatable">
+            <thead class="table-secondary">
+            <tr>
+                <th>Date</th>
+                <th>Montant</th>
+                <th>Statut</th>
+                <th>Traité par</th>
+                <th>Actions</th> {# Nouvelle colonne #}
+            </tr>
+            </thead>
+            <tbody>
+            {% for appro in compte_agence.approAgences|sort((a, b) => b.dateDemande <=> a.dateDemande) %} {# Tri par date plus récente #}
+                <tr>
+                    <td>{{ appro.dateDemande|date('Y-m-d H:i') }}</td>
+                    <td>{{ appro.montant|number_format(0, '.', ' ') }} {{ appro.devise.nom }}</td> {# Ajout de la devise #}
+                    <td>
+                        {% if appro.statut == 'en_attente' %}
+                            <span class="badge bg-warning">En attente</span>
+                        {% elseif appro.statut == 'approuve' %}
+                            <span class="badge bg-success">Approuvé</span>
+                        {% else %}
+                            <span class="badge bg-danger">Rejeté</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if appro.validePar is not null %}
+                            {{ appro.validePar.nom ~ ' ' ~ appro.validePar.prenoms }}
+                        {% else %}
+                            ---
+                        {% endif %}
+                    </td>
+                    <td>
+                        {# Bouton Détail qui ouvre un modal pour chaque approvisionnement #}
+                        <button type="button" class="btn btn-info btn-sm"
+                                data-bs-toggle="modal" data-bs-target="#detailApproModal{{ appro.id }}">
+                            Détail
+                        </button>
+                    </td>
+                </tr>
+                {# Modal pour chaque approvisionnement - Placement à l'intérieur de la boucle pour un ID unique #}
+                <div class="modal fade" id="detailApproModal{{ appro.id }}" tabindex="-1" aria-labelledby="detailApproModalLabel{{ appro.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="detailApproModalLabel{{ appro.id }}">Détails de l'approvisionnement</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>Date de la demande :</strong> {{ appro.dateDemande|date('Y-m-d H:i') }}</p>
+                                <p><strong>Montant :</strong> {{ appro.montant|number_format(0, '.', ' ') }} {{ appro.devise.nom }}</p>
+                                <p><strong>Statut :</strong>
+                                    {% if appro.statut == 'en_attente' %}
+                                        <span class="badge bg-warning">En attente</span>
+                                    {% elseif appro.statut == 'approuve' %}
+                                        <span class="badge bg-success">Approuvé</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Rejeté</span>
+                                    {% endif %}
+                                </p>
+                                <p><strong>Demandeur :</strong> {{ appro.demandeur.nom ~ ' ' ~ appro.demandeur.prenoms }}</p>
+                                <p><strong>Agence :</strong> {{ appro.agence.nom }}</p>
+                                <p><strong>Devise :</strong> {{ appro.devise.nom }}</p>
+                                {% if appro.validePar is not null %}
+                                    <p><strong>Traité par :</strong> {{ appro.validePar.nom ~ ' ' ~ appro.validePar.prenoms }}</p>
+                                    <p><strong>Date de traitement :</strong> {{ appro.dateTraitement|date('Y-m-d H:i') }}</p>
+                                {% endif %}
+                                {% if appro.statut == 'en_attente' %}
+                                    <hr>
+                                    <p class="fw-bold">Actions :</p>
+                                    {# Les formulaires d'actions pour valider/rejeter #}
+                                    <div class="d-flex gap-2">
+
+                                        <form id="validerForm{{ appro.id }}" action="{{ path('app_appro_agence_valider', {'id': appro.id}) }}" method="post">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('valider' ~ appro.id) }}">
+                                            <button type="button" class="btn btn-success w-100" onclick="confirmValidation({{ appro.id }})">Valider</button>
+                                        </form>
+                                        <form id="rejeterForm{{ appro.id }}" action="{{ path('app_appro_agence_rejeter', {'id': appro.id}) }}" method="post">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('rejeter' ~ appro.id) }}">
+                                            <button type="button" class="btn btn-outline-danger w-100" onclick="confirmRejet({{ appro.id }})">Rejeter</button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Aucune demande d'approvisionnement enregistrée pour ce compte.</p>
+    {% endif %}
+    {# Modal Bootstrap 5 pour faire une demande d'approvisionnement (inchangé) #}
+    <div class="modal fade" id="addApproAgenceModal" tabindex="-1" aria-labelledby="addApproAgenceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addApproAgenceModalLabel">Demande d'approvisionnement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form_start(formApproAgence) }}
+                    {{ form_widget(formApproAgence) }}
+                    <button type="submit" class="btn btn-primary mt-3">Soumettre la demande</button>
+                    {{ form_end(formApproAgence) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        function confirmValidation(approId) {
+            Swal.fire({
+                title: 'Êtes-vous sûr?',
+                text: "Vous allez valider cette demande d'approvisionnement!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Oui, valider!',
+                cancelButtonText: 'Annuler'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('validerForm' + approId).submit();
+                }
+            });
+        }
+
+        function confirmRejet(approId) {
+            Swal.fire({
+                title: 'Êtes-vous sûr?',
+                text: "Vous allez rejeter cette demande d'approvisionnement!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Oui, rejeter!',
+                cancelButtonText: 'Annuler'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('rejeterForm' + approId).submit();
+                }
+            });
+        }
+    </script>
+{% endblock %}

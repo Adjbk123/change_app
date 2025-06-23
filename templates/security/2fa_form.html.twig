@@ -1,0 +1,28 @@
+{% extends 'security/baseAuth.html.twig' %}
+
+{% block title %}Vérification en deux étapes{% endblock %}
+{% block pageTitle %}Vérification en deux étapes{% endblock %}
+
+{% block body %}
+
+            <p class="py-2 text-center">Un code vous a été envoyé par email. Veuillez le saisir ci-dessous pour continuer.</p>
+
+
+    <form method="post" action="{{ path('2fa_login_check') }}">
+
+    <div class="form-group">
+                    <input  id="_auth_code"
+                            type="text"
+                            name="_auth_code"
+                            autocomplete="one-time-code"
+                            class ="form-control form-control-lg" required autofocus placeholder="Code de vérification">
+                </div>
+        <div class="my-3">
+            <button type="submit" class="btn btn-primary btn-lg  btn-rounded w-100">
+                <i class="fe-log-in"></i> Vérifier
+            </button>
+        </div>
+
+            </form>
+
+{% endblock %}

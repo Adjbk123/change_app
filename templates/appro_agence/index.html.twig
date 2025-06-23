@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique des Approvisionnements Agence{% endblock %}
+
+{% block button %}
+    <a href="{{ path('app_appro_agence_new') }}" class="btn btn-outline-primary">
+        <i class="bx bx-plus"></i> Nouvelle demande
+    </a>
+{% endblock %}
+
+{% block body %}
+
+    <table class="table table-hover datatable">
+        <thead class="table-light">
+        <tr>
+            <th>#</th>
+            <th>Montant </th>
+            <th>Statut</th>
+            <th>Date Demande</th>
+            <th>Date Traitement</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for appro in appro_agences %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ appro.montant | number_format(0, ',', ' ') }} {{ appro.devise.codeIso }}</td>
+                <td>
+                    {% if appro.statut == 'en_attente' %}
+                        <span class="badge bg-warning text-dark">En attente</span>
+                    {% elseif appro.statut == 'approuve' %}
+                        <span class="badge bg-success">Approuvé</span>
+                    {% elseif appro.statut == 'rejete' %}
+                        <span class="badge bg-danger">Rejeté</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ appro.statut }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ appro.dateDemande ? appro.dateDemande|date('d/m/Y H:i') : '-' }}</td>
+                <td>{{ appro.dateTraitement ? appro.dateTraitement|date('d/m/Y H:i') : '-' }}</td>
+                <td>
+                    {# Le bouton "Voir" est remplacé par un bouton qui ouvre la modal #}
+                    <button type="button" class="btn  btn-info" title="Voir les détails"
+                            data-bs-toggle="modal" data-bs-target="#detailApproAgenceModal{{ appro.id }}">
+                        <i class="bx bx-show"></i>
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {# Incluez TOUTES les modals de détail après la table. Chaque modal doit être présent dans le DOM. #}
+    {# Cela garantit que la modal correcte s'ouvre lorsque l'utilisateur clique sur "Détail". #}
+    {% for appro in appro_agences %}
+        {{ include('appro_agence/_appro_agence_detail_modal.html.twig', {'appro': appro}) }}
+    {% endfor %}
+
+{% endblock %}

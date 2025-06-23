@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ApproCaisse{% endblock %}
+
+{% block body %}
+    <h1>ApproCaisse</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ appro_caisse.id }}</td>
+            </tr>
+            <tr>
+                <th>Montant</th>
+                <td>{{ appro_caisse.montant }}</td>
+            </tr>
+            <tr>
+                <th>Statut</th>
+                <td>{{ appro_caisse.statut }}</td>
+            </tr>
+            <tr>
+                <th>DateDemande</th>
+                <td>{{ appro_caisse.dateDemande ? appro_caisse.dateDemande|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>DateTraitement</th>
+                <td>{{ appro_caisse.dateTraitement ? appro_caisse.dateTraitement|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_appro_caisse_index') }}">back to list</a>
+
+    <a href="{{ path('app_appro_caisse_edit', {'id': appro_caisse.id}) }}">edit</a>
+
+    {{ include('appro_caisse/_delete_form.html.twig') }}
+{% endblock %}

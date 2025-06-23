@@ -1,0 +1,42 @@
+{% extends 'security/baseAuth.html.twig' %}
+
+{% block title %}Réinitialiser votre mot de passe{% endblock %}
+{% block pageTitle %}Mot de passe oublié ?{% endblock %}
+{% block description %}Entrez votre adresse e-mail pour recevoir un lien de réinitialisation{% endblock %}
+
+{% block body %}
+    {% for flash_error in app.flashes('reset_password_error') %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %}
+
+    {{ form_start(requestForm) }}
+    {{ form_row(requestForm.email) }}
+
+    <div class="my-3">
+        <small>Nous vous enverrons un lien pour réinitialiser votre mot de passe.</small>
+    </div>
+
+    <button class="btn btn-primary w-100">Envoyer le lien</button>
+    {{ form_end(requestForm) }}
+{% endblock %}
+{% extends 'security/baseAuth.html.twig' %}
+
+{% block title %}Réinitialiser votre mot de passe{% endblock %}
+{% block pageTitle %}Mot de passe oublié ?{% endblock %}
+{% block description %}Entrez votre adresse e-mail pour recevoir un lien de réinitialisation{% endblock %}
+
+{% block body %}
+    {% for flash_error in app.flashes('reset_password_error') %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %}
+
+    {{ form_start(requestForm) }}
+    {{ form_row(requestForm.email) }}
+
+    <div class="my-3">
+        <small>Nous vous enverrons un lien pour réinitialiser votre mot de passe.</small>
+    </div>
+
+    <button class="btn btn-primary w-100">Envoyer le lien</button>
+    {{ form_end(requestForm) }}
+{% endblock %}

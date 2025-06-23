@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Caisse - {{ caisse.nom }}{% endblock %}
+
+{% block button %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{{ path('app_agence_show', {'id': caisse.agence.id}) }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCompteCaisseModal">
+            <i class="bi bi-plus-circle"></i> Ajouter un compte caisse
+        </button>
+    </div>
+{% endblock %}
+
+{% block body %}
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <strong>Détails de la caisse</strong>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered mb-0">
+                <tbody>
+                <tr>
+                    <th>Nom</th>
+                    <td>{{ caisse.nom }}</td>
+                </tr>
+                {# Ajoute ici d'autres champs si besoin comme devise, agence, etc. #}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="border-start border-4 border-primary ps-3 mb-3">
+        <h4 class="text-primary">Comptes liés à la caisse</h4>
+    </div>
+
+    {% if caisse.compteCaisses is not empty %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Nom du compte</th>
+                    <th>Solde initial</th>
+                    <th>Solde restant</th>
+                    <th>Seuil Alerte</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for compteCaisse in caisse.compteCaisses %}
+                    <tr>
+                        <td>{{ compteCaisse.devise.nom }}</td>
+                        <td>{{ compteCaisse.soldeInitial | number_format(0, '.', ' ') }} {{ compteCaisse.devise.codeIso }}</td>
+                        <td>{{ compteCaisse.soldeRestant | number_format(0, '.', ' ') }} {{ compteCaisse.devise.codeIso }}</td>
+                        <td>{{ compteCaisse.seuilAlerte | number_format(0, '.', ' ') }} {{ compteCaisse.devise.codeIso }}</td>
+                        <td>
+                            <a href="{{ path('app_compte_caisse_show', {'id': compteCaisse.id}) }}"
+                               class="btn btn-sm btn-outline-info w-100">Gérer
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            Aucun compte caisse enregistré pour cette caisse.
+        </div>
+    {% endif %}
+
+    {# Modal Bootstrap pour ajouter un compte caisse #}
+    <div class="modal fade" id="addCompteCaisseModal" tabindex="-1" aria-labelledby="addCompteCaisseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="addCompteCaisseModalLabel">
+                        Ajouter un compte caisse à {{ caisse.nom }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form_start(formCompteCaisse) }}
+                    <div class="mb-3">
+                        {{ form_widget(formCompteCaisse) }}
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">Créer le compte</button>
+                    </div>
+                    {{ form_end(formCompteCaisse) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

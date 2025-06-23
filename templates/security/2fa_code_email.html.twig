@@ -1,0 +1,48 @@
+
+    <table class="body-wrap" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; width: 100%; background-color: transparent;">
+        <tr>
+            <td></td>
+            <td class="container" width="600" style="max-width: 600px; margin: 0 auto;">
+                <div class="content" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <table class="main" width="100%" cellpadding="0" cellspacing="0" style="border-radius: 3px; border: none;">
+                        <tr>
+                            <td class="content-wrap" style="color: #495057; font-size: 14px; padding: 30px; box-shadow: 0 0.75rem 1.5rem rgba(18,38,63,.03); border-radius: 7px; background-color: #fff;">
+                                <table width="100%">
+                                    <tr>
+                                        <td style="padding-bottom: 20px;">
+                                            Bonjour,
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding-bottom: 20px;">
+                                            Voici votre code de vérification pour finaliser votre connexion :
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: center; padding: 20px 0;">
+                                            <h1 style="font-size: 32px; margin: 0;">{{ code }}</h1>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding-bottom: 20px;">
+                                            Ce code est valable pendant quelques minutes.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding-top: 30px;">
+                                            Merci,<br><strong>L’équipe SecureVote</strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: center; font-size: 12px; color: #999; padding-top: 40px;">
+                                            © {{ "now"|date("Y") }} SecureVote
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>

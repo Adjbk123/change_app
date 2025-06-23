@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ApproCompteGeneral{% endblock %}
+
+{% block body %}
+    <h1>ApproCompteGeneral</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ appro_compte_general.id }}</td>
+            </tr>
+            <tr>
+                <th>Montant</th>
+                <td>{{ appro_compte_general.montant }}</td>
+            </tr>
+            <tr>
+                <th>DateAppro</th>
+                <td>{{ appro_compte_general.dateAppro ? appro_compte_general.dateAppro|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_appro_compte_general_index') }}">back to list</a>
+
+    <a href="{{ path('app_appro_compte_general_edit', {'id': appro_compte_general.id}) }}">edit</a>
+
+    {{ include('appro_compte_general/_delete_form.html.twig') }}
+{% endblock %}

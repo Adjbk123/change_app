@@ -1,0 +1,18 @@
+{% extends 'security/baseAuth.html.twig' %}
+
+{% block title %}Nouveau mot de passe{% endblock %}
+{% block pageTitle %}Réinitialiser le mot de passe{% endblock %}
+{% block description %}Saisissez votre nouveau mot de passe sécurisé{% endblock %}
+
+{% block body %}
+    {% for flash_error in app.flashes('reset_password_error') %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %}
+
+    {{ form_start(resetForm) }}
+    {{ form_row(resetForm.plainPassword.first, {'label': 'Nouveau mot de passe'}) }}
+    {{ form_row(resetForm.plainPassword.second, {'label': 'Répétez le mot de passe'}) }}
+
+    <button class="btn btn-primary w-100">Réinitialiser</button>
+    {{ form_end(resetForm) }}
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+{% block title %}Comptes Bancaires - {{ pays.nom }}{% endblock %}
+{% block button %}
+    <a href="{{ path('app_pays_compte_bancaire_index') }}" class="btn btn-outline-primary mb-3">
+        <i class="bx bx-arrow-back"></i> Retour à la liste des pays
+    </a>
+{% endblock %}
+{% block body %}
+
+    {% if banques is not empty %}
+        {% for banqueId, banqueData in banques %}
+            <div class="card border shadow-sm mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bx bxs-bank me-2"></i> {{ banqueData['banque'].nom }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if banqueData['comptes'] is not empty %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle text-center">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>N° de Compte</th>
+                                    <th>Devise</th>
+                                    <th>Solde initial</th>
+                                    <th>Solde restant</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for compte in banqueData['comptes'] %}
+                                    <tr>
+                                        <td>{{ compte.numeroBancaire }}</td>
+                                        <td>{{ compte.devise.nom }}</td>
+                                        <td>{{ compte.soldeInitial|number_format(0, '.', ' ') }}</td>
+                                        <td>{{ compte.soldeRestant|number_format(0, '.', ' ') }}</td>
+                                        <td>
+                                            <button class="btn btn-success btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#approModal{{ compte.id }}">
+                                                Approvisionner
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {# Modal d'approvisionnement #}
+                                    <div class="modal fade" id="approModal{{ compte.id }}" tabindex="-1"
+                                         aria-labelledby="approModalLabel{{ compte.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="approModalLabel{{ compte.id }}">
+                                                        Approvisionnement du compte {{ compte.numeroBancaire }}
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="{{ path('app_compte_bancaire_appro', { id: compte.id }) }}" method="post">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Montant</label>
+                                                            <input type="text" name="montant" class="form-control money-input" required>
+                                                        </div>
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('approvisionnement_bancaire' ~ compte.id) }}">
+                                                        <div class="d-grid">
+                                                            <button type="submit" class="btn btn-primary">Soumettre</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Aucun compte bancaire enregistré pour cette banque.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-warning">Aucune banque enregistrée pour {{ pays.nom }}.</div>
+    {% endif %}
+{% endblock %}

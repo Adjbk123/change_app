@@ -1,0 +1,280 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des comptes utilisateurs{% endblock %}
+
+{% block button %}
+    <a href="{{ path('app_register') }}" class="btn btn-outline-primary">
+        <i class="bx bx-user-plus me-2"></i> Créer un compte
+    </a>
+{% endblock %}
+
+{% block body %}
+    <div class="table-responsive">
+        <table class="table table-striped datatable">
+            <thead>
+            <tr>
+                <th scope="col" class="text-center">N°</th>
+                <th scope="col">Email</th>
+                <th scope="col">Nom & Prénoms</th>
+                <th scope="col">Téléphone</th>
+                <th scope="col" class="text-center">Rôle Principal</th>
+                <th scope="col" class="text-center">Statut</th>
+                <th scope="col">Créé le</th>
+                <th scope="col">Mis à jour le</th>
+                <th scope="col" class="text-center">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr>
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.nomComplet }}</td>
+                    <td>{{ user.telephone }}</td>
+                    <td class="text-center">
+                        {% if 'ROLE_ADMIN' in user.roles %}
+                            <span class="badge bg-danger">Administrateur</span>
+                        {% elseif 'ROLE_CAISSE' in user.roles %}
+                            <span class="badge bg-info text-white">Caissier(e)</span>
+                        {% elseif 'ROLE_USER' in user.roles %}
+                            <span class="badge bg-secondary">Responsable d'agence</span>
+                        {% else %}
+                            <span class="badge bg-light text-muted">Non défini</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if user.isActive %}
+                            <span class="badge bg-success text-white">
+                                <i class="bx bx-check-circle me-1"></i>Actif
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning text-white">
+                                <i class="bx bx-error-circle me-1"></i>Inactif
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.createdAt ? user.createdAt|date('Y-m-d H:i:s') : 'N/A' }}</td>
+                    <td>{{ user.updatedAt ? user.updatedAt|date('Y-m-d H:i:s') : 'N/A' }}</td>
+                    <td class="text-center">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton_{{ user.id }}" data-bs-toggle="dropdown" aria-expanded="false" title="Plus d'actions">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton_{{ user.id }}">
+                                <li>
+                                    <a class="dropdown-item" href="{{ path('app_user_show', {'id': user.id}) }}">
+                                        <i class="bx bx-show me-2"></i>Voir les détails
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ path('app_user_edit', {'id': user.id}) }}">
+                                        <i class="bx bx-edit-alt me-2"></i>Modifier le compte
+                                    </a>
+                                </li>
+                                {# Nouveau lien pour la réinitialisation de mot de passe #}
+                                <li>
+                                    <a class="dropdown-item reset-password-btn" href="#"
+                                       data-bs-toggle="modal"
+                                       data-bs-target="#resetPasswordModal"
+                                       data-user-id="{{ user.id }}"
+                                       data-user-name="{{ user.nomComplet }}"
+                                       data-csrf-token="{{ csrf_token('reset_password' ~ user.id) }}">
+                                        <i class="bx bx-key me-2"></i> Réinitialiser mot de passe
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% if user.isActive %}
+                                    <li>
+                                        <a class="dropdown-item text-danger toggle-status-btn" href="#"
+                                           data-action="{{ path('app_user_toggle_status', {'id': user.id}) }}"
+                                           data-message="Êtes-vous sûr de vouloir désactiver le compte de {{ user.nomComplet }} ?"
+                                           data-token="{{ csrf_token('toggle' ~ user.id) }}"
+                                           data-confirm-text="Oui, désactiver"
+                                           data-cancel-text="Annuler"
+                                           data-title="Désactiver le compte">
+                                            <i class="bx bx-user-x me-2"></i> Désactiver le compte
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li>
+                                        <a class="dropdown-item text-success toggle-status-btn" href="#"
+                                           data-action="{{ path('app_user_toggle_status', {'id': user.id}) }}"
+                                           data-message="Êtes-vous sûr de vouloir activer le compte de {{ user.nomComplet }} ?"
+                                           data-token="{{ csrf_token('toggle' ~ user.id) }}"
+                                           data-confirm-text="Oui, activer"
+                                           data-cancel-text="Annuler"
+                                           data-title="Activer le compte">
+                                            <i class="bx bx-user-check me-2"></i> Activer le compte
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="9" class="text-center py-4">Aucun utilisateur trouvé.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# Le MODAL pour la réinitialisation du mot de passe #}
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resetPasswordModalLabel">Réinitialiser le mot de passe de <span id="modalUserName"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="resetPasswordForm" method="POST" action=""> {# L'action sera définie par JS #}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">Nouveau mot de passe</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required minlength="8" placeholder="Minimum 8 caractères">
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirmer le nouveau mot de passe</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        <input type="hidden" name="_token" id="resetPasswordCsrfToken" value="">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Mettre à jour le mot de passe</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }} {# N'oubliez pas d'inclure les scripts du parent si vous en avez dans base.html.twig #}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Script pour le toggle status (déjà existant)
+            const toggleButtons = document.querySelectorAll('.toggle-status-btn');
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const actionUrl = this.getAttribute('data-action');
+                    const message = this.getAttribute('data-message');
+                    const token = this.getAttribute('data-token');
+                    const confirmText = this.getAttribute('data-confirm-text');
+                    const cancelText = this.getAttribute('data-cancel-text');
+                    const title = this.getAttribute('data-title');
+                    const isDeactivation = this.classList.contains('text-danger');
+
+                    Swal.fire({
+                        title: title,
+                        text: message,
+                        icon: isDeactivation ? 'warning' : 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: isDeactivation ? '#dc3545' : '#28a745',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: confirmText,
+                        cancelButtonText: cancelText,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = actionUrl;
+                            form.style.display = 'none';
+
+                            const tokenInput = document.createElement('input');
+                            tokenInput.type = 'hidden';
+                            tokenInput.name = '_token';
+                            tokenInput.value = token;
+                            form.appendChild(tokenInput);
+
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // --- NOUVEAU SCRIPT POUR LA RÉINITIALISATION DU MOT DE PASSE ---
+            const resetPasswordModal = document.getElementById('resetPasswordModal');
+            const resetPasswordForm = document.getElementById('resetPasswordForm');
+            const modalUserNameSpan = document.getElementById('modalUserName');
+            const newPasswordInput = document.getElementById('new_password');
+            const confirmPasswordInput = document.getElementById('confirm_password');
+            const resetPasswordCsrfTokenInput = document.getElementById('resetPasswordCsrfToken');
+
+            // Écouteur pour l'ouverture du modal
+            resetPasswordModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Bouton qui a déclenché le modal
+                const userId = button.getAttribute('data-user-id');
+                const userName = button.getAttribute('data-user-name');
+                const csrfToken = button.getAttribute('data-csrf-token');
+
+                // Met à jour l'action du formulaire et les données du modal
+                resetPasswordForm.action = `{{ path('app_user_reset_password', {'id': 'PLACEHOLDER'}) }}`.replace('PLACEHOLDER', userId);
+                modalUserNameSpan.textContent = userName;
+                resetPasswordCsrfTokenInput.value = csrfToken;
+
+                // Réinitialise les champs du formulaire à chaque ouverture
+                newPasswordInput.value = '';
+                confirmPasswordInput.value = '';
+            });
+
+            // Écouteur pour la soumission du formulaire du modal
+            resetPasswordForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // Empêche la soumission normale du formulaire
+
+                const newPassword = newPasswordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+
+                if (newPassword !== confirmPassword) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur de saisie',
+                        text: 'Les mots de passe ne correspondent pas.',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: 'Compris'
+                    });
+                    return; // Arrête la soumission
+                }
+
+                if (newPassword.length < 8) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Mot de passe trop court',
+                        text: 'Le nouveau mot de passe doit contenir au moins 8 caractères.',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: 'Compris'
+                    });
+                    return;
+                }
+
+                // Soumet le formulaire via JavaScript après validation
+                Swal.fire({
+                    title: 'Confirmer la réinitialisation ?',
+                    text: `Le mot de passe de ${modalUserNameSpan.textContent} sera modifié.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0d6efd',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Oui, réinitialiser',
+                    cancelButtonText: 'Annuler'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Cacher le modal Bootstrap avant de soumettre
+                        const bsModal = bootstrap.Modal.getInstance(resetPasswordModal);
+                        if (bsModal) {
+                            bsModal.hide();
+                        }
+                        resetPasswordForm.submit(); // Soumet le formulaire réel
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

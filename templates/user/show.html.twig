@@ -1,0 +1,133 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de l'utilisateur : {{ user.nomComplet }}{% endblock %}
+{% block button%}
+    <div class="d-flex justify-content-end">
+
+        <div>
+            <a href="{{ path('app_user_index') }}" class="btn btn-secondary me-2">
+                <i class="material-icons me-1">arrow_back</i> Retour à la liste
+            </a>
+            <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-outline-primary">
+                <i class="material-icons me-1">edit</i> Modifier
+            </a>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+
+        {# Informations de base de l'utilisateur #}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary">
+                <h5 class="mb-0  text-white">Informations Personnelles</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-striped mb-0">
+                    <tbody>
+                    <tr>
+                        <th scope="row" class="w-25">ID</th>
+                        <td>{{ user.id }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Email</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Nom Complet</th>
+                        <td>{{ user.nomComplet }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Téléphone</th>
+                        <td>{{ user.telephone ?? 'N/A' }}</td> {# Utilisation de l'opérateur "null-coalescing" #}
+                    </tr>
+                    <tr>
+                        <th scope="row">Rôles Système</th>
+                        <td>
+                            {% if user.roles is not empty %}
+                                {% for role in user.roles %}
+                                    {% if role == 'ROLE_ADMIN' %}
+                                        <span class="badge badge-danger me-1">Administrateur</span>
+                                    {% elseif role == 'ROLE_CAISSE' %}
+                                        <span class="badge badge-info text-dark me-1">Caissier(e)</span>
+                                    {% elseif role == 'ROLE_RESPONSABLE' %}
+                                        <span class="badge badge-secondary me-1">Responsable d'agence</span>
+                                    {% else %}
+                                        <span class="badge badge-light text-muted me-1">{{ role }}</span>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <span class="badge badge-light text-muted">Aucun rôle défini</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Statut du Compte</th>
+                        <td>
+                            {% if user.isActive %}
+                                <span class="badge badge-success text-white"><i class="material-icons icon-small me-1">check_circle</i> Actif</span>
+                            {% else %}
+                                <span class="badge badge-warning text-white"><i class="material-icons icon-small me-1">warning</i> Inactif</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Créé le</th>
+                        <td>{{ user.createdAt ? user.createdAt|date('Y-m-d H:i:s') : 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Dernière mise à jour le</th>
+                        <td>{{ user.updatedAt ? user.updatedAt|date('Y-m-d H:i:s') : 'N/A' }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# Historique des affectations d'agence #}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary">
+                <h5 class="mb-0 text-white">Historique des affectations d'agence</h5>
+            </div>
+            <div class="card-body">
+                {% if user.affectationAgences is not empty %}
+                    <table class="table table-bordered table-striped mb-0">
+                        <thead>
+                        <tr>
+                            <th scope="col" class="text-center">N°</th>
+                            <th scope="col">Agence</th>
+                            <th scope="col">Rôle Interne</th>
+                            <th scope="col">Date de début</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for affectation in user.affectationAgences|sort((a, b) => b.dateDebut <=> a.dateDebut) %} {# Tri par date de début décroissante #}
+                            <tr>
+                                <td class="text-center">{{ loop.index }}</td>
+                                <td>{{ affectation.agence.nom ?? 'Agence inconnue' }}</td>
+                                <td>
+                                    {% if affectation.roleInterne == 'ROLE_ADMIN' %}
+                                        <span class="badge badge-danger">Administrateur</span>
+                                    {% elseif affectation.roleInterne == 'ROLE_CAISSE' %}
+                                        <span class="badge badge-info text-white">Caissier(e)</span>
+                                    {% elseif affectation.roleInterne == 'ROLE_USER' %}
+                                        <span class="badge badge-secondary">Responsable d'agence</span>
+                                    {% else %}
+                                    {% endif %}
+                                </td>
+                                <td>{{ affectation.dateDebut ? affectation.dateDebut|date('Y-m-d') : 'N/A' }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted text-center">Aucune affectation d'agence trouvée pour cet utilisateur.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}TypeClient{% endblock %}
+
+{% block body %}
+    <h1>TypeClient</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ type_client.id }}</td>
+            </tr>
+            <tr>
+                <th>Libelle</th>
+                <td>{{ type_client.libelle }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_type_client_index') }}">back to list</a>
+
+    <a href="{{ path('app_type_client_edit', {'id': type_client.id}) }}">edit</a>
+
+    {{ include('type_client/_delete_form.html.twig') }}
+{% endblock %}

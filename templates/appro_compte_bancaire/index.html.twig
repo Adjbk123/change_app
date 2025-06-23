@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ApproCompteBancaire index{% endblock %}
+
+{% block body %}
+    <h1>ApproCompteBancaire index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Montant</th>
+                <th>DateAppro</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for appro_compte_bancaire in appro_compte_bancaires %}
+            <tr>
+                <td>{{ appro_compte_bancaire.id }}</td>
+                <td>{{ appro_compte_bancaire.montant }}</td>
+                <td>{{ appro_compte_bancaire.dateAppro ? appro_compte_bancaire.dateAppro|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_appro_compte_bancaire_show', {'id': appro_compte_bancaire.id}) }}">show</a>
+                    <a href="{{ path('app_appro_compte_bancaire_edit', {'id': appro_compte_bancaire.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_appro_compte_bancaire_new') }}">Create new</a>
+{% endblock %}

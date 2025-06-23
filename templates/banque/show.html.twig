@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Banque - {{ banque.nom }}{% endblock %}
+
+{% block button %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{{ path('app_banque_index') }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCompteBancaireModal">
+            <i class="bi bi-plus-circle"></i> Ajouter un compte bancaire
+        </button>
+    </div>
+{% endblock %}
+
+{% block body %}
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <strong>Détails de la banque</strong>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered mb-0">
+                <tbody>
+                <tr>
+                    <th style="width: 200px;">Nom</th>
+                    <td>{{ banque.nom }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="border-start border-4 border-primary ps-3 mb-3">
+        <h4 class="text-primary">Comptes bancaires</h4>
+    </div>
+
+    {% if banque.compteBancaires is not empty %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Pays</th>
+                    <th>Numéro</th>
+                    <th>Solde initial</th>
+                    <th>Solde restant</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for compte in banque.compteBancaires %}
+                    <tr>
+                        <td>{{ compte.pays.nom }}</td>
+                        <td>{{ compte.numeroBancaire }}</td>
+                        <td>{{ compte.soldeInitial | number_format(0, '.', ' ') }} {{ compte.devise.codeIso }}</td>
+                        <td>{{ compte.soldeRestant | number_format(0, '.', ' ') }} {{ compte.devise.codeIso }}</td>
+                        <td>
+                            <a href="{{ path('app_compte_bancaire_show', {'id': compte.id}) }}" class="btn btn-sm btn-outline-info">
+                                Voir
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            Aucun compte bancaire enregistré pour cette banque.
+        </div>
+    {% endif %}
+
+    {# Modal Bootstrap pour ajouter un compte bancaire #}
+    <div class="modal fade" id="addCompteBancaireModal" tabindex="-1" aria-labelledby="addCompteBancaireModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="addCompteBancaireModalLabel">
+                        Ajouter un compte à {{ banque.nom }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form_start(formCompteBancaire) }}
+                    <div class="mb-3">
+                        {{ form_widget(formCompteBancaire) }}
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">Créer le compte</button>
+                    </div>
+                    {{ form_end(formCompteBancaire) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des types de client{% endblock %}
+{% block button %}
+
+    <a href="{{ path('app_type_client_new') }}" class="btn btn-outline-primary">Create new</a>
+
+{% endblock %}
+
+{% block body %}
+
+
+    <table class="table datatable table-hover">
+        <thead class="table-secondary">
+            <tr>
+                <th>Id</th>
+                <th>Libelle</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for type_client in type_clients %}
+            <tr>
+                <td>{{ type_client.id }}</td>
+                <td>{{ type_client.libelle }}</td>
+                <td>
+                    <a href="{{ path('app_type_client_show', {'id': type_client.id}) }}">show</a>
+                    <a href="{{ path('app_type_client_edit', {'id': type_client.id}) }}">edit</a>
+                </td>
+            </tr>
+
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

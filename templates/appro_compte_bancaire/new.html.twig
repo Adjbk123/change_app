@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New ApproCompteBancaire{% endblock %}
+
+{% block body %}
+    <h1>Create new ApproCompteBancaire</h1>
+
+    {{ include('appro_compte_bancaire/_form.html.twig') }}
+
+    <a href="{{ path('app_appro_compte_bancaire_index') }}">back to list</a>
+{% endblock %}

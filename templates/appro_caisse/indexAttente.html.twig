@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Appro. Caisse en attente{% endblock %}
+{% block button %}
+    <a href="{{ path('app_appro_caisse_index') }}" class="btn btn-outline-primary">Retour</a>
+{% endblock %}
+
+{% block body %}
+    <table class="table datatable">
+        <thead class="table-secondary">
+        <tr>
+            <th>N°</th>
+            <th>Caisse</th>
+            <th>Montant</th>
+            <th>Statut</th>
+            <th>DateDemande</th>
+            <th>DateTraitement</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for appro_caisse in appro_caisses %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ appro_caisse.caisse.nom }}</td>
+                <td>{{ appro_caisse.montant }}</td>
+                <td>{{ appro_caisse.statut }}</td>
+                <td>{{ appro_caisse.dateDemande ? appro_caisse.dateDemande|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ appro_caisse.dateTraitement ? appro_caisse.dateTraitement|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_appro_caisse_show', {'id': appro_caisse.id}) }}">show</a>
+                    <a href="{{ path('app_appro_caisse_edit', {'id': appro_caisse.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

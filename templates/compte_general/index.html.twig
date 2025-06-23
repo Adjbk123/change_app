@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Listes comptes principaux{% endblock %}
+{% block button %}
+    {# Remplacer le lien par un bouton qui ouvre le modal #}
+    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCompteGeneralModal">
+        Nouvel ajout
+    </button>
+{% endblock %}
+
+{% block body %}
+    <table class="table datatable"> {# Ajout de la classe datatable si vous utilisez une librairie pour des tableaux interactifs #}
+        <thead class="table-secondary">
+        <tr>
+            <th>N°</th>
+            <th>Devise</th>
+            <th>Solde Initial</th>
+            <th>Solde Restant</th>
+            <th>Seuil Alerte</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for compte_general in compte_generals %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ compte_general.devise.nom }}</td>
+                <td>{{ compte_general.soldeInitial }}</td>
+                <td>{{ compte_general.soldeRestant }}</td>
+                <td>{{ compte_general.seuilAlerte }}</td>
+                <td>
+
+                   <a href="{{ path('app_compte_general_show', {'id': compte_general.id}) }}" class="btn btn-sm btn-outline-info">Gérér</a>
+
+
+                </td>
+            </tr>
+
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {# Le Modal Bootstrap 5 pour ajouter un compte général #}
+    <div class="modal fade" id="addCompteGeneralModal" tabindex="-1" aria-labelledby="addCompteGeneralModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCompteGeneralModalLabel">Ajouter un nouveau compte principal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {# Ici, nous allons inclure le formulaire de création de compte général #}
+                    {{ form_start(formCompteGeneral) }}
+                    {{ form_widget(formCompteGeneral) }}
+                    <button type="submit" class="btn btn-primary mt-3">Créer le compte</button>
+                    {{ form_end(formCompteGeneral) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

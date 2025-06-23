@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New CompteGeneral{% endblock %}
+
+{% block body %}
+    <h1>Create new CompteGeneral</h1>
+
+    {{ include('compte_general/_form.html.twig') }}
+
+    <a href="{{ path('app_compte_general_index') }}">back to list</a>
+{% endblock %}

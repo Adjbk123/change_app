@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des pays{% endblock %}
+{% block button %}
+    <a href="{{ path('app_pays_new') }}" class="btn btn-outline-primary">Nouvel ajout</a>
+{% endblock %}
+
+{% block body %}
+    <table class="table datatable">
+        <thead class="table-secondary">
+        <tr>
+            <th>N°</th>
+            <th>Nom</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for pay in pays %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ pay.nom }}</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton{{ pay.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bx bx-dots-vertical-rounded"></i>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ pay.id }}">
+                            <li><a class="dropdown-item" href="{{ path('app_pays_show', {'id': pay.id}) }}">Voir</a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_pays_edit', {'id': pay.id}) }}">Modifier</a></li>
+                            {# Optionnel : Pour un bouton de suppression, il est recommandé d'utiliser un formulaire distinct pour des raisons de sécurité et de bonnes pratiques. #}
+                            {#
+                            <li>
+                                <form method="post" action="{{ path('app_pays_delete', {'id': pay.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce pays ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ pay.id) }}">
+                                    <button class="dropdown-item text-danger">Supprimer</button>
+                                </form>
+                            </li>
+                            #}
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">Aucun enregistrement trouvé</td> {# Traduit en français #}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

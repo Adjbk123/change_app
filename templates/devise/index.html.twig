@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Devise index{% endblock %}
+
+{% block body %}
+    <h1>Devise index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nom</th>
+                <th>CodeIso</th>
+                <th>Symbole</th>
+                <th>IsActive</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for devise in devises %}
+            <tr>
+                <td>{{ devise.id }}</td>
+                <td>{{ devise.nom }}</td>
+                <td>{{ devise.codeIso }}</td>
+                <td>{{ devise.symbole }}</td>
+                <td>{{ devise.isActive ? 'Yes' : 'No' }}</td>
+                <td>
+                    <a href="{{ path('app_devise_show', {'id': devise.id}) }}">show</a>
+                    <a href="{{ path('app_devise_edit', {'id': devise.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_devise_new') }}">Create new</a>
+{% endblock %}

@@ -1,0 +1,36 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Pays{% endblock %}
+
+
+{% block body %}
+    <table class="table table-hover datatable">
+        <thead class="table-secondary">
+        <tr>
+            <th>N°</th>
+            <th>Nom du Pays</th>
+            <th>Nombre de Comptes Bancaires</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for data in pays_data %}
+            <tr>
+                <td>{{ loop.index}}</td>
+                <td>{{ data.pays.nom }}</td>
+                <td>{{ data.nombre_comptes }}</td>
+                <td>
+                    <a href="{{ path('app_banque_by_pays', {'id': data.pays.id}) }}" class="btn btn-info btn-sm">
+                        Voir les banques
+                    </a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">Aucun pays trouvé.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}CompteBancaire index{% endblock %}
+
+{% block body %}
+    <h1>CompteBancaire index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>SoldeInitial</th>
+                <th>SoldeRestant</th>
+                <th>SeuilAlerte</th>
+                <th>NumeroBancaire</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for compte_bancaire in compte_bancaires %}
+            <tr>
+                <td>{{ compte_bancaire.id }}</td>
+                <td>{{ compte_bancaire.soldeInitial }}</td>
+                <td>{{ compte_bancaire.soldeRestant }}</td>
+                <td>{{ compte_bancaire.seuilAlerte }}</td>
+                <td>{{ compte_bancaire.numeroBancaire }}</td>
+                <td>
+                    <a href="{{ path('app_compte_bancaire_show', {'id': compte_bancaire.id}) }}">show</a>
+                    <a href="{{ path('app_compte_bancaire_edit', {'id': compte_bancaire.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_compte_bancaire_new') }}">Create new</a>
+{% endblock %}

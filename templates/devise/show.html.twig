@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Devise{% endblock %}
+
+{% block body %}
+    <h1>Devise</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ devise.id }}</td>
+            </tr>
+            <tr>
+                <th>Nom</th>
+                <td>{{ devise.nom }}</td>
+            </tr>
+            <tr>
+                <th>CodeIso</th>
+                <td>{{ devise.codeIso }}</td>
+            </tr>
+            <tr>
+                <th>Symbole</th>
+                <td>{{ devise.symbole }}</td>
+            </tr>
+            <tr>
+                <th>IsActive</th>
+                <td>{{ devise.isActive ? 'Yes' : 'No' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_devise_index') }}">back to list</a>
+
+    <a href="{{ path('app_devise_edit', {'id': devise.id}) }}">edit</a>
+
+    {{ include('devise/_delete_form.html.twig') }}
+{% endblock %}

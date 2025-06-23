@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New CompteAgence{% endblock %}
+
+{% block body %}
+    <h1>Create new CompteAgence</h1>
+
+    {{ include('compte_agence/_form.html.twig') }}
+
+    <a href="{{ path('app_compte_agence_index') }}">back to list</a>
+{% endblock %}

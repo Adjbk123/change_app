@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit CompteGeneral{% endblock %}
+{% block button %}
+
+
+    <a href="{{ path('app_compte_general_index') }}" class="btn btn-outline-secondary">Retour</a>
+{% endblock %}
+
+{% block body %}
+
+    {{ include('compte_general/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+{% endblock %}

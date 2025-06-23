@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}CompteCaisse index{% endblock %}
+
+{% block body %}
+    <h1>CompteCaisse index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>SoldeInitial</th>
+                <th>SoldeRestant</th>
+                <th>SeuilAlerte</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for compte_caisse in compte_caisses %}
+            <tr>
+                <td>{{ compte_caisse.id }}</td>
+                <td>{{ compte_caisse.soldeInitial }}</td>
+                <td>{{ compte_caisse.soldeRestant }}</td>
+                <td>{{ compte_caisse.seuilAlerte }}</td>
+                <td>
+                    <a href="{{ path('app_compte_caisse_show', {'id': compte_caisse.id}) }}">show</a>
+                    <a href="{{ path('app_compte_caisse_edit', {'id': compte_caisse.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_compte_caisse_new') }}">Create new</a>
+{% endblock %}

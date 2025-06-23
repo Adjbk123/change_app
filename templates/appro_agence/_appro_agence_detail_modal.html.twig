@@ -1,0 +1,51 @@
+{# templates/appro_agence/_appro_agence_detail_modal.html.twig #}
+
+{# Le paramètre 'appro' est l'objet ApproAgence que vous passez au template #}
+<div class="modal fade" id="detailApproAgenceModal{{ appro.id }}" tabindex="-1" aria-labelledby="detailApproAgenceModalLabel{{ appro.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailApproAgenceModalLabel{{ appro.id }}">Détails de l'approvisionnement Agence</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>ID :</strong> {{ appro.id }}</p>
+                <p><strong>Montant :</strong> {{ appro.montant|number_format(0, '.', ' ') }} {{ appro.devise.nom }}</p>
+                <p><strong>Statut :</strong>
+                    {% if appro.statut == 'en_attente' %}
+                        <span class="badge bg-warning">En attente</span>
+                    {% elseif appro.statut == 'approuve' %}
+                        <span class="badge bg-success">Approuvé</span>
+                    {% else %}
+                        <span class="badge bg-danger">Rejeté</span>
+                    {% endif %}
+                </p>
+                <p><strong>Date de la demande :</strong> {{ appro.dateDemande ? appro.dateDemande|date('Y-m-d H:i:s') : 'N/A' }}</p>
+                <p><strong>Date de traitement :</strong> {{ appro.dateTraitement ? appro.dateTraitement|date('Y-m-d H:i:s') : 'N/A' }}</p>
+                <p><strong>Demandeur :</strong> {{ appro.demandeur.nom ~ ' ' ~ appro.demandeur.prenoms }}</p>
+                <p><strong>Agence :</strong> {{ appro.agence.nom }}</p>
+                <p><strong>Devise :</strong> {{ appro.devise.nom }}</p>
+                {% if appro.validePar is not null %}
+                    <p><strong>Traité par :</strong> {{ appro.validePar.nom ~ ' ' ~ appro.validePar.prenoms }}</p>
+                {% endif %}
+
+                {% if appro.statut == 'en_attente' %}
+                    <hr>
+                    <p class="fw-bold">Actions :</p>
+                    <div class="d-flex gap-2">
+                        {# Formulaire pour Valider #}
+                        <form action="{{ path('app_appro_agence_valider', {'id': appro.id}) }}" method="post">
+                            <input type="hidden" name="_token" value="{{ csrf_token('valider' ~ appro.id) }}">
+                            <button type="submit" class="btn btn-success">Valider</button>
+                        </form>
+                        {# Formulaire pour Rejeter #}
+                        <form action="{{ path('app_appro_agence_rejeter', {'id': appro.id}) }}" method="post">
+                            <input type="hidden" name="_token" value="{{ csrf_token('rejeter' ~ appro.id) }}">
+                            <button type="submit" class="btn btn-danger">Rejeter</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

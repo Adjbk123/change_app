@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des banques{% endblock %}
+{% block button %}
+    <a href="{{ path('app_banque_new') }}" class="btn btn-outline-primary">Ajouter une nouvelle banque</a>
+
+{% endblock %}
+
+{% block body %}
+    <table class="table table-hover datatable">
+        <thead class="table-secondary">
+            <tr>
+                <th>N°</th>
+                <th>Nom</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for banque in banques %}
+            <tr>
+                <td>{{ loop.index}}</td>
+                <td>{{ banque.nom }}</td>
+                <td>
+                    <a href="{{ path('app_banque_show', {'id': banque.id}) }}" class="btn btn-primary">Gérer</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
