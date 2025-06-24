@@ -1,7 +1,26 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Tableau de bord{% endblock %}
+{% block button %}
+
+    <div class="btn-group dropend my-3">
+        <button type="button" class="btn btn-info dropdown-toggle waves-effect waves-light" data-bs-toggle="dropdown" aria-expanded="false">
+            Effectuer une opération <i class="mdi mdi-chevron-right"></i>
+        </button>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="{{ path('app_operation_new', { type: 'achat' }) }}">Achat</a>
+            <a class="dropdown-item" href="{{ path('app_operation_new', { type: 'vente' }) }}">Vente</a>
+            <a class="dropdown-item" href="{{ path('app_operation_new', { type: 'depot' }) }}">Dépôt</a>
+            <a class="dropdown-item" href="{{ path('app_operation_new', { type: 'retrait' }) }}">Retrait</a>
+            <a class="dropdown-item" href="{{ path('app_operation_new', { type: 'transfert' }) }}">Transfert</a>
+        </div>
+    </div>
+
+{% endblock %}
 
 {% block body %}
+
+
+
 
 {% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Opération{% endblock %}
+
+{% block body %}
+
+    <div class="card-body">
+        <form method="post" action="">
+            {# Sécurité : Ne jamais oublier le jeton CSRF #}
+            <input type="hidden" name="_token"
+                   value="{{ csrf_token('new_operation_token') }}">
+
+            {% include 'operation/_form_client_info.html.twig' %}
+
+
+            {% if type == 'achat' %}
+                {% include 'operation/_form_achat_fields.html.twig' %}
+
+            {% elseif type == 'depot' %}
+                {% include 'operation/_form_depot_fields.html.twig' %}
+
+            {% endif %}
+
+
+            <button type="submit" class="btn btn-primary mt-3 w-100">Enregistrer
+                l'opération
+            </button>
+        </form>
+    </div>
+
+
+
+
+{% endblock %}

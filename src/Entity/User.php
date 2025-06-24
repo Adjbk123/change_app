@@ -111,6 +111,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
     #[ORM\OneToMany(targetEntity: Client::class, mappedBy: 'createdBy')]
     private Collection $clients;
 
+    /**
+     * @var Collection<int, MouvementCompteClient>
+     */
+    #[ORM\OneToMany(targetEntity: MouvementCompteClient::class, mappedBy: 'effectuePar')]
+    private Collection $mouvementCompteClients;
+
+    /**
+     * @var Collection<int, Operation>
+     */
+    #[ORM\OneToMany(targetEntity: Operation::class, mappedBy: 'agent')]
+    private Collection $operations;
+
     public function __construct()
     {
         $this->affectationAgences = new ArrayCollection();
@@ -122,6 +134,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
         $this->mouvementCaisses = new ArrayCollection();
         $this->mouvementCompteBancaires = new ArrayCollection();
         $this->clients = new ArrayCollection();
+        $this->mouvementCompteClients = new ArrayCollection();
+        $this->operations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -582,6 +596,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
             // set the owning side to null (unless already changed)
             if ($client->getCreatedBy() === $this) {
                 $client->setCreatedBy(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MouvementCompteClient>
+     */
+    public function getMouvementCompteClients(): Collection
+    {
+        return $this->mouvementCompteClients;
+    }
+
+    public function addMouvementCompteClient(MouvementCompteClient $mouvementCompteClient): static
+    {
+        if (!$this->mouvementCompteClients->contains($mouvementCompteClient)) {
+            $this->mouvementCompteClients->add($mouvementCompteClient);
+            $mouvementCompteClient->setEffectuePar($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMouvementCompteClient(MouvementCompteClient $mouvementCompteClient): static
+    {
+        if ($this->mouvementCompteClients->removeElement($mouvementCompteClient)) {
+            // set the owning side to null (unless already changed)
+            if ($mouvementCompteClient->getEffectuePar() === $this) {
+                $mouvementCompteClient->setEffectuePar(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Operation>
+     */
+    public function getOperations(): Collection
+    {
+        return $this->operations;
+    }
+
+    public function addOperation(Operation $operation): static
+    {
+        if (!$this->operations->contains($operation)) {
+            $this->operations->add($operation);
+            $operation->setAgent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOperation(Operation $operation): static
+    {
+        if ($this->operations->removeElement($operation)) {
+            // set the owning side to null (unless already changed)
+            if ($operation->getAgent() === $this) {
+                $operation->setAgent(null);
             }
         }
 

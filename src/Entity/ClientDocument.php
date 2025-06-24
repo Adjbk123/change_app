@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ClientDocumentRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ClientDocumentRepository::class)]
@@ -27,6 +28,15 @@ class ClientDocument
 
     #[ORM\Column]
     private ?bool $isActif = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTime $dateEmission = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTime $dateExpiration = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $numero = null;
 
     public function getId(): ?int
     {
@@ -89,6 +99,42 @@ class ClientDocument
     public function setIsActif(bool $isActif): static
     {
         $this->isActif = $isActif;
+
+        return $this;
+    }
+
+    public function getDateEmission(): ?\DateTime
+    {
+        return $this->dateEmission;
+    }
+
+    public function setDateEmission(\DateTime $dateEmission): static
+    {
+        $this->dateEmission = $dateEmission;
+
+        return $this;
+    }
+
+    public function getDateExpiration(): ?\DateTime
+    {
+        return $this->dateExpiration;
+    }
+
+    public function setDateExpiration(\DateTime $dateExpiration): static
+    {
+        $this->dateExpiration = $dateExpiration;
+
+        return $this;
+    }
+
+    public function getNumero(): ?string
+    {
+        return $this->numero;
+    }
+
+    public function setNumero(string $numero): static
+    {
+        $this->numero = $numero;
 
         return $this;
     }

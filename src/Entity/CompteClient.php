@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CompteClientRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -26,6 +28,31 @@ class CompteClient
 
     #[ORM\ManyToOne(inversedBy: 'compteClients')]
     private ?ProfilClient $profilClient = null;
+
+    /**
+     * @var Collection<int, MouvementCompteClient>
+     */
+    #[ORM\OneToMany(targetEntity: MouvementCompteClient::class, mappedBy: 'compteClient')]
+    private Collection $mouvementCompteClients;
+
+    /**
+     * @var Collection<int, Operation>
+     */
+    #[ORM\OneToMany(targetEntity: Operation::class, mappedBy: 'compteClientSource')]
+    private Collection $operations;
+
+    /**
+     * @var Collection<int, Operation>
+     */
+    #[ORM\OneToMany(targetEntity: Operation::class, mappedBy: 'compteClientCible')]
+    private Collection $operationsc;
+
+    public function __construct()
+    {
+        $this->mouvementCompteClients = new ArrayCollection();
+        $this->operations = new ArrayCollection();
+        $this->operationsc = new ArrayCollection();
+    }
 
 
     public function getId(): ?int
@@ -77,6 +104,96 @@ class CompteClient
     public function setSoldeActuel(string $soldeActuel): static
     {
         $this->soldeActuel = $soldeActuel;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MouvementCompteClient>
+     */
+    public function getMouvementCompteClients(): Collection
+    {
+        return $this->mouvementCompteClients;
+    }
+
+    public function addMouvementCompteClient(MouvementCompteClient $mouvementCompteClient): static
+    {
+        if (!$this->mouvementCompteClients->contains($mouvementCompteClient)) {
+            $this->mouvementCompteClients->add($mouvementCompteClient);
+            $mouvementCompteClient->setCompteClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMouvementCompteClient(MouvementCompteClient $mouvementCompteClient): static
+    {
+        if ($this->mouvementCompteClients->removeElement($mouvementCompteClient)) {
+            // set the owning side to null (unless already changed)
+            if ($mouvementCompteClient->getCompteClient() === $this) {
+                $mouvementCompteClient->setCompteClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Operation>
+     */
+    public function getOperations(): Collection
+    {
+        return $this->operations;
+    }
+
+    public function addOperation(Operation $operation): static
+    {
+        if (!$this->operations->contains($operation)) {
+            $this->operations->add($operation);
+            $operation->setCompteClientSource($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOperation(Operation $operation): static
+    {
+        if ($this->operations->removeElement($operation)) {
+            // set the owning side to null (unless already changed)
+            if ($operation->getCompteClientSource() === $this) {
+                $operation->setCompteClientSource(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Operation>
+     */
+    public function getOperationsc(): Collection
+    {
+        return $this->operationsc;
+    }
+
+    public function addOperationsc(Operation $operationsc): static
+    {
+        if (!$this->operationsc->contains($operationsc)) {
+            $this->operationsc->add($operationsc);
+            $operationsc->setCompteClientCible($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOperationsc(Operation $operationsc): static
+    {
+        if ($this->operationsc->removeElement($operationsc)) {
+            // set the owning side to null (unless already changed)
+            if ($operationsc->getCompteClientCible() === $this) {
+                $operationsc->setCompteClientCible(null);
+            }
+        }
 
         return $this;
     }

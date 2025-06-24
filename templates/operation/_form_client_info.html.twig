@@ -1,0 +1,238 @@
+<div class="mb-3">
+    <label for="client" class="form-label">Client</label>
+    <div class="input-group">
+        <select class="form-control select2" id="client" name="client">
+            <option value="">-- Sélectionnez un client existant --</option>
+            {% for client in clients %}
+                <option value="{{ client.id }}">{{ client.nomComplet }}</option> {# Adaptez "nomComplet" si besoin #}
+            {% endfor %}
+        </select>
+        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#clientModal">
+            <i class="fas fa-plus"></i> Nouveau Client
+        </button>
+    </div>
+</div>
+
+<div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="clientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clientModalLabel">Créer un nouveau client</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="progress-container mb-4">
+                    <div class="progress-step active" id="modalProgressStep1">1. Infos Client</div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" id="modalProgressStep2">2. Pièce d'Identité</div>
+                </div>
+
+                <form id="modalClientForm" action="{{ path('app_client_new') }}" method="post" enctype="multipart/form-data">
+                    <div class="form-step active" id="modalStep1">
+                        <fieldset class="mb-4 p-3 border rounded">
+                            <legend class="float-none w-auto px-2 fs-6">1. Informations de base du Client</legend>
+                            <div class="mb-3"><label for="modal-nom" class="form-label">Nom :</label><input type="text" class="form-control" id="modal-nom" name="client[nom]" required></div>
+                            <div class="mb-3"><label for="modal-prenom" class="form-label">Prénom(s) :</label><input type="text" class="form-control" id="modal-prenom" name="client[prenom]" required></div>
+                            <div class="mb-3"><label for="modal-contact" class="form-label">Contact :</label><input type="text" class="form-control" id="modal-contact" name="client[contact]" required></div>
+                            <div class="mb-3"><label for="modal-email" class="form-label">Email :</label><input type="email" class="form-control" id="modal-email" name="client[email]"></div>
+                            <div class="mb-3"><label for="modal-profession" class="form-label">Profession :</label><input type="text" class="form-control" id="modal-profession" name="client[profession]"></div>
+                            <div class="mb-3"><label for="modal-typeClient" class="form-label">Type de Client :</label><select class="form-select" id="modal-typeClient" name="client[typeClient]" required><option value="">-- Sélectionner un type --</option>{% for typeClient in typeClients %}<option value="{{ typeClient.id }}" data-libelle="{{ typeClient.libelle }}">{{ typeClient.libelle }}</option>{% endfor %}</select></div>
+                            <div id="modal-entrepriseFields" style="display: none;"><hr class="my-4"><h5 class="mb-3">Informations Entreprise</h5><div class="mb-3"><label for="modal-ifu" class="form-label">Numéro IFU :</label><input type="text" class="form-control" id="modal-ifu" name="client[ifu]" data-required-if-entreprise="true"></div><div class="mb-3"><label for="modal-registreCommerce" class="form-label">Numéro Registre de Commerce :</label><input type="text" class="form-control" id="modal-registreCommerce" name="client[registreCommerce]" data-required-if-entreprise="true"></div></div>
+                            <button type="button" class="btn btn-primary float-end next-step">Suivant</button>
+                        </fieldset>
+                    </div>
+                    <div class="form-step" id="modalStep2" style="display: none;">
+                        <fieldset class="mb-4 p-3 border rounded">
+                            <legend class="float-none w-auto px-2 fs-6">2. Pièce d'Identité (obligatoire)</legend>
+                            <div class="mb-3"><label for="modal-pieceIdentiteType" class="form-label">Type de Pièce :</label><select class="form-select" id="modal-pieceIdentiteType" name="pieceIdentite[type]" required><option value="">-- Sélectionner un type --</option>{% for pieceIdentiteType in pieceIdentiteTypes %}<option value="{{ pieceIdentiteType.id }}">{{ pieceIdentiteType.libelle }}</option>{% endfor %}</select></div>
+                            <div class="mb-3"><label for="modal-pieceIdentiteNumero" class="form-label">Numéro :</label><input type="text" class="form-control" id="modal-pieceIdentiteNumero" name="pieceIdentite[numero]" required></div>
+                            <div class="mb-3"><label for="modal-pieceIdentiteDateEmission" class="form-label">Date d'émission :</label><input type="date" class="form-control" id="modal-pieceIdentiteDateEmission" name="pieceIdentite[dateEmission]" required></div>
+                            <div class="mb-3"><label for="modal-pieceIdentiteAnneesValidite" class="form-label">Nombre d'années de validité :</label><input type="number" class="form-control" id="modal-pieceIdentiteAnneesValidite" name="pieceIdentite[anneesValidite]" min="1" max="50" value="10" required></div>
+                            <div class="mb-3"><label for="modal-pieceIdentiteFichier" class="form-label">Fichier (scan/photo) :</label><input type="file" class="form-control" id="modal-pieceIdentiteFichier" name="pieceIdentite[fichier]" required></div>
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary prev-step">Précédent</button>
+                                <button type="submit" class="btn btn-success">Enregistrer le Client</button>
+                            </div>
+                        </fieldset>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .progress-container { display: flex; justify-content: center; align-items: center; margin-bottom: 2rem; position: relative; }
+    .progress-step { background-color: #e0e0e0; color: #6c757d; border-radius: 20px; padding: 8px 15px; font-weight: 700; transition: background-color .3s ease, color .3s ease; z-index: 1; white-space: nowrap; }
+    .progress-step.active { background-color: #0d6efd; color: #fff; }
+    .progress-line { flex-grow: 1; height: 4px; background-color: #e0e0e0; position: absolute; width: calc(100% - 350px); /* Ajusté pour un meilleur visuel */ z-index: 0; }
+    .form-step.active { display: block; }
+    .form-step { display: none; }
+    .is-invalid { border-color: #dc3545; }
+    .is-invalid:focus { box-shadow: 0 0 0 .25rem rgba(220, 53, 69, .25); }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // ====================================================================
+        // SECTION 1: SÉLECTION DES ÉLÉMENTS DU DOM
+        // ====================================================================
+        const clientModalEl = document.getElementById('clientModal');
+        if (!clientModalEl) return; // Sécurité: ne rien faire si la modale n'est pas sur la page
+
+        const clientModal = new bootstrap.Modal(clientModalEl);
+        const modalClientForm = document.getElementById('modalClientForm');
+        const mainClientSelect = document.getElementById('client');
+        const modalSteps = modalClientForm.querySelectorAll('.form-step');
+        const modalProgressSteps = clientModalEl.querySelectorAll('.progress-step');
+        const modalTypeClientSelect = modalClientForm.querySelector('#modal-typeClient');
+        const modalEntrepriseFields = modalClientForm.querySelector('#modal-entrepriseFields');
+        let modalCurrentStep = 0;
+
+        // ====================================================================
+        // SECTION 2: LOGIQUE POUR LA CRÉATION DE CLIENT DANS LA MODALE (AJAX)
+        // ====================================================================
+        modalClientForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(modalClientForm);
+            Swal.fire({
+                title: 'Création en cours...',
+                text: 'Veuillez patienter.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch("{{ path('app_client_new_ajax') }}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        // Gérer les erreurs HTTP (ex: 500, 404)
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.message || `Erreur serveur: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Succès!', data.message, 'success');
+
+                        const newClient = data.client;
+                        const option = document.createElement('option');
+                        option.value = newClient.id;
+                        option.textContent = newClient.nomComplet;
+                        option.selected = true;
+                        mainClientSelect.appendChild(option);
+
+                        // Déclenche un événement "change" pour que d'autres scripts puissent réagir
+                        mainClientSelect.dispatchEvent(new Event('change'));
+
+                        clientModal.hide();
+                    } else {
+                        // Erreurs de validation du formulaire retournées par le serveur
+                        Swal.fire('Erreur', data.message || 'Un problème est survenu lors de la validation.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('Erreur de communication', error.message || 'Impossible de contacter le serveur.', 'error');
+                });
+        });
+
+        // Événement déclenché lors de la fermeture de la modale
+        clientModalEl.addEventListener('hidden.bs.modal', function () {
+            // Réinitialisation complète du formulaire pour la prochaine ouverture
+            modalClientForm.reset();
+            showModalStep(0);
+            toggleModalEntrepriseFields();
+            // Retire toutes les classes d'erreur de validation
+            modalClientForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        });
+
+
+        // ====================================================================
+        // SECTION 3: LOGIQUE POUR LE FORMULAIRE MULTI-ÉTAPES DANS LA MODALE
+        // ====================================================================
+        function showModalStep(stepIndex) {
+            modalSteps.forEach((step, index) => {
+                step.classList.toggle('active', index === stepIndex);
+            });
+            modalProgressSteps.forEach((pStep, index) => {
+                pStep.classList.toggle('active', index <= stepIndex); // Rend les étapes précédentes actives aussi
+            });
+            modalCurrentStep = stepIndex;
+        }
+
+        function toggleModalEntrepriseFields() {
+            const selectedOption = modalTypeClientSelect.options[modalTypeClientSelect.selectedIndex];
+            const isEntreprise = selectedOption?.dataset?.libelle?.toLowerCase().includes('entreprise');
+
+            modalEntrepriseFields.style.display = isEntreprise ? 'block' : 'none';
+            modalEntrepriseFields.querySelectorAll('[data-required-if-entreprise="true"]').forEach(input => {
+                if (isEntreprise) {
+                    input.setAttribute('required', 'required');
+                } else {
+                    input.removeAttribute('required');
+                    input.classList.remove('is-invalid'); // Retire l'erreur si le champ redevient non requis
+                }
+            });
+        }
+
+        modalTypeClientSelect.addEventListener('change', toggleModalEntrepriseFields);
+
+        modalClientForm.querySelectorAll('.next-step').forEach(button => {
+            button.addEventListener('click', () => {
+                if (validateCurrentStep()) {
+                    showModalStep(modalCurrentStep + 1);
+                } else {
+                    Swal.fire('Champs manquants', 'Veuillez remplir tous les champs obligatoires.', 'warning');
+                }
+            });
+        });
+
+        modalClientForm.querySelectorAll('.prev-step').forEach(button => {
+            button.addEventListener('click', () => {
+                showModalStep(modalCurrentStep - 1);
+            });
+        });
+
+        function validateCurrentStep() {
+            const currentActiveStep = modalSteps[modalCurrentStep];
+            let allFieldsValid = true;
+
+            // On ne valide que les champs requis et visibles de l'étape actuelle
+            currentActiveStep.querySelectorAll('[required]').forEach(input => {
+                input.classList.remove('is-invalid'); // Réinitialise avant de valider
+                if (!input.value.trim()) {
+                    // Vérification pour les select, file, etc.
+                    if (input.type === 'select-one' && input.value === '') {
+                        allFieldsValid = false;
+                    } else if (input.type === 'file' && input.files.length === 0) {
+                        allFieldsValid = false;
+                    } else if (input.checkValidity() === false) { // Utilise la validation native du navigateur
+                        allFieldsValid = false;
+                    }
+                }
+
+                if (!allFieldsValid && !input.value.trim()){
+                    input.classList.add('is-invalid');
+                }
+            });
+
+            return allFieldsValid;
+        }
+
+        // Initialisation au chargement
+        showModalStep(0);
+        toggleModalEntrepriseFields();
+    });
+</script>

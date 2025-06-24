@@ -1,54 +1,300 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Client{% endblock %}
+{% block title %}Client : {{ client.nom }} {{ client.prenoms }}{% endblock %}
+{% block button %}
+
+
+        <div>
+            <a href="{{ path('app_client_index') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left me-1"></i> Retour à la liste
+            </a>
+            <a href="{{ path('app_client_edit', {'id': client.id}) }}" class="btn btn-primary me-2">
+                <i class="bi bi-pencil me-1"></i> Modifier
+            </a>
+
+        </div>
+
+
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .section-card-header {
+            background-color: var(--bs-light);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--bs-border-color);
+            border-radius: var(--bs-border-radius) var(--bs-border-radius) 0 0;
+            margin-bottom: 0;
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+        .info-label {
+            font-weight: 600;
+            color: var(--bs-secondary);
+        }
+        .info-value {
+            color: var(--bs-dark);
+        }
+        .list-group-item:first-child { border-top-left-radius: 0; border-top-right-radius: 0; }
+        .list-group-item:last-child { border-bottom-left-radius: var(--bs-border-radius); border-bottom-right-radius: var(--bs-border-radius); }
+
+        .card-profile {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card-profile:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.3rem 0.6rem rgba(0,0,0,.1) !important;
+        }
+
+        .status-badge {
+            font-size: 0.85em;
+            padding: 0.4em 0.8em;
+        }
+
+        /* Styles pour le bouton de suppression */
+        .delete-form button {
+            background: none;
+            border: none;
+            padding: 0;
+            color: var(--bs-danger);
+        }
+        .delete-form button:hover {
+            text-decoration: underline;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <h1>Client</h1>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ client.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ client.nom }}</td>
-            </tr>
-            <tr>
-                <th>Prenoms</th>
-                <td>{{ client.prenoms }}</td>
-            </tr>
-            <tr>
-                <th>Contact</th>
-                <td>{{ client.contact }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ client.email }}</td>
-            </tr>
-            <tr>
-                <th>RegistreCommerce</th>
-                <td>{{ client.registreCommerce }}</td>
-            </tr>
-            <tr>
-                <th>Profession</th>
-                <td>{{ client.profession }}</td>
-            </tr>
-            <tr>
-                <th>CreatedAt</th>
-                <td>{{ client.createdAt ? client.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Ifu</th>
-                <td>{{ client.ifu }}</td>
-            </tr>
-        </tbody>
-    </table>
 
-    <a href="{{ path('app_client_index') }}">back to list</a>
+        <div class="row g-4">
+            {# Informations Personnelles (fixe en haut à gauche) #}
+            <div class="col-lg-12">
+                <div class="card shadow-sm h-100">
+                    <h3 class="section-card-header">Informations Générales</h3>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="info-label">ID Client:</span>
+                                <span class="info-value">{{ client.id }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="info-label">Contact:</span>
+                                <span class="info-value"><a href="tel:{{ client.contact }}">{{ client.contact }}</a></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="info-label">Email:</span>
+                                <span class="info-value">{{ client.email ? '<a href="mailto:' ~ client.email ~ '">' ~ client.email ~ '</a>'|raw : '<em class="text-muted">Non renseigné</em>' }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="info-label">Profession:</span>
+                                <span class="info-value">{{ client.profession ?: '<em class="text-muted">Non renseignée</em>' }}</span>
+                            </li>
+                            {% if client.ifu %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span class="info-label">Numéro IFU:</span>
+                                    <span class="info-value">{{ client.ifu }}</span>
+                                </li>
+                            {% endif %}
+                            {% if client.registreCommerce %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span class="info-label">Reg. Commerce:</span>
+                                    <span class="info-value">{{ client.registreCommerce }}</span>
+                                </li>
+                            {% endif %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center text-muted small">
+                                <span class="info-label">Créé le:</span>
+                                <span class="info-value">{{ client.createdAt ? client.createdAt|date('d/m/Y à H:i:s') : 'N/A' }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
-    <a href="{{ path('app_client_edit', {'id': client.id}) }}">edit</a>
+            <hr>
+            {# Section pour les onglets (Profils et Documents) #}
+            <div class="col-lg-12">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header p-0">
+                        <ul class="nav nav-tabs nav-tabs-custom nav-justified" id="myClientTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="profils-tab" data-bs-toggle="tab" data-bs-target="#profils" type="button" role="tab" aria-controls="profils" aria-selected="true">
+                                    <i class="bi bi-person-badge me-2"></i> Profils Client ({{ client.profilClients|length }})
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab" aria-controls="documents" aria-selected="false">
+                                    <i class="bi bi-file-earmark-text me-2"></i> Pièces d'Identité ({{ client.clientDocuments|length }})
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="myClientTabContent">
+                            {# Contenu de l'onglet Profils Client #}
+                            <div class="tab-pane fade show active" id="profils" role="tabpanel" aria-labelledby="profils-tab">
+                                {% if client.profilClients is not empty %}
+                                    <div class="row  g-3">
+                                        {% for profilClient in client.profilClients %}
+                                            <div class="col-md-3">
+                                                <div class="card card-profile h-100 shadow-sm border-start border-4 {% if profilClient.isActif %}border-success{% else %}border-danger{% endif %}">
+                                                    <div class="card-body d-flex flex-column">
+                                                        <h5 class="card-title text-info d-flex align-items-center mb-3">
+                                                            <i class="bi bi-tag-fill me-2"></i> {{ profilClient.typeClient.libelle }}
+                                                        </h5>
+                                                        <p class="card-text mb-1">
+                                                            <strong class="info-label">N° Profil:</strong> <span class="info-value">{{ profilClient.numeroProfilCompte }}</span>
+                                                        </p>
+                                                        <p class="card-text mb-2">
+                                                            <strong class="info-label">Statut:</strong>
+                                                            <span class="badge rounded-pill status-badge {% if profilClient.isActif %}bg-success{% else %}bg-danger{% endif %} ms-1">
+                                                                <i class="bi {% if profilClient.isActif %}bi-check-circle-fill{% else %}bi-x-circle-fill{% endif %} me-1"></i>
+                                                                {{ profilClient.isActif ? 'Actif' : 'Inactif' }}
+                                                            </span>
+                                                        </p>
+                                                        <p class="card-text mt-auto">
+                                                            <small class="text-muted">Créé le: {{ profilClient.createdAt ? profilClient.createdAt|date('d/m/Y H:i:s') : 'N/A' }}</small>
+                                                        </p>
+                                                        <a href="{{ path('app_profil_client_show', {'id': profilClient.id}) }}" class="btn btn-sm btn-outline-info mt-3">
+                                                            <i class="bi bi-box-arrow-right me-1"></i> Gérer ce profil
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                                        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                                        <div>Aucun profil client associé pour le moment.</div>
+                                    </div>
+                                {% endif %}
+                            </div>
 
-    {{ include('client/_delete_form.html.twig') }}
+                            {# Contenu de l'onglet Pièces d'Identité (en table) #}
+                            <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
+                                {% if client.clientDocuments is not empty %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-striped">
+                                            <thead class="table-light">
+                                            <tr>
+                                                <th>Type de Pièce</th>
+                                                <th>Numéro</th>
+                                                <th>Date d'Émission</th>
+                                                <th>Date d'Expiration</th>
+                                                <th>Statut</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for document in client.clientDocuments %}
+                                                <tr>
+                                                    <td>{{ document.pieceIdentite.libelle }}</td>
+                                                    <td>{{ document.numero ?: 'N/A' }}</td>
+                                                    <td>{{ document.dateEmission ? document.dateEmission|date('d/m/Y') : 'N/A' }}</td>
+                                                    <td>
+                                                        {% if document.dateExpiration %}
+                                                            <span class="{% if document.dateExpiration < 'now'|date('Y-m-d') %}text-danger fw-bold{% else %}text-success{% endif %}">
+                                                                    {{ document.dateExpiration|date('d/m/Y') }}
+                                                                </span>
+                                                        {% else %}
+                                                            <em class="text-muted">Non spécifié</em>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if document.dateExpiration and document.dateExpiration < 'now'|date('Y-m-d') %}
+                                                            <span class="badge bg-danger status-badge">
+                                                                    <i class="bi bi-hourglass-split me-1"></i> Expiré
+                                                                </span>
+                                                        {% else %}
+                                                            <span class="badge bg-success status-badge">
+                                                                    <i class="bi bi-check-circle-fill me-1"></i> Valide
+                                                                </span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if document.fichier %}
+                                                            <button type="button" class="btn btn-sm btn-outline-warning"
+                                                                    data-bs-toggle="modal" data-bs-target="#documentViewerModal"
+                                                                    data-document-url="{{ asset('uploads/piece/' ~ document.fichier) }}"
+                                                                    data-document-title="{{ document.pieceIdentite.libelle }} - {{ client.nom }} {{ client.prenoms }}">
+                                                                <i class="bi bi-eye-fill me-1"></i> Voir
+                                                            </button>
+                                                        {% else %}
+                                                            <span class="text-danger small">Fichier introuvable</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                                        <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                                        <div>Aucune pièce d'identité associée pour ce client.</div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    {# MODAL pour la visualisation du document #}
+    <div class="modal fade" id="documentViewerModal" tabindex="-1" aria-labelledby="documentViewerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="documentViewerModalLabel">Prévisualisation du Document</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    {# Le contenu sera chargé ici par JavaScript #}
+                    <iframe id="documentIframe" src="" frameborder="0" width="100%" height="600px"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <a id="downloadDocumentLink" href="#" class="btn btn-primary" download target="_blank">
+                        <i class="bi bi-download me-1"></i> Télécharger
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var documentViewerModal = document.getElementById('documentViewerModal');
+            documentViewerModal.addEventListener('show.bs.modal', function (event) {
+                // Button that triggered the modal
+                var button = event.relatedTarget;
+                // Extract info from data-bs-* attributes
+                var documentUrl = button.getAttribute('data-document-url');
+                var documentTitle = button.getAttribute('data-document-title');
+
+                // Update the modal's content.
+                var modalTitle = documentViewerModal.querySelector('.modal-title');
+                var documentIframe = documentViewerModal.querySelector('#documentIframe');
+                var downloadLink = documentViewerModal.querySelector('#downloadDocumentLink');
+
+                modalTitle.textContent = documentTitle;
+                documentIframe.src = documentUrl;
+                downloadLink.href = documentUrl; // Permet de télécharger le fichier directement
+            });
+
+            // Gérer le cas où le modal se ferme et l'iframe doit être vidée
+            documentViewerModal.addEventListener('hide.bs.modal', function () {
+                var documentIframe = documentViewerModal.querySelector('#documentIframe');
+                documentIframe.src = ''; // Vide le src pour arrêter la lecture/prévisualisation
+            });
+        });
+    </script>
 {% endblock %}

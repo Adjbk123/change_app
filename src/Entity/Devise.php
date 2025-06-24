@@ -102,6 +102,18 @@ class Devise
     #[ORM\OneToMany(targetEntity: CompteClient::class, mappedBy: 'devise')]
     private Collection $compteClients;
 
+    /**
+     * @var Collection<int, MouvementCompteClient>
+     */
+    #[ORM\OneToMany(targetEntity: MouvementCompteClient::class, mappedBy: 'devise')]
+    private Collection $mouvementCompteClients;
+
+    /**
+     * @var Collection<int, Operation>
+     */
+    #[ORM\OneToMany(targetEntity: Operation::class, mappedBy: 'deviseSource')]
+    private Collection $operations;
+
     public function __construct()
     {
         $this->compteCaisses = new ArrayCollection();
@@ -116,6 +128,8 @@ class Devise
         $this->mouvementCompteBancaires = new ArrayCollection();
         $this->tauxChanges = new ArrayCollection();
         $this->compteClients = new ArrayCollection();
+        $this->mouvementCompteClients = new ArrayCollection();
+        $this->operations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -537,6 +551,66 @@ class Devise
             // set the owning side to null (unless already changed)
             if ($compteClient->getDevise() === $this) {
                 $compteClient->setDevise(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MouvementCompteClient>
+     */
+    public function getMouvementCompteClients(): Collection
+    {
+        return $this->mouvementCompteClients;
+    }
+
+    public function addMouvementCompteClient(MouvementCompteClient $mouvementCompteClient): static
+    {
+        if (!$this->mouvementCompteClients->contains($mouvementCompteClient)) {
+            $this->mouvementCompteClients->add($mouvementCompteClient);
+            $mouvementCompteClient->setDevise($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMouvementCompteClient(MouvementCompteClient $mouvementCompteClient): static
+    {
+        if ($this->mouvementCompteClients->removeElement($mouvementCompteClient)) {
+            // set the owning side to null (unless already changed)
+            if ($mouvementCompteClient->getDevise() === $this) {
+                $mouvementCompteClient->setDevise(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Operation>
+     */
+    public function getOperations(): Collection
+    {
+        return $this->operations;
+    }
+
+    public function addOperation(Operation $operation): static
+    {
+        if (!$this->operations->contains($operation)) {
+            $this->operations->add($operation);
+            $operation->setDeviseSource($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOperation(Operation $operation): static
+    {
+        if ($this->operations->removeElement($operation)) {
+            // set the owning side to null (unless already changed)
+            if ($operation->getDeviseSource() === $this) {
+                $operation->setDeviseSource(null);
             }
         }
 

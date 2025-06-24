@@ -56,11 +56,18 @@ class Client
     #[ORM\OneToMany(targetEntity: ProfilClient::class, mappedBy: 'client')]
     private Collection $profilClients;
 
+    /**
+     * @var Collection<int, Operation>
+     */
+    #[ORM\OneToMany(targetEntity: Operation::class, mappedBy: 'client')]
+    private Collection $operations;
+
 
     public function __construct()
     {
         $this->clientDocuments = new ArrayCollection();
         $this->profilClients = new ArrayCollection();
+        $this->operations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -240,5 +247,39 @@ class Client
         return $this;
     }
 
+    /**
+     * @return Collection<int, Operation>
+     */
+    public function getOperations(): Collection
+    {
+        return $this->operations;
+    }
+
+    public function addOperation(Operation $operation): static
+    {
+        if (!$this->operations->contains($operation)) {
+            $this->operations->add($operation);
+            $operation->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOperation(Operation $operation): static
+    {
+        if ($this->operations->removeElement($operation)) {
+            // set the owning side to null (unless already changed)
+            if ($operation->getClient() === $this) {
+                $operation->setClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getNomComplet(): string
+    {
+        return trim($this->nom . ' ' . $this->prenoms);
+    }
 
 }

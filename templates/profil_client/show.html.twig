@@ -1,34 +1,72 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}ProfilClient{% endblock %}
+{% block title %}Détails du Profil : {{ profil_client.numeroProfilCompte }}{% endblock %}
+{% block button %}
+    <a href="{{ path('app_client_show', {'id': profil_client.client.id}) }}" class="btn btn-outline-primary"> Retour </a>
+{% endblock %}
 
 {% block body %}
-    <h1>ProfilClient</h1>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ profil_client.id }}</td>
-            </tr>
-            <tr>
-                <th>NumeroProfilCompte</th>
-                <td>{{ profil_client.numeroProfilCompte }}</td>
-            </tr>
-            <tr>
-                <th>IsActif</th>
-                <td>{{ profil_client.isActif ? 'Yes' : 'No' }}</td>
-            </tr>
-            <tr>
-                <th>CreatedAt</th>
-                <td>{{ profil_client.createdAt ? profil_client.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <ul class="nav nav-tabs nav-tabs-custom nav-justified" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="info" aria-selected="true">Informations du Profil</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="comptes-tab" data-bs-toggle="tab" data-bs-target="#comptes" type="button" role="tab" aria-controls="comptes" aria-selected="false">Comptes Clients Liés</button>
+            </li>
 
-    <a href="{{ path('app_profil_client_index') }}">back to list</a>
 
-    <a href="{{ path('app_profil_client_edit', {'id': profil_client.id}) }}">edit</a>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h4>Informations du Profil</h4>
 
-    {{ include('profil_client/_delete_form.html.twig') }}
+                        <p><strong>Numéro de Profil :</strong> {{ profil_client.numeroProfilCompte }}</p>
+                        <p><strong>Type de Client :</strong> {{ profil_client.typeClient.libelle }}</p>
+                        <p><strong>Statut :</strong> {% if profil_client.isActif %} Actif {% else %} Inactif {% endif %}</p>
+                        <p><strong>Créé le :</strong> {{ profil_client.createdAt ? profil_client.createdAt|date('d/m/Y H:i:s') : 'N/A' }}</p>
+                        <p><strong>Dernière mise à jour :</strong> {{ profil_client.updatedAt ? profil_client.updatedAt|date('d/m/Y H:i:s') : 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="comptes" role="tabpanel" aria-labelledby="comptes-tab">
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h4>Comptes Clients Liés ({{ profil_client.compteClients|length }})</h4>
+                        {% if profil_client.compteClients is not empty %}
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>ID Compte</th>
+                                    <th>Numéro de Compte</th>
+                                    <th>Solde</th>
+                                    <th>Type de Compte</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for compteClient in profil_client.compteClients %}
+                                    <tr>
+                                        <td>{{ compteClient.id }}</td>
+                                        <td>{{ compteClient.numeroCompte }}</td>
+                                        <td>{{ compteClient.solde|number_format(2, ',', ' ') }} F CFA</td>
+                                        <td>{{ compteClient.typeCompte.libelle }}</td>
+                                        <td>{% if compteClient.isActif %} Actif {% else %} Inactif {% endif %}</td>
+                                        <td><a href="{{ path('app_compte_client_show', {'id': compteClient.id}) }}" class="btn btn-info">Voir</a></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p>Aucun compte client associé à ce profil pour le moment.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
 {% endblock %}

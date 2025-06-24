@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\TauxChangeRepository;
+use Doctrine\DBAL\Types\Types; // MODIFIÉ : Import du namespace pour les types Doctrine
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TauxChangeRepository::class)]
@@ -22,11 +23,13 @@ class TauxChange
     #[ORM\ManyToOne(inversedBy: 'tauxChanges')]
     private ?Devise $deviseCible = null;
 
-    #[ORM\Column]
-    private ?float $tauxAchat = null;
+    // MODIFIÉ : Passage de float au type DECIMAL pour la précision
+    #[ORM\Column(type: Types::DECIMAL, precision: 12, scale: 6)]
+    private ?string $tauxAchat = null;
 
-    #[ORM\Column]
-    private ?float $tauxVente = null;
+    // MODIFIÉ : Passage de float au type DECIMAL pour la précision
+    #[ORM\Column(type: Types::DECIMAL, precision: 12, scale: 6)]
+    private ?string $tauxVente = null;
 
     #[ORM\Column]
     private ?\DateTime $dateDebut = null;
@@ -78,24 +81,28 @@ class TauxChange
         return $this;
     }
 
-    public function getTauxAchat(): ?float
+    // MODIFIÉ : Le getter retourne maintenant une string
+    public function getTauxAchat(): ?string
     {
         return $this->tauxAchat;
     }
 
-    public function setTauxAchat(float $tauxAchat): static
+    // MODIFIÉ : Le setter accepte maintenant une string
+    public function setTauxAchat(string $tauxAchat): static
     {
         $this->tauxAchat = $tauxAchat;
 
         return $this;
     }
 
-    public function getTauxVente(): ?float
+    // MODIFIÉ : Le getter retourne maintenant une string
+    public function getTauxVente(): ?string
     {
         return $this->tauxVente;
     }
 
-    public function setTauxVente(float $tauxVente): static
+    // MODIFIÉ : Le setter accepte maintenant une string
+    public function setTauxVente(string $tauxVente): static
     {
         $this->tauxVente = $tauxVente;
 

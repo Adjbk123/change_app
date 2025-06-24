@@ -1,11 +1,180 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Client{% endblock %}
+{% block title %}Nouveau Client{% endblock %}
+{% block button %}
+    <a href="{{ path('app_client_index') }}" class="btn btn-outline-primary">Retour à la liste</a>
+{% endblock %}
 
 {% block body %}
-    <h1>Create new Client</h1>
+    <h1>Créer un nouveau Client</h1>
 
-    {{ include('client/_form.html.twig') }}
+    <div class="progress-container mb-4">
+        <div class="progress-step active" id="progressStep1">1. Infos Client</div>
+        <div class="progress-line"></div>
+        <div class="progress-step" id="progressStep2">2. Pièce d'Identité</div>
+    </div>
 
-    <a href="{{ path('app_client_index') }}">back to list</a>
+    <form id="clientForm" action="{{ path('app_client_new') }}" method="post" enctype="multipart/form-data">
+        <div class="form-step active" id="step1">
+            <fieldset class="mb-4 p-3 border rounded">
+                <legend class="float-none w-auto px-2">1. Informations de base du Client</legend>
+                <div class="mb-3">
+                    <label for="nom" class="form-label">Nom :</label>
+                    <input type="text" class="form-control" id="nom" name="client[nom]" required>
+                </div>
+                <div class="mb-3">
+                    <label for="prenom" class="form-label">Prénom(s) :</label>
+                    <input type="text" class="form-control" id="prenom" name="client[prenom]" required>
+                </div>
+                <div class="mb-3">
+                    <label for="contact" class="form-label">Contact :</label>
+                    <input type="text" class="form-control" id="contact" name="client[contact]" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email :</label>
+                    <input type="email" class="form-control" id="email" name="client[email]">
+                </div>
+                <div class="mb-3">
+                    <label for="profession" class="form-label">Profession :</label>
+                    <input type="text" class="form-control" id="profession" name="client[profession]">
+                </div>
+                <div class="mb-3">
+                    <label for="typeClient" class="form-label">Type de Client :</label>
+                    <select class="form-select" id="typeClient" name="client[typeClient]" required>
+                        <option value="">-- Sélectionner un type --</option>
+                        {% for typeClient in typeClients %}
+                            <option value="{{ typeClient.id }}" data-libelle="{{ typeClient.libelle }}">{{ typeClient.libelle }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {# Champs pour le type "Entreprise" - Initiallement cachés #}
+                <div id="entrepriseFields" style="display: none;">
+                    <hr class="my-4">
+                    <h5 class="mb-3">Informations Entreprise</h5>
+                    <div class="mb-3">
+                        <label for="ifu" class="form-label">Numéro IFU :</label>
+                        <input type="text" class="form-control" id="ifu" name="client[ifu]" data-required-if-entreprise="true">
+                    </div>
+                    <div class="mb-3">
+                        <label for="registreCommerce" class="form-label">Numéro Registre de Commerce :</label>
+                        <input type="text" class="form-control" id="registreCommerce" name="client[registreCommerce]" data-required-if-entreprise="true">
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary next-step">Suivant</button>
+            </fieldset>
+        </div>
+
+        <div class="form-step" id="step2">
+            <fieldset class="mb-4 p-3 border rounded">
+                <legend class="float-none w-auto px-2">2. Pièce d'Identité (obligatoire)</legend>
+                <div class="mb-3">
+                    <label for="pieceIdentiteType" class="form-label">Type de Pièce :</label>
+                    <select class="form-select" id="pieceIdentiteType" name="pieceIdentite[type]" required>
+                        <option value="">-- Sélectionner un type --</option>
+                        {% for pieceIdentiteType in pieceIdentiteTypes %}
+                            <option value="{{ pieceIdentiteType.id }}">{{ pieceIdentiteType.libelle }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="pieceIdentiteNumero" class="form-label">Numéro :</label>
+                    <input type="text" class="form-control" id="pieceIdentiteNumero" name="pieceIdentite[numero]" required>
+                </div>
+                <div class="mb-3">
+                    <label for="pieceIdentiteDateEmission" class="form-label">Date d'émission :</label>
+                    <input type="date" class="form-control" id="pieceIdentiteDateEmission" name="pieceIdentite[dateEmission]" required>
+                </div>
+                <div class="mb-3">
+                    <label for="pieceIdentiteAnneesValidite" class="form-label">Nombre d'années de validité :</label>
+                    <input type="number" class="form-control" id="pieceIdentiteAnneesValidite" name="pieceIdentite[anneesValidite]" min="1" max="50" value="10" required>
+                </div>
+                <div class="mb-3">
+                    <label for="pieceIdentiteFichier" class="form-label">Fichier (scan/photo) :</label>
+                    <input type="file" class="form-control" id="pieceIdentiteFichier" name="pieceIdentite[fichier]" required>
+                </div>
+                <button type="button" class="btn btn-secondary prev-step">Précédent</button>
+                <button type="submit" class="btn btn-primary">Enregistrer le Client</button>
+            </fieldset>
+        </div>
+    </form>
+
+    {# CDN SweetAlert2 #}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {# Votre script JavaScript externe #}
+    <script src="{{ asset('js/client_form.js') }}"></script>
+
+    {# Script inline pour les messages flash (si votre CSP l'autorise ou si vous n'avez pas de solution plus propre) #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for flash_message in app.flashes('success') %}
+            Swal.fire({
+                icon: 'success',
+                title: 'Succès !',
+                text: '{{ flash_message }}',
+                showConfirmButton: false,
+                timer: 3000
+            });
+            {% endfor %}
+
+            {% for flash_message in app.flashes('error') %}
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur !',
+                text: '{{ flash_message }}',
+                confirmButtonText: 'OK'
+            });
+            {% endfor %}
+        });
+    </script>
+
+    <style>
+        .form-step {
+            display: none; /* Cache toutes les étapes par défaut */
+        }
+        .form-step.active {
+            display: block; /* Affiche l'étape active */
+        }
+        .is-invalid {
+            border-color: #dc3545;
+        }
+        .is-invalid:focus {
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+        }
+
+        /* Styles pour la barre de progression */
+        .progress-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .progress-step {
+            background-color: #e0e0e0;
+            color: #6c757d;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            z-index: 1; /* Pour qu'il soit au-dessus de la ligne */
+            white-space: nowrap; /* Empêche le texte de passer à la ligne */
+        }
+
+        .progress-step.active {
+            background-color: #007bff; /* Couleur primaire de Bootstrap */
+            color: #fff;
+        }
+
+        .progress-line {
+            flex-grow: 1;
+            height: 4px;
+            background-color: #e0e0e0;
+            position: absolute;
+            width: calc(100% - 200px); /* Ajuster selon la largeur des .progress-step */
+            z-index: 0;
+        }
+    </style>
 {% endblock %}

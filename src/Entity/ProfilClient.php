@@ -36,6 +36,9 @@ class ProfilClient
     #[ORM\OneToMany(targetEntity: CompteClient::class, mappedBy: 'profilClient')]
     private Collection $compteClients;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
     public function __construct()
     {
         $this->compteClients = new ArrayCollection();
@@ -132,6 +135,18 @@ class ProfilClient
                 $compteClient->setProfilClient(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
