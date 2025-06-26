@@ -1,0 +1,106 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+
+        // ====================================================================
+        // SECTION 2: LOGIQUE POUR LA CRÉATION DE CLIENT DANS LA MODALE (AJAX)
+        // ====================================================================
+        const clientModalEl = document.getElementById('clientModal');
+        const clientModal = new bootstrap.Modal(clientModalEl);
+        const modalClientForm = document.getElementById('modalClientForm');
+        const mainClientSelect = document.getElementById('client');
+
+        modalClientForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(modalClientForm);
+            Swal.fire({ title: 'Création en cours...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+
+            fetch("{{ path('app_client_new_ajax') }}", {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Succès!', data.message, 'success');
+
+                        const newClient = data.client;
+                        const option = document.createElement('option');
+                        option.value = newClient.id;
+                        option.textContent = newClient.nomComplet;
+                        option.selected = true;
+                        mainClientSelect.appendChild(option);
+
+                        clientModal.hide();
+                        modalClientForm.reset();
+                        showModalStep(0); // Réinitialise à la première étape pour la prochaine fois
+                    } else {
+                        Swal.fire('Erreur', data.message || 'Un problème est survenu.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('Erreur de communication', 'Impossible de contacter le serveur.', 'error');
+                });
+        });
+
+
+        // ====================================================================
+        // SECTION 3: LOGIQUE POUR LE FORMULAIRE MULTI-ÉTAPES DANS LA MODALE
+        // ====================================================================
+        const modalSteps = modalClientForm.querySelectorAll('.form-step');
+        const modalProgressSteps = clientModalEl.querySelectorAll('.progress-step');
+        const modalTypeClientSelect = modalClientForm.querySelector('#modal-typeClient');
+        const modalEntrepriseFields = modalClientForm.querySelector('#modal-entrepriseFields');
+        let modalCurrentStep = 0;
+
+        function showModalStep(stepIndex) {
+            modalSteps.forEach((step, index) => {
+                step.style.display = (index === stepIndex) ? 'block' : 'none';
+            });
+            modalProgressSteps.forEach((pStep, index) => {
+                pStep.classList.toggle('active', index === stepIndex);
+            });
+            modalCurrentStep = stepIndex;
+        }
+
+        function toggleModalEntrepriseFields() {
+            const selectedOption = modalTypeClientSelect.options[modalTypeClientSelect.selectedIndex];
+            const isEntreprise = selectedOption?.dataset?.libelle?.toLowerCase().includes('entreprise');
+            modalEntrepriseFields.style.display = isEntreprise ? 'block' : 'none';
+            modalEntrepriseFields.querySelectorAll('[data-required-if-entreprise="true"]').forEach(input => {
+                if (isEntreprise) input.setAttribute('required', 'required');
+                else input.removeAttribute('required');
+            });
+        }
+
+        modalTypeClientSelect.addEventListener('change', toggleModalEntrepriseFields);
+
+        modalClientForm.querySelectorAll('.next-step').forEach(button => {
+            button.addEventListener('click', () => {
+                const currentActiveStep = modalClientForm.querySelector('.form-step:not([style*="display: none"])');
+                let allFieldsValid = true;
+                currentActiveStep.querySelectorAll('[required]').forEach(input => {
+                    if (!input.value) {
+                        allFieldsValid = false;
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+                if (allFieldsValid) showModalStep(modalCurrentStep + 1);
+                else Swal.fire('Champs manquants', 'Veuillez remplir tous les champs obligatoires.', 'error');
+            });
+        });
+
+        modalClientForm.querySelectorAll('.prev-step').forEach(button => {
+            button.addEventListener('click', () => showModalStep(modalCurrentStep - 1));
+        });
+
+        // Initialisation au chargement
+        showModalStep(0);
+        toggleModalEntrepriseFields();
+    });
+</script>

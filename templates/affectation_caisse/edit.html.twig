@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit AffectationCaisse{% endblock %}
+
+{% block body %}
+    <h1>Edit AffectationCaisse</h1>
+
+    {{ include('affectation_caisse/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_affectation_caisse_index') }}">back to list</a>
+
+    {{ include('affectation_caisse/_delete_form.html.twig') }}
+{% endblock %}

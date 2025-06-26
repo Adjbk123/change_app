@@ -1,0 +1,47 @@
+
+{# --- La fenêtre modale pour la création du client reste inchangée --- #}
+<div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="clientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clientModalLabel">Créer un nouveau client</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="progress-container mb-4">
+                    <div class="progress-step active" id="modalProgressStep1">1. Infos Client</div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" id="modalProgressStep2">2. Pièce d'Identité</div>
+                </div>
+
+                <form id="modalClientForm" action="{{ path('app_client_new') }}" method="post" enctype="multipart/form-data">
+                    <div class="form-step active" id="modalStep1">
+                        <fieldset class="mb-4 p-3 border rounded">
+                            <legend class="float-none w-auto px-2 fs-6">1. Informations de base du Client</legend>
+                            <div class="mb-3"><label for="modal-nom" class="form-label">Nom :</label><input type="text" class="form-control" id="modal-nom" name="client[nom]" required></div>
+                            <div class="mb-3"><label for="modal-prenom" class="form-label">Prénom(s) :</label><input type="text" class="form-control" id="modal-prenom" name="client[prenom]" required></div>
+                            <div class="mb-3"><label for="modal-contact" class="form-label">Contact :</label><input type="text" class="form-control" id="modal-contact" name="client[contact]" required></div>
+                            <div class="mb-3"><label for="modal-email" class="form-label">Email :</label><input type="email" class="form-control" id="modal-email" name="client[email]"></div>
+                            <div class="mb-3"><label for="modal-profession" class="form-label">Profession :</label><input type="text" class="form-control" id="modal-profession" name="client[profession]"></div>
+                            <div class="mb-3"><label for="modal-typeClient" class="form-label">Type de Client :</label><select class="form-select" id="modal-typeClient" name="client[typeClient]" required><option value="">-- Sélectionner un type --</option>{% for typeClient in typeClients %}<option value="{{ typeClient.id }}" data-libelle="{{ typeClient.libelle }}">{{ typeClient.libelle }}</option>{% endfor %}</select></div>
+                            <div id="modal-entrepriseFields" style="display: none;"><hr class="my-4"><h5 class="mb-3">Informations Entreprise</h5><div class="mb-3"><label for="modal-ifu" class="form-label">Numéro IFU :</label><input type="text" class="form-control" id="modal-ifu" name="client[ifu]" data-required-if-entreprise="true"></div><div class="mb-3"><label for="modal-registreCommerce" class="form-label">Numéro Registre de Commerce :</label><input type="text" class="form-control" id="modal-registreCommerce" name="client[registreCommerce]" data-required-if-entreprise="true"></div></div>
+                            <button type="button" class="btn btn-primary next-step">Suivant</button>
+                        </fieldset>
+                    </div>
+                    <div class="form-step" id="modalStep2">
+                        <fieldset class="mb-4 p-3 border rounded">
+                            <legend class="float-none w-auto px-2 fs-6">2. Pièce d'Identité (obligatoire)</legend>
+                            <div class="mb-3"><label for="modal-pieceIdentiteType" class="form-label">Type de Pièce :</label><select class="form-select" id="modal-pieceIdentiteType" name="pieceIdentite[type]" required><option value="">-- Sélectionner un type --</option>{% for pieceIdentiteType in pieceIdentiteTypes %}<option value="{{ pieceIdentiteType.id }}">{{ pieceIdentiteType.libelle }}</option>{% endfor %}</select></div>
+                            <div class="mb-3"><label for="modal-pieceIdentiteNumero" class="form-label">Numéro :</label><input type="text" class="form-control" id="modal-pieceIdentiteNumero" name="pieceIdentite[numero]" required></div>
+                            <div class="mb-3"><label for="modal-pieceIdentiteDateEmission" class="form-label">Date d'émission :</label><input type="date" class="form-control" id="modal-pieceIdentiteDateEmission" name="pieceIdentite[dateEmission]" required></div>
+                            <div class="mb-3"><label for="modal-pieceIdentiteAnneesValidite" class="form-label">Nombre d'années de validité :</label><input type="number" class="form-control" id="modal-pieceIdentiteAnneesValidite" name="pieceIdentite[anneesValidite]" min="1" max="50" value="10" required></div>
+                            <div class="mb-3"><label for="modal-pieceIdentiteFichier" class="form-label">Fichier (scan/photo) :</label><input type="file" class="form-control" id="modal-pieceIdentiteFichier" name="pieceIdentite[fichier]" required></div>
+                            <button type="button" class="btn btn-secondary prev-step">Précédent</button>
+                            <button type="submit" class="btn btn-success">Enregistrer le Client</button>
+                        </fieldset>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

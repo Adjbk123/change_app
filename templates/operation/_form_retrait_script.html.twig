@@ -1,0 +1,355 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const retraitContainer = document.getElementById('group-RETRAIT');
+        if (!retraitContainer) {
+            console.warn("Conteneur 'group-RETRAIT' non trouvé. Le script de retrait ne s'exécutera pas.");
+            return;
+        }
+
+        // Sélecteurs de champs du formulaire
+        const profilClientSelectContainer = document.getElementById('profilClientSelectContainer');
+        const profilClientSelect = document.getElementById('profilClient-select');
+        const profilClientHiddenInput = document.getElementById('profilClient-hidden');
+        const deviseCompteADebiterSelect = document.getElementById('op-deviseCompteADebiter');
+        const montantRetraitInput = document.getElementById('op-montantRetrait');
+        const typeRetraitSelect = document.getElementById('op-typeRetrait');
+        const deviseADonnerSelect = document.getElementById('op-deviseADonner');
+        const montantADonnerInput = document.getElementById('op-montantADonner');
+        const montantADonnerLabel = document.querySelector('label[for="op-montantADonner"]');
+        const tauxRetraitInput = document.getElementById('op-tauxRetrait');
+        const transfertDetailsDiv = document.getElementById('transfertDetails');
+        const beneficiaireExistantSelect = document.getElementById('op-beneficiaireExistant');
+        const beneficiaireStatusMessageDiv = document.getElementById('beneficiaireStatusMessage');
+        const typeCompteBeneficiaireSelect = document.getElementById('op-typeCompteBeneficiaire');
+        const nomBeneficiaireInput = document.getElementById('op-nomBeneficiaire');
+        const contactBeneficiaireInput = document.getElementById('op-contactBeneficiaire');
+        const detailCompteInput = document.getElementById('op-detailCompte');
+        const institutionFinanciereInput = document.getElementById('op-institutionFinanciere');
+        const paysBeneficiaireSelect = document.getElementById('op-paysBeneficiaire');
+        const motifRetraitInput = document.getElementById('op-motifRetrait');
+        const feedbackDiv = document.getElementById('operation-feedback');
+        const submitButton = document.getElementById('submit-operation');
+        const getRateUrl = retraitContainer.dataset.getRateUrl;
+        const checkBalanceUrl = retraitContainer.dataset.checkBalanceUrl;
+        const getBeneficiairesUrl = retraitContainer.dataset.getBeneficiairesUrl;
+        const checkClientBalanceUrl = retraitContainer.dataset.checkClientBalanceUrl;
+        let currentRateRetrait = null;
+
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        function resetBeneficiaireFields() {
+            nomBeneficiaireInput.value = '';
+            contactBeneficiaireInput.value = '';
+            typeCompteBeneficiaireSelect.value = '';
+            detailCompteInput.value = '';
+            institutionFinanciereInput.value = '';
+            paysBeneficiaireSelect.value = '';
+        }
+
+        function toggleTransfertFields() {
+            const isTransfert = typeRetraitSelect.value === 'TRANSFERT';
+            transfertDetailsDiv.style.display = isTransfert ? 'block' : 'none';
+            if (montantADonnerLabel) {
+                montantADonnerLabel.textContent = isTransfert ? 'Montant à transférer au bénéficiaire' : 'Montant à remettre au client';
+            }
+            if (!isTransfert) {
+                beneficiaireExistantSelect.innerHTML = '<option value="">-- Chercher ou sélectionner --</option>';
+                beneficiaireStatusMessageDiv.innerHTML = '';
+                beneficiaireExistantSelect.disabled = false;
+                resetBeneficiaireFields();
+            }
+            const isBeneficiaireSelected = beneficiaireExistantSelect.value !== '';
+            const requiredManualTransfertFields = [
+                nomBeneficiaireInput, typeCompteBeneficiaireSelect,
+                detailCompteInput, institutionFinanciereInput, paysBeneficiaireSelect
+            ];
+            requiredManualTransfertFields.forEach(field => {
+                if (isTransfert && !isBeneficiaireSelected) {
+                    field.setAttribute('required', 'required');
+                } else {
+                    field.removeAttribute('required');
+                }
+            });
+            if (isTransfert && !isBeneficiaireSelected) {
+                contactBeneficiaireInput.setAttribute('required', 'required');
+            } else {
+                contactBeneficiaireInput.removeAttribute('required');
+            }
+        }
+
+        async function loadBeneficiairesForProfilClient(profilClientId) {
+            beneficiaireExistantSelect.innerHTML = '<option value="">Chargement...</option>';
+            beneficiaireExistantSelect.disabled = true;
+            beneficiaireStatusMessageDiv.innerHTML = '<div class="text-info"><i class="fas fa-spinner fa-spin me-2"></i>Chargement des bénéficiaires...</div>';
+            resetBeneficiaireFields();
+            if (!profilClientId || typeRetraitSelect.value !== 'TRANSFERT') {
+                beneficiaireExistantSelect.innerHTML = '<option value="">-- Chercher ou sélectionner --</option>';
+                beneficiaireExistantSelect.disabled = false;
+                beneficiaireStatusMessageDiv.innerHTML = '';
+                toggleTransfertFields();
+                return;
+            }
+            try {
+                const response = await fetch(getBeneficiairesUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ profilClientId: profilClientId })
+                });
+                if (!response.ok) {
+                    throw new Error("Erreur lors de la récupération des bénéficiaires.");
+                }
+                const data = await response.json();
+                if (data.success && data.beneficiaires.length > 0) {
+                    beneficiaireExistantSelect.innerHTML = '<option value="">-- Chercher ou sélectionner (Nouveau bénéficiaire) --</option>';
+                    data.beneficiaires.forEach(benef => {
+                        const option = document.createElement('option');
+                        option.value = benef.id;
+                        option.textContent = `${benef.nomComplet} (${benef.typeCompte || 'N/A'} - ${benef.detailCompte || 'N/A'})`;
+                        option.dataset.beneficiaire = JSON.stringify(benef);
+                        beneficiaireExistantSelect.appendChild(option);
+                    });
+                    beneficiaireStatusMessageDiv.innerHTML = `<div class="alert alert-success mt-1 p-2"><i class="fas fa-info-circle me-1"></i>${data.beneficiaires.length} bénéficiaire(s) trouvé(s) pour ce profil.</div>`;
+                } else {
+                    beneficiaireExistantSelect.innerHTML = '<option value="">Aucun bénéficiaire enregistré pour ce profil. (Nouveau bénéficiaire)</option>';
+                    beneficiaireStatusMessageDiv.innerHTML = `<div class="alert alert-info mt-1 p-2"><i class="fas fa-info-circle me-1"></i>Aucun bénéficiaire enregistré pour ce profil client. Veuillez en ajouter un.</div>`;
+                    resetBeneficiaireFields();
+                }
+            } catch (error) {
+                console.error("Erreur de chargement des bénéficiaires:", error);
+                beneficiaireStatusMessageDiv.innerHTML = `<div class="alert alert-danger mt-1 p-2">Erreur: ${error.message} lors du chargement des bénéficiaires.</div>`;
+                beneficiaireExistantSelect.innerHTML = '<option value="">Erreur de chargement.</option>';
+            } finally {
+                beneficiaireExistantSelect.disabled = false;
+                toggleTransfertFields();
+                window.updateRetraitDetails();
+            }
+        }
+
+        function fillBeneficiaireFields(beneficiaireData) {
+            nomBeneficiaireInput.value = beneficiaireData.nomComplet || '';
+            contactBeneficiaireInput.value = beneficiaireData.contact || '';
+            typeCompteBeneficiaireSelect.value = beneficiaireData.typeCompte || '';
+            detailCompteInput.value = beneficiaireData.detailCompte || '';
+            institutionFinanciereInput.value = beneficiaireData.institutionFinanciere || '';
+            paysBeneficiaireSelect.value = beneficiaireData.pays ? beneficiaireData.pays.id : '';
+        }
+
+        window.updateRetraitDetails = async function() {
+            const profilClientId = profilClientHiddenInput.value;
+            const deviseCompteADebiterId = deviseCompteADebiterSelect.value;
+            const montantRetrait = parseFloat(montantRetraitInput.value);
+            const typeRetraitValue = typeRetraitSelect.value;
+            const deviseADonnerId = deviseADonnerSelect.value;
+            const deviseCompteADebiterCode = deviseCompteADebiterSelect.options[deviseCompteADebiterSelect.selectedIndex]?.dataset.code || '???';
+            const deviseADonnerCode = deviseADonnerSelect.options[deviseADonnerSelect.selectedIndex]?.dataset.code || '???';
+            let isValidBase = true;
+            let feedbackMessage = '';
+
+            if (!profilClientId && profilClientSelectContainer && getComputedStyle(profilClientSelectContainer).display !== 'none') {
+                isValidBase = false;
+                feedbackMessage = 'Veuillez sélectionner un profil client.';
+            } else if (!deviseCompteADebiterId) {
+                isValidBase = false;
+                feedbackMessage = 'Veuillez sélectionner la devise du compte à débiter.';
+            } else if (isNaN(montantRetrait) || montantRetrait <= 0) {
+                isValidBase = false;
+                feedbackMessage = 'Veuillez entrer un montant valide à débiter (doit être > 0).';
+            } else if (!typeRetraitValue) {
+                isValidBase = false;
+                feedbackMessage = 'Veuillez choisir le type de retrait (Espèces/Transfert).';
+            } else if (!deviseADonnerId) {
+                isValidBase = false;
+                feedbackMessage = 'Veuillez sélectionner la devise à donner.';
+            }
+
+            if (!isValidBase) {
+                montantADonnerInput.value = '';
+                tauxRetraitInput.value = '';
+                feedbackDiv.innerHTML = `<p class="text-muted mb-0 alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>${feedbackMessage}</p>`;
+                submitButton.disabled = true;
+                return;
+            }
+
+            feedbackDiv.innerHTML = `<div class="text-info"><i class="fas fa-spinner fa-spin me-2"></i>Calcul et vérifications...</div>`;
+            submitButton.disabled = true;
+            let montantADonnerFinal = montantRetrait;
+            let tauxUtilise = 1;
+            let isConversion = false;
+
+            try {
+                if (deviseCompteADebiterId !== deviseADonnerId) {
+                    isConversion = true;
+                    feedbackDiv.innerHTML = `<div class="text-info"><i class="fas fa-spinner fa-spin me-2"></i>Recherche du taux de conversion...</div>`;
+                    const rateResponse = await fetch(getRateUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: JSON.stringify({ deviseSource: deviseCompteADebiterId, deviseCible: deviseADonnerId })
+                    });
+                    if (!rateResponse.ok) {
+                        throw new Error(`Erreur HTTP ${rateResponse.status} lors de la récupération du taux.`);
+                    }
+                    const rateData = await rateResponse.json();
+                    if (!rateData.success) {
+                        feedbackDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>${rateData.message}</div>`;
+                        submitButton.disabled = true;
+                        return;
+                    }
+                    tauxUtilise = rateData.taux;
+                    montantADonnerFinal = montantRetrait * tauxUtilise;
+                    currentRateRetrait = tauxUtilise;
+                } else {
+                    currentRateRetrait = 1;
+                }
+
+                montantADonnerInput.value = montantADonnerFinal.toFixed(2);
+                tauxRetraitInput.value = tauxUtilise.toFixed(6);
+                let feedbackHtml = '';
+                if (isConversion) {
+                    feedbackHtml = `Taux de conversion appliqué : <strong>1 ${deviseCompteADebiterCode} = ${tauxUtilise.toFixed(4)} ${deviseADonnerCode}</strong>.`;
+                    feedbackHtml += `<br>Le client recevra <strong>${montantADonnerFinal.toFixed(2)} ${deviseADonnerCode}</strong>.`;
+                } else {
+                    feedbackHtml = `Le client recevra <strong>${montantADonnerFinal.toFixed(2)} ${deviseADonnerCode}</strong>.`;
+                }
+                feedbackDiv.innerHTML = `<div class="alert alert-info">${feedbackHtml}</div>`;
+
+                // Ajouter une div dédiée pour les messages dynamiques
+                const soldeClientDiv = document.createElement('div');
+                soldeClientDiv.classList.add('mt-1');
+                feedbackDiv.appendChild(soldeClientDiv);
+
+                // Afficher le message de vérification dedans
+                soldeClientDiv.innerHTML = `<div class="text-info p-1">Vérification du solde du compte client... <i class="fas fa-spinner fa-spin"></i></div>`;
+
+                const clientBalanceResponse = await fetch(checkClientBalanceUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ profilClientId: profilClientId, deviseId: deviseCompteADebiterId, montant: montantRetrait })
+                });
+
+                if (!clientBalanceResponse.ok) {
+                    throw new Error(`Erreur HTTP ${clientBalanceResponse.status} lors de la vérification du solde du compte client.`);
+                }
+
+                const clientBalanceData = await clientBalanceResponse.json();
+                if (!clientBalanceData.sufficient) {
+                    soldeClientDiv.innerHTML = `<div class="alert alert-danger mt-1 p-2"><i class="fas fa-times-circle me-1"></i><strong>Attention :</strong> Solde insuffisant (${montantRetrait.toFixed(2)} ${deviseCompteADebiterCode}) sur le compte client.</div>`;
+                    submitButton.disabled = true;
+                    return;
+                } else {
+                    soldeClientDiv.innerHTML = `<div class="alert alert-success mt-1 p-2"><i class="fas fa-check-circle me-1"></i>Solde compte client suffisant.</div>`;
+                }
+
+                let isValidTransfertDetails = true;
+                const isTransfert = typeRetraitValue === 'TRANSFERT';
+                if (isTransfert) {
+                    const isBeneficiaireSelected = beneficiaireExistantSelect.value !== '';
+                    if (!isBeneficiaireSelected) {
+                        if (!nomBeneficiaireInput.value || !typeCompteBeneficiaireSelect.value || !detailCompteInput.value || !institutionFinanciereInput.value || !paysBeneficiaireSelect.value) {
+                            isValidTransfertDetails = false;
+                            feedbackDiv.innerHTML += `<div class="alert alert-danger mt-1 p-2"><i class="fas fa-exclamation-triangle me-2"></i>Veuillez remplir tous les détails du nouveau bénéficiaire.</div>`;
+                        }
+                    }
+                }
+
+                if (!isValidTransfertDetails) {
+                    submitButton.disabled = true;
+                    return;
+                }
+
+                if (typeRetraitValue === 'ESPECES') {
+                    const balanceDiv = document.createElement('div');
+                    balanceDiv.classList.add('mt-1');
+                    feedbackDiv.appendChild(balanceDiv);
+                    balanceDiv.innerHTML = `<div class="text-info p-1">Vérification du solde de caisse... <i class="fas fa-spinner fa-spin"></i></div>`;
+
+                    const balanceResponse = await fetch(checkBalanceUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: JSON.stringify({ devise: deviseADonnerId, montant: montantADonnerFinal })
+                    });
+
+                    if (!balanceResponse.ok) {
+                        throw new Error(`Erreur HTTP ${balanceResponse.status} lors de la vérification du solde de caisse.`);
+                    }
+
+                    const balanceData = await balanceResponse.json();
+                    if (balanceData.sufficient) {
+                        submitButton.disabled = false;
+                        balanceDiv.innerHTML = `<div class="alert alert-success mt-1 p-2"><i class="fas fa-check-circle me-1"></i>Solde caisse suffisant pour la remise en ${deviseADonnerCode}.</div>`;
+                    } else {
+                        balanceDiv.innerHTML = `<div class="alert alert-danger mt-1 p-2"><i class="fas fa-times-circle me-1"></i><strong>Attention :</strong> ${balanceData.message || `Solde caisse insuffisant pour remettre ${montantADonnerFinal.toFixed(2)} ${deviseADonnerCode}.`}</div>`;
+                        submitButton.disabled = true;
+                    }
+                } else {
+                    submitButton.disabled = false;
+                    feedbackDiv.innerHTML += `<div class="alert alert-success mt-1 p-2"><i class="fas fa-check-circle me-1"></i>Retrait par Transfert - Validité OK.</div>`;
+                }
+            } catch (error) {
+                console.error("Erreur dans updateRetraitDetails:", error);
+                feedbackDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Erreur: ${error.message}</div>`;
+                submitButton.disabled = true;
+            }
+        };
+
+        const debouncedRetraitUpdate = debounce(window.updateRetraitDetails, 500);
+
+        if (profilClientSelect) {
+            profilClientSelect.addEventListener('change', function() {
+                profilClientHiddenInput.value = this.value;
+                if (typeRetraitSelect.value === 'TRANSFERT') {
+                    loadBeneficiairesForProfilClient(this.value);
+                }
+                window.updateRetraitDetails();
+            });
+        }
+
+        deviseCompteADebiterSelect.addEventListener('change', window.updateRetraitDetails);
+        montantRetraitInput.addEventListener('input', debouncedRetraitUpdate);
+        typeRetraitSelect.addEventListener('change', function() {
+            toggleTransfertFields();
+            if (this.value === 'TRANSFERT' && profilClientHiddenInput.value) {
+                loadBeneficiairesForProfilClient(profilClientHiddenInput.value);
+            }
+            window.updateRetraitDetails();
+        });
+        deviseADonnerSelect.addEventListener('change', window.updateRetraitDetails);
+
+        nomBeneficiaireInput.addEventListener('input', debouncedRetraitUpdate);
+        contactBeneficiaireInput.addEventListener('input', debouncedRetraitUpdate);
+        typeCompteBeneficiaireSelect.addEventListener('change', window.updateRetraitDetails);
+        detailCompteInput.addEventListener('input', debouncedRetraitUpdate);
+        institutionFinanciereInput.addEventListener('input', debouncedRetraitUpdate);
+        paysBeneficiaireSelect.addEventListener('change', window.updateRetraitDetails);
+        motifRetraitInput.addEventListener('input', debouncedRetraitUpdate);
+
+        if (beneficiaireExistantSelect) {
+            beneficiaireExistantSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const beneficiaireData = JSON.parse(selectedOption.dataset.beneficiaire);
+                    fillBeneficiaireFields(beneficiaireData);
+                } else {
+                    resetBeneficiaireFields();
+                }
+                toggleTransfertFields();
+                window.updateRetraitDetails();
+            });
+        }
+
+        setTimeout(() => {
+            toggleTransfertFields();
+            if (profilClientHiddenInput.value && typeRetraitSelect.value === 'TRANSFERT') {
+                loadBeneficiairesForProfilClient(profilClientHiddenInput.value);
+            }
+            window.updateRetraitDetails();
+        }, 50);
+    });
+
+</script>

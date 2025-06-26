@@ -1,13 +1,62 @@
-<div class="operation-group" id="group-DÉPÔT" style="display:none;">
-    <h5 class="mt-4">Détails du Dépôt</h5>
-    <div class="mb-3">
-        <label for="depot-deviseSource" class="form-label">Devise du dépôt</label>
-        <select class="form-select" id="depot-deviseSource" name="deviseSource">
-            {% for devise in devises %}<option value="{{ devise.id }}">{{ devise.codeIso }}</option>{% endfor %}
-        </select>
-    </div>
-    <div class="mb-3">
-        <label for="depot-montantSource" class="form-label">Montant à déposer</label>
-        <input type="number" step="0.001" class="form-control" id="depot-montantSource" name="montantSource">
-    </div>
+{# templates/operation/_form_depot_fields.html.twig #}
+
+<div class="operation-group" id="group-DEPOT"
+     data-get-rate-url="{{ path('api_get_exchange_rate') }}"
+     data-check-balance-url="{{ path('api_check_cash_desk_balance') }}">
+    <fieldset>
+        <legend>
+            <h5 class="border-primary border-start border-3 ps-3 py-3 ">Détails du Dépôt</h5>
+        </legend>
+
+        {# Conteneur du sélecteur de ProfilClient (UNIQUEMENT pour le dépôt) #}
+        <div class="mb-3" id="profilClientSelectContainer" style="display: none;">
+            <label for="profilClient-select" class="form-label fw-bold">Profil Client Associé</label>
+            {# Le `name` du select visible est maintenant `profilClient_display` #}
+            {# Il ne sera PAS soumis. Sa valeur sera copiée dans le champ caché #}
+            <select class="form-select-lg form-select" id="profilClient-select" name="profilClient_display" required>
+                <option value="">-- Sélectionnez un profil client --</option>
+            </select>
+            <small class="form-text text-muted" id="profilClientHelpText">
+                Sélectionnez le profil client pour l'opération.
+            </small>
+        </div>
+
+        {# CHAMP CACHÉ : C'est LUI qui porte le nom 'profilClient' et qui sera soumis #}
+        <input type="hidden" id="profilClient-hidden" name="profilClient">
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="op-deviseApportee" class="form-label">Devise apportée par le client</label>
+                <select class="form-select form-select-lg" id="op-deviseApportee" name="deviseApportee" required>
+                    <option value="">Sélectionnez une devise</option>
+                    {% for devise in devises %}
+                        <option value="{{ devise.id }}" data-code="{{ devise.codeIso }}">{{ devise.nom }} ({{ devise.codeIso }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="op-montantApporte" class="form-label">Montant apporté</label>
+                <input type="number" step="0.01" class="form-control form-control-lg" id="op-montantApporte" name="montantApporte" required min="0.01">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="op-deviseCibleCompte" class="form-label">Devise du compte client à créditer</label>
+                <select class="form-select form-select-lg" id="op-deviseCibleCompte" name="deviseCibleCompte" required>
+                    <option value="">Sélectionnez une devise</option>
+                    {% for devise in devises %}
+                        <option value="{{ devise.id }}" data-code="{{ devise.codeIso }}">{{ devise.nom }} ({{ devise.codeIso }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="op-montantCibleCompte" class="form-label">Montant à créditer (après conversion si applicable)</label>
+                <input type="number" step="0.01" class="form-control form-control-lg" id="op-montantCibleCompte" name="montantCibleCompte" readonly>
+            </div>
+        </div>
+
+        <input type="hidden" id="op-tauxDepot" name="tauxDepot">
+        <div id="operation-feedback" class="mt-2 rounded" style="min-height: 40px;"></div>
+    </fieldset>
 </div>

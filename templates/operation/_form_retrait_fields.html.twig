@@ -1,0 +1,128 @@
+{# templates/operation/_form_retrait_fields.html.twig #}
+
+<div class="operation-group" id="group-RETRAIT"
+     data-get-rate-url="{{ path('api_get_exchange_rate') }}"
+     data-check-balance-url="{{ path('api_check_cash_desk_balance') }}"
+     data-get-beneficiaires-url="{{ path('api_get_beneficiaires_by_profil_client') }}"
+     data-check-client-balance-url="{{ path('api_check_client_account_balance') }}">
+    <fieldset>
+        <legend>
+            <h5 class="border-primary border-start border-3 ps-3 py-3 ">Détails du Retrait</h5>
+        </legend>
+
+        {# Assurez-vous que ce bloc est toujours pertinent pour le chargement des bénéficiaires si c'est un transfert #}
+        {# Si 'type' peut être 'transfert' aussi, l'afficher toujours #}
+        {% if type == 'retrait' or type == 'transfert' %} {# Ajustez cette condition si nécessaire #}
+            <div class="mb-3" id="profilClientSelectContainer"> {# Enlever display: none; si toujours visible #}
+                <label for="profilClient-select" class="form-label fw-bold">Profil Client Associé</label>
+                <select class="form-select-lg form-select" id="profilClient-select" name="profilClient_display" required>
+                    <option value="">-- Sélectionnez un profil client --</option>
+                    {# Les options seront chargées dynamiquement #}
+                </select>
+                <small class="form-text text-muted" id="profilClientHelpText">
+                    Sélectionnez le profil client pour l'opération.
+                </small>
+            </div>
+            <input type="hidden" id="profilClient-hidden" name="profilClient">
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="op-deviseCompteADebiter" class="form-label">Devise du compte client à débiter</label>
+                <select class="form-select form-select-lg" id="op-deviseCompteADebiter" name="deviseCompteADebiter" required>
+                    <option value="">Sélectionnez une devise</option>
+                    {% for devise in devises %}
+                        <option value="{{ devise.id }}" data-code="{{ devise.codeIso }}">{{ devise.nom }} ({{ devise.codeIso }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="op-montantRetrait" class="form-label">Montant à débiter du compte</label>
+                <input type="number" step="0.01" class="form-control form-control-lg" id="op-montantRetrait" name="montantRetrait" required min="0.01">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="op-typeRetrait" class="form-label">Type de Retrait</label>
+                <select class="form-select form-select-lg" id="op-typeRetrait" name="typeRetrait" required>
+                    <option value="">-- Choisir le type --</option>
+                    <option value="ESPECES">Espèces au guichet</option>
+                    <option value="TRANSFERT">Transfert (Virement)</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="op-deviseADonner" class="form-label">Devise à donner au client (si différente)</label>
+                <select class="form-select form-select-lg" id="op-deviseADonner" name="deviseADonner" required>
+                    <option value="">Sélectionnez une devise</option>
+                    {% for devise in devises %}
+                        <option value="{{ devise.id }}" data-code="{{ devise.codeIso }}">{{ devise.nom }} ({{ devise.codeIso }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="op-montantADonner" class="form-label">Montant à remettre au client</label>
+            <input type="number" step="0.01" class="form-control form-control-lg" id="op-montantADonner" name="montantADonner" readonly>
+        </div>
+
+        <input type="hidden" id="op-tauxRetrait" name="tauxRetrait">
+        <div id="operation-feedback" class="mt-2 rounded" style="min-height: 40px;"></div>
+
+        <div id="transfertDetails" style="display: none;">
+            <h6 class="border-secondary border-start border-2 ps-2 py-1 mt-4">Détails du Bénéficiaire & Transfert</h6>
+            <div class="mb-3">
+                <label for="op-beneficiaireExistant" class="form-label">Bénéficiaire Existant</label>
+                <select class="form-select" id="op-beneficiaireExistant" name="beneficiaireExistant">
+                    <option value="">-- Chercher ou sélectionner --</option>
+                </select>
+                <small class="form-text text-muted" id="beneficiaireHelpText">
+                    Commencez à taper un nom ou un numéro de compte pour chercher.
+                </small>
+                <div id="beneficiaireStatusMessage" class="mt-1"></div> {# Nouvelle div pour les messages #}
+            </div>
+            <div class="mb-3">
+                <label for="op-typeCompteBeneficiaire" class="form-label">Type de Compte Bénéficiaire</label>
+                <select class="form-select" id="op-typeCompteBeneficiaire" name="typeCompteBeneficiaire">
+                    <option value="">-- Choisir --</option>
+                    <option value="BANQUE">Compte Bancaire</option>
+                    <option value="MOBILE_MONEY">Mobile Money</option>
+                </select>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="op-nomBeneficiaire" class="form-label">Nom Complet du Bénéficiaire</label>
+                    <input type="text" class="form-control" id="op-nomBeneficiaire" name="nomBeneficiaire">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="op-contactBeneficiaire" class="form-label">Contact (Numéro de Téléphone/Email)</label>
+                    <input type="text" class="form-control" id="op-contactBeneficiaire" name="contactBeneficiaire">
+                </div>
+            </div>
+            <div class="mb-3" id="detailCompteField">
+                <label for="op-detailCompte" class="form-label">Numéro de Compte / Numéro Mobile Money</label>
+                <input type="text" class="form-control" id="op-detailCompte" name="detailCompte">
+            </div>
+            <div class="mb-3" id="institutionFinanciereField">
+                <label for="op-institutionFinanciere" class="form-label">Nom de la Banque / Opérateur Mobile Money</label>
+                <input type="text" class="form-control" id="op-institutionFinanciere" name="institutionFinanciere">
+            </div>
+            <div class="mb-3">
+                <label for="op-paysBeneficiaire" class="form-label">Pays du Bénéficiaire</label>
+                <select class="form-select" id="op-paysBeneficiaire" name="paysBeneficiaire">
+                    <option value="">-- Sélectionnez un pays --</option>
+                    {% for pays in pays %}
+                        <option value="{{ pays.id }}">{{ pays.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="op-motifRetrait" class="form-label">Motif du Retrait</label>
+                <textarea class="form-control" id="op-motifRetrait" name="motifRetrait" rows="2"></textarea>
+            </div>
+        </div>
+
+        <div id="operation-feedback" class="mt-2 rounded" style="min-height: 40px;"></div>
+    </fieldset>
+</div>

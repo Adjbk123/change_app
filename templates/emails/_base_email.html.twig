@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Notification{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:'Montserrat', sans-serif;">
+
+<!-- Logo -->
+<div style="text-align:center;padding-top:20px;">
+    <img src="https://tondomaine.com/assets/logo-change.png" alt="Logo"
+         style="max-width:150px;height:auto;margin-bottom:20px;" />
+</div>
+
+<!-- Conteneur principal -->
+<table align="center" cellpadding="0" cellspacing="0" width="100%" style="padding: 20px 0; background-color: #f5f5f5;">
+    <tr>
+        <td align="center">
+            <table cellpadding="0" cellspacing="0" width="600"
+                   style="background-color:#ffffff;border-radius:8px;overflow:hidden;text-align:left;">
+
+                <!-- Header -->
+                <tr>
+                    <td style="background-color:#11845a;padding:24px;text-align:center;">
+                        <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;font-family:'Montserrat', Arial, sans-serif;">
+                            {% block header %}APPLICATION DE CHANGE{% endblock %}
+                        </h1>
+                    </td>
+                </tr>
+
+                <!-- Contenu principal -->
+                <tr>
+                    <td style="padding:40px 30px;color:#333;font-size:16px;line-height:1.6;font-family:'Montserrat', Arial, sans-serif;">
+                        {% block content %}
+                            <!-- Contenu du mail ici -->
+                        {% endblock %}
+                    </td>
+                </tr>
+
+                <!-- Pied de page -->
+                <tr>
+                    <td style="padding:20px;text-align:center;font-size:12px;color:#777;font-family:'Montserrat', Arial, sans-serif;">
+                        {% block footer %}
+                            Ceci est un message automatique. Merci de ne pas répondre directement à cet email.<br />
+                            &copy; {{ "now"|date("Y") }} Application de Change – Tous droits réservés.
+                        {% endblock %}
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

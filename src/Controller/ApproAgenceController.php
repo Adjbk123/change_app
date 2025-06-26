@@ -70,7 +70,7 @@ final class ApproAgenceController extends AbstractController
             // Calcul nouveau solde général
             $nouveauSoldeGeneral = $compteGeneral->getSoldeRestant() - $montant;
             if ($nouveauSoldeGeneral < 0) {
-                $this->addFlash('error', 'Solde insuffisant dans le compte général pour valider cette demande.');
+                $this->addFlash('danger', 'Solde insuffisant dans le compte général pour valider cette demande.');
                 $em->getConnection()->rollBack();
                 return $this->redirectToRoute('app_compte_agence_show', ['id' => $compteAgence->getId()]);
             }

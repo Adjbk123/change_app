@@ -30,10 +30,17 @@ class Pays
     #[ORM\OneToMany(targetEntity: CompteBancaire::class, mappedBy: 'pays')]
     private Collection $compteBancaires;
 
+    /**
+     * @var Collection<int, Beneficiaire>
+     */
+    #[ORM\OneToMany(targetEntity: Beneficiaire::class, mappedBy: 'pays')]
+    private Collection $beneficiaires;
+
     public function __construct()
     {
         $this->agences = new ArrayCollection();
         $this->compteBancaires = new ArrayCollection();
+        $this->beneficiaires = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -107,6 +114,36 @@ class Pays
             // set the owning side to null (unless already changed)
             if ($compteBancaire->getPays() === $this) {
                 $compteBancaire->setPays(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Beneficiaire>
+     */
+    public function getBeneficiaires(): Collection
+    {
+        return $this->beneficiaires;
+    }
+
+    public function addBeneficiaire(Beneficiaire $beneficiaire): static
+    {
+        if (!$this->beneficiaires->contains($beneficiaire)) {
+            $this->beneficiaires->add($beneficiaire);
+            $beneficiaire->setPays($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBeneficiaire(Beneficiaire $beneficiaire): static
+    {
+        if ($this->beneficiaires->removeElement($beneficiaire)) {
+            // set the owning side to null (unless already changed)
+            if ($beneficiaire->getPays() === $this) {
+                $beneficiaire->setPays(null);
             }
         }
 

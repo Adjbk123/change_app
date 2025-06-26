@@ -1,34 +1,386 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Nouvelle Opération{% endblock %}
+{% block title %}Nouvelle Opération d'{{ type }}{% endblock %}
 
 {% block body %}
+    {% set routeAction =
+        type == 'achat-vente' ? path('operation_achat_vente_new') :
+        (type == 'depot' ? path('operation_versement_new') :
+        (type == 'retrait' ? path('operation_retrait_new') :
+        '#')) %}
 
-    <div class="card-body">
-        <form method="post" action="">
-            {# Sécurité : Ne jamais oublier le jeton CSRF #}
-            <input type="hidden" name="_token"
-                   value="{{ csrf_token('new_operation_token') }}">
+        <div class="container-fluid py-4">
+            <h1 class="display-5 fw-bold text-primary mb-4">
+                <i class="bi bi-cash-stack me-3"></i> Nouvelle Opération de <span class="text-secondary">{{ type|capitalize }}</span>
+                    </h1>
 
-            {% include 'operation/_form_client_info.html.twig' %}
+                    <form method="POST" action="{{ routeAction }}" id="exchangeOperationForm" class="card shadow-sm p-4">
+                    <input type="hidden" name="_token" value="{{ csrf_token('new_operation_token') }}">
 
+                    {% include 'operation/_form_client.html.twig' %}
+                    <hr class="my-4">
 
-            {% if type == 'achat' %}
-                {% include 'operation/_form_achat_fields.html.twig' %}
-
-            {% elseif type == 'depot' %}
-                {% include 'operation/_form_depot_fields.html.twig' %}
-
+                    {% if type=="achat-vente" %}
+                    {% include 'operation/_form_achat_vente_fields.html.twig' %}
+                    {% elseif type=="depot" %}
+                    {% include 'operation/_form_depot_fields.html.twig' %}
+                    {% elseif type=="retrait" %}
+                    {% include 'operation/_form_retrait_fields.html.twig' %}
             {% endif %}
 
+            <div class="mt-4">
+                <button type="submit" id="submit-operation" class="btn btn-primary btn-lg w-100">
+                    <i class="bi bi-save me-2"></i> Enregistrer l'opération
+                </button>
+            </div>
+                    </form>
+        </div>
 
-            <button type="submit" class="btn btn-primary mt-3 w-100">Enregistrer
-                l'opération
-            </button>
-        </form>
-    </div>
+    {% include 'operation/_client_modal.html.twig' %}
+    {% endblock %}
+
+    {% block javascripts %}
+        {{ parent() }}
 
 
+        {# Inclusion des scripts spécifiques #}
+    {% if type=="achat-vente" %}
+        {% include 'operation/_form_achat_vente_script.html.twig' %}
+    {% elseif type=="depot" %}
+        {% include 'operation/_form_depot_script.html.twig' %}
+    {% elseif type=="retrait" %}
+        {% include 'operation/_form_retrait_script.html.twig' %} {# NOUVEL INCLUDE ICI #}
+    {% endif %}
+
+    {# Inclusion du script de gestion du profil client (global pour tous les types qui l'utilisent) #}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const clientSelect = document.getElementById('client');
+        const profilClientSelectContainer = document.getElementById('profilClientSelectContainer');
+        const profilClientSelect = document.getElementById('profilClient-select');
+        const profilClientHiddenInput = document.getElementById('profilClient-hidden');
+        const profilClientHelpText = document.getElementById('profilClientHelpText');
+        const submitButton = document.getElementById('submit-operation');
+        const mainForm = document.getElementById('exchangeOperationForm');
+
+        const getProfilClientsUrl = "{{ path('api_get_profil_clients_by_client') }}";
+
+        function resetProfilClientSelect(disableSubmit = true) {
+            if (profilClientSelect) {
+                profilClientSelect.innerHTML = '<option value="">-- Sélectionnez un profil client --</option>';
+                profilClientSelect.value = '';
+                profilClientSelect.removeAttribute('required');
+                profilClientSelect.disabled = false; // Ne pas le laisser disabled
+            }
+            if (profilClientHiddenInput) {
+                profilClientHiddenInput.value = '';
+            }
+            if (profilClientSelectContainer) {
+                profilClientSelectContainer.style.display = 'none';
+            }
+            if (profilClientHelpText) {
+                profilClientHelpText.textContent = 'Sélectionnez le profil client pour l\'opération.';
+            }
+
+            if (disableSubmit && submitButton) {
+                submitButton.disabled = true; // Désactiver par défaut si pas de client/profil valide
+            }
+        }
+
+        // Exposer les fonctions de mise à jour des formulaires spécifiques
+        // pour qu'elles puissent être appelées par la logique de sélection de client/profil
+        function triggerDepotUpdate() {
+            if (typeof window.updateDepotDetails === 'function') {
+                window.updateDepotDetails();
+            }
+        }
+        function triggerAchatVenteUpdate() {
+            if (typeof window.updateOperationDetails === 'function') {
+                window.updateOperationDetails();
+            } else {
+                if (submitButton) submitButton.disabled = false; // Si pas de script spécifique, activer quand même
+            }
+        }
+        function triggerRetraitUpdate() { // NOUVELLE FONCTION POUR LE RETRAIT
+            if (typeof window.updateRetraitDetails === 'function') {
+                window.updateRetraitDetails();
+            } else {
+                if (submitButton) submitButton.disabled = false; // Si pas de script spécifique, activer quand même
+            }
+        }
 
 
+        // Initialisation au chargement
+        resetProfilClientSelect(true); // Désactive le bouton au démarrage
+
+        // Écouteur sur le Client de base (sélecteur #client)
+        if (clientSelect) {
+            clientSelect.addEventListener('change', async function() {
+                const clientId = this.value;
+
+                // Réinitialiser les profils pour tous les types d'abord
+                resetProfilClientSelect(true); // Réinitialiser le sélecteur de profil client et désactiver le bouton
+
+                if (!clientId) { // Si aucun client n'est sélectionné
+                    // Assurez-vous que les fonctions de mise à jour des formulaires spécifiques sont appelées
+                    // pour qu'elles désactivent le bouton si nécessaire.
+                    triggerDepotUpdate();
+                    triggerAchatVenteUpdate();
+                    triggerRetraitUpdate(); // Appeler aussi pour le retrait
+                    return;
+                }
+
+                // Logique pour récupérer les profils clients (si le type le demande)
+                if (['depot', 'retrait'].includes('{{ type }}')) { // Pour dépôt et retrait, on a besoin du profil client
+                    if (profilClientSelect && profilClientSelectContainer && profilClientHelpText && profilClientHiddenInput) {
+                        profilClientSelect.innerHTML = '<option value="">Chargement des profils...</option>';
+                        profilClientSelect.value = '';
+                        profilClientHiddenInput.value = '';
+                        profilClientSelectContainer.style.display = 'block';
+                        profilClientSelect.setAttribute('required', 'required');
+                        profilClientSelect.disabled = true; // Désactiver visuellement pendant le chargement
+                        profilClientHelpText.textContent = 'Chargement...';
+                    }
+                    if (submitButton) submitButton.disabled = true;
+
+                    try {
+                        const response = await fetch(getProfilClientsUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                            body: JSON.stringify({ clientId: clientId })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error("Erreur lors de la récupération des profils clients: " + response.statusText);
+                        }
+
+                        const data = await response.json();
+
+                        if (data.success && data.profilClients.length > 0) {
+                            if (profilClientSelect && profilClientHiddenInput) {
+                                profilClientSelect.innerHTML = '<option value="">-- Sélectionnez un profil client --</option>';
+                                data.profilClients.forEach(profil => {
+                                    const option = document.createElement('option');
+                                    option.value = profil.id;
+                                    option.textContent = `${profil.numeroProfilCompte} (${profil.typeClient})`;
+                                    profilClientSelect.appendChild(option);
+                                });
+
+                                if (data.profilClients.length === 1) {
+                                    profilClientSelect.value = data.profilClients[0].id;
+                                    profilClientHiddenInput.value = data.profilClients[0].id;
+                                    profilClientSelect.disabled = true; // Visuellement désactivé
+                                    if (profilClientHelpText) profilClientHelpText.textContent = 'Un seul profil trouvé, sélectionné automatiquement.';
+                                } else {
+                                    profilClientSelect.disabled = false;
+                                    profilClientSelect.value = ''; // S'assurer qu'aucune option n'est présélectionnée par défaut
+                                    profilClientHiddenInput.value = ''; // Laisser le champ caché vide jusqu'à sélection manuelle
+                                    if (profilClientHelpText) profilClientHelpText.textContent = 'Sélectionnez le profil client pour l\'opération.';
+                                }
+                            }
+                            // Déclencher la mise à jour du formulaire spécifique après la sélection du profil
+                            if ('{{ type }}' === 'depot') triggerDepotUpdate();
+                            if ('{{ type }}' === 'retrait') triggerRetraitUpdate(); // Déclencher pour le retrait
+                        } else {
+                            resetProfilClientSelect(true);
+                            if (profilClientHelpText) profilClientHelpText.innerHTML = '<span class="text-danger">Aucun profil client trouvé pour ce client.</span>';
+                            if ('{{ type }}' === 'depot') triggerDepotUpdate();
+                            if ('{{ type }}' === 'retrait') triggerRetraitUpdate(); // Déclencher pour le retrait
+                        }
+                    } catch (error) {
+                        console.error("Erreur AJAX de récupération des profils:", error);
+                        resetProfilClientSelect(true);
+                        if (profilClientHelpText) profilClientHelpText.innerHTML = `<span class="text-danger">Erreur: ${error.message}</span>`;
+                        if ('{{ type }}' === 'depot') triggerDepotUpdate();
+                        if ('{{ type }}' === 'retrait') triggerRetraitUpdate(); // Déclencher pour le retrait
+                    }
+                } else if ('{{ type }}' === 'achat-vente') { // Pour achat-vente, pas de profil client spécifique ici
+                    triggerAchatVenteUpdate();
+                } else { // Pour tout autre type non géré par un script spécifique
+                    if (submitButton) submitButton.disabled = false;
+                }
+            });
+        }
+
+        // Écouteur sur le sélecteur de ProfilClient (UNIQUEMENT pour dépôt/retrait)
+        if (profilClientSelect && profilClientHiddenInput) {
+            profilClientSelect.addEventListener('change', function() {
+                profilClientHiddenInput.value = this.value; // Met à jour le champ caché
+                if ('{{ type }}' === 'depot') {
+                    triggerDepotUpdate();
+                } else if ('{{ type }}' === 'retrait') { // Écouter aussi pour le retrait
+                    triggerRetraitUpdate();
+                }
+            });
+        }
+
+        // --- Script SweetAlert2 de confirmation pour toutes les soumissions ---
+        if (mainForm && submitButton) {
+            mainForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                if (submitButton.disabled) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Opération Impossible',
+                        text: 'Veuillez corriger les erreurs ou compléter les informations requises avant de valider.',
+                        confirmButtonText: 'Compris'
+                    });
+                    return;
+                }
+
+                let confirmationHtml = '';
+                let title = 'Confirmer l’opération ?';
+                let icon = 'question';
+
+                const clientDisplay = clientSelect ? (clientSelect.options[clientSelect.selectedIndex]?.textContent || 'N/A') : 'N/A';
+                // Le profilClientDisplay n'est pertinent que pour dépôt/retrait
+                const profilClientDisplay = ['depot', 'retrait'].includes('{{ type }}') && profilClientSelect ? (profilClientSelect.options[profilClientSelect.selectedIndex]?.textContent || 'N/A') : '';
+
+
+                if ('{{ type }}' === 'depot') {
+                    const montantApporte = parseFloat(document.getElementById('op-montantApporte').value).toFixed(2);
+                    const deviseApporteeCode = document.getElementById('op-deviseApportee').options[document.getElementById('op-deviseApportee').selectedIndex]?.dataset.code;
+                    const deviseCibleCompteCode = document.getElementById('op-deviseCibleCompte').options[document.getElementById('op-deviseCibleCompte').selectedIndex]?.dataset.code;
+                    const montantCibleCompte = parseFloat(document.getElementById('op-montantCibleCompte').value).toFixed(2);
+                    const tauxApplique = parseFloat(document.getElementById('op-tauxDepot').value).toFixed(4);
+
+                    confirmationHtml = `
+                            <div class="text-start">
+                                <p><strong>Client:</strong> ${clientDisplay}</p>
+                                <p><strong>Profil Client:</strong> ${profilClientDisplay}</p>
+                                <p><strong>Type d'opération :</strong> <span class="badge ${deviseApporteeCode === deviseCibleCompteCode ? 'bg-info' : 'bg-warning'}">${deviseApporteeCode === deviseCibleCompteCode ? 'Dépôt Classique' : 'Dépôt avec Conversion'}</span></p>
+                                <p><strong>Montant apporté :</strong> ${montantApporte} ${deviseApporteeCode}</p>
+                                <p><strong>Montant crédité :</strong> ${montantCibleCompte} ${deviseCibleCompteCode}</p>
+                                ${deviseApporteeCode !== deviseCibleCompteCode ? `<p><strong>Taux appliqué :</strong> ${tauxApplique}</p>` : ''}
+                            </div>
+                        `;
+                } else if ('{{ type }}' === 'achat-vente') {
+                    const opMontantSource = document.getElementById('op-montantSource');
+                    const opMontantCible = document.getElementById('op-montantCible');
+                    const opDeviseSource = document.getElementById('op-deviseSource');
+                    const opDeviseCible = document.getElementById('op-deviseCible');
+                    const opTypeOperation = document.getElementById('op-typeOperation');
+                    const opTaux = document.getElementById('op-taux');
+
+                    const montantSource = opMontantSource ? parseFloat(opMontantSource.value).toFixed(2) : 'N/A';
+                    const montantCible = opMontantCible ? parseFloat(opMontantCible.value).toFixed(2) : 'N/A';
+                    const deviseSource = opDeviseSource ? (opDeviseSource.options[opDeviseSource.selectedIndex]?.dataset.code || 'N/A') : 'N/A';
+                    const deviseCible = opDeviseCible ? (opDeviseCible.options[opDeviseCible.selectedIndex]?.dataset.code || 'N/A') : 'N/A';
+                    const operationTypeDisplay = opTypeOperation ? (opTypeOperation.value === 'ACHAT' ? 'Achat' : 'Vente') : 'N/A';
+                    const currentRate = opTaux ? parseFloat(opTaux.value).toFixed(4) : 'N/A';
+
+                    confirmationHtml = `
+                            <div class="text-start">
+                                <p><strong>Client:</strong> ${clientDisplay}</p>
+                                <p><strong>Type d'opération :</strong> <span class="badge ${opTypeOperation && opTypeOperation.value === 'ACHAT' ? 'bg-success' : 'bg-primary'}">${operationTypeDisplay}</span></p>
+                                <p><strong>Montant reçu :</strong> ${montantSource} ${deviseSource}</p>
+                                <p><strong>Montant à remettre :</strong> ${montantCible} ${deviseCible}</p>
+                                <p><strong>Taux appliqué :</strong> ${currentRate}</p>
+                            </div>
+                        `;
+                } else if ('{{ type }}' === 'retrait') { // NOUVEAU: Logic for Retrait confirmation
+                    const opMontantRetrait = document.getElementById('op-montantRetrait');
+                    const opDeviseCompteADebiter = document.getElementById('op-deviseCompteADebiter');
+                    const opMontantADonner = document.getElementById('op-montantADonner');
+                    const opDeviseADonner = document.getElementById('op-deviseADonner');
+                    const opTypeRetrait = document.getElementById('op-typeRetrait');
+                    const opTauxRetrait = document.getElementById('op-tauxRetrait');
+
+                    const montantRetrait = opMontantRetrait ? parseFloat(opMontantRetrait.value).toFixed(2) : 'N/A';
+                    const deviseCompteADebiterCode = opDeviseCompteADebiter ? (opDeviseCompteADebiter.options[opDeviseCompteADebiter.selectedIndex]?.dataset.code || 'N/A') : 'N/A';
+                    const montantADonner = opMontantADonner ? parseFloat(opMontantADonner.value).toFixed(2) : 'N/A';
+                    const deviseADonnerCode = opDeviseADonner ? (opDeviseADonner.options[opDeviseADonner.selectedIndex]?.dataset.code || 'N/A') : 'N/A';
+                    const typeRetraitValue = opTypeRetrait ? opTypeRetrait.value : 'N/A';
+                    const tauxRetrait = opTauxRetrait ? parseFloat(opTauxRetrait.value).toFixed(4) : 'N/A';
+
+                    let typeRetraitDisplay = '';
+                    let badgeClass = 'bg-secondary';
+                    if (typeRetraitValue === 'ESPECES') {
+                        typeRetraitDisplay = 'Retrait en Espèces';
+                        badgeClass = 'bg-success';
+                    } else if (typeRetraitValue === 'TRANSFERT') {
+                        typeRetraitDisplay = 'Retrait par Transfert';
+                        badgeClass = 'bg-primary';
+                    }
+
+                    confirmationHtml = `
+                            <div class="text-start">
+                                <p><strong>Client:</strong> ${clientDisplay}</p>
+                                <p><strong>Profil Client:</strong> ${profilClientDisplay}</p>
+                                <p><strong>Type de Retrait :</strong> <span class="badge ${badgeClass}">${typeRetraitDisplay}</span></p>
+                                <p><strong>Compte débité :</strong> ${montantRetrait} ${deviseCompteADebiterCode}</p>
+                                <p><strong>Montant à donner :</strong> ${montantADonner} ${deviseADonnerCode}</p>
+                                ${deviseCompteADebiterCode !== deviseADonnerCode ? `<p><strong>Taux de conversion :</strong> ${tauxRetrait}</p>` : ''}
+                                ${typeRetraitValue === 'TRANSFERT' ? `<p>Détails du transfert...</p>` : ''}
+                            </div>
+                        `;
+                }
+
+                const result = await Swal.fire({
+                    title: title,
+                    html: confirmationHtml, // Utilisez 'html' ici pour afficher le contenu détaillé
+                    icon: icon,
+                    showCancelButton: true,
+                    confirmButtonText: 'Oui, valider',
+                    cancelButtonText: 'Annuler',
+                    confirmButtonColor: '#11845a',
+                    cancelButtonColor: '#d33'
+                });
+
+                if (result.isConfirmed) {
+                    mainForm.submit();
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.fire(
+                        'Annulé',
+                        'L\'opération a été annulée.',
+                        'info'
+                    );
+                }
+            });
+        } else {
+            console.warn("Formulaire principal ou bouton de soumission non trouvé. Le script de confirmation ne s'exécutera pas.");
+        }
+    });
+</script>
+
+
+<style>
+    /* Styles pour rendre le formulaire multi-étapes plus clair */
+    .progress-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 2rem;
+        position: relative
+    }
+    .progress-step {
+        background-color: #e0e0e0;
+        color: #6c757d;
+        border-radius: 20px;
+        padding: 8px 15px;
+        font-weight: 700;
+        transition: background-color .3s ease, color .3s ease;
+        z-index: 1;
+        white-space: nowrap
+    }
+    .progress-step.active {
+        background-color: #0d6efd;
+        color: #fff
+    }
+    .progress-line {
+        flex-grow: 1;
+        height: 4px;
+        background-color: #e0e0e0;
+        position: absolute;
+        width: calc(100% - 300px);
+        z-index: 0
+    }
+    .is-invalid {
+        border-color: #dc3545
+    }
+    .is-invalid:focus {
+        box-shadow: 0 0 0 .25rem rgba(220, 53, 69, .25)
+    }
+</style>
 {% endblock %}

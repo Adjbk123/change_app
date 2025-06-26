@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\CompteClient;
+use App\Entity\Devise;
+use App\Entity\ProfilClient;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +16,17 @@ class CompteClientRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, CompteClient::class);
+    }
+
+    public function findOneByProfilClientAndDevise(ProfilClient $profilClient, Devise $devise): ?CompteClient // MODIFIÉ
+    {
+        return $this->createQueryBuilder('cc')
+            ->andWhere('cc.profilClient = :profilClient') // MODIFIÉ
+            ->andWhere('cc.devise = :devise')
+            ->setParameter('profilClient', $profilClient) // MODIFIÉ
+            ->setParameter('devise', $devise)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     //    /**

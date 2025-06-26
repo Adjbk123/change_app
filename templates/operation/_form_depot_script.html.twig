@@ -1,0 +1,159 @@
+{# templates/operation/_form_depot_script.html.twig #}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const depotContainer = document.getElementById('group-DEPOT');
+
+        // Vérifier si le conteneur du dépôt existe pour s'assurer que le script s'exécute sur la bonne page.
+        if (!depotContainer) {
+            console.warn("Conteneur 'group-DEPOT' non trouvé. Le script de dépôt ne s'exécutera pas.");
+            return;
+        }
+
+        const deviseApporteeSelect = document.getElementById('op-deviseApportee');
+        const montantApporteInput = document.getElementById('op-montantApporte');
+        const deviseCibleCompteSelect = document.getElementById('op-deviseCibleCompte');
+        const montantCibleCompteInput = document.getElementById('op-montantCibleCompte');
+        const tauxDepotInput = document.getElementById('op-tauxDepot');
+        const feedbackDiv = document.getElementById('operation-feedback');
+        const submitButton = document.getElementById('submit-operation');
+
+        // Ajout du sélecteur de profil client ici
+        const profilClientSelect = document.getElementById('profilClient-select');
+        // NOTE: le `clientSelect` est géré dans le script principal de `new.html.twig` pour déclencher la logique de profil.
+
+        const getRateUrl = depotContainer.dataset.getRateUrl;
+        const checkBalanceUrl = depotContainer.dataset.checkBalanceUrl;
+
+        let currentRateDepot = null;
+
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        async function updateDepotDetails() {
+            const deviseApporteeId = deviseApporteeSelect.value;
+            const montantApporte = parseFloat(montantApporteInput.value);
+            const deviseCibleCompteId = deviseCibleCompteSelect.value;
+            const profilClientId = profilClientSelect ? profilClientSelect.value : null; // Récupérer l'ID du profil client
+
+            // Récupérer les codes ISO pour l'affichage (avec fallback si non trouvé)
+            const deviseApporteeCode = deviseApporteeSelect.options[deviseApporteeSelect.selectedIndex]?.dataset.code || '???';
+            const deviseCibleCompteCode = deviseCibleCompteSelect.options[deviseCibleCompteSelect.selectedIndex]?.dataset.code || '???';
+
+            // --- Condition de désactivation du bouton AJOUTÉE : `!profilClientId` ---
+            if (!profilClientId || !deviseApporteeId || !deviseCibleCompteId || isNaN(montantApporte) || montantApporte <= 0) {
+                montantCibleCompteInput.value = '';
+                tauxDepotInput.value = '';
+                feedbackDiv.innerHTML = '<p class="text-muted mb-0 alert alert-warning">Veuillez sélectionner un profil client, les devises et entrer le montant apporté.</p>';
+                submitButton.disabled = true;
+                return;
+            }
+
+            feedbackDiv.innerHTML = `<div class="text-info"><i class="fas fa-spinner fa-spin me-2"></i>Calcul en cours...</div>`;
+            submitButton.disabled = true; // Désactiver pendant le calcul
+
+            let montantFinal = montantApporte;
+            let tauxUtilise = 1;
+            let isConversion = false;
+
+            try {
+                if (deviseApporteeId !== deviseCibleCompteId) {
+                    isConversion = true;
+                    feedbackDiv.innerHTML = `<div class="text-info"><i class="fas fa-spinner fa-spin me-2"></i>Recherche du taux de conversion...</div>`;
+
+                    const rateResponse = await fetch(getRateUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: JSON.stringify({ deviseSource: deviseApporteeId, deviseCible: deviseCibleCompteId })
+                    });
+
+                    if (!rateResponse.ok) {
+                        throw new Error(`Erreur HTTP ${rateResponse.status} lors de la récupération du taux.`);
+                    }
+
+                    const rateData = await rateResponse.json();
+
+                    if (!rateData.success) {
+                        feedbackDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>${rateData.message}</div>`;
+                        return;
+                    }
+                    tauxUtilise = rateData.taux;
+                    montantFinal = montantApporte * tauxUtilise;
+                    currentRateDepot = tauxUtilise;
+                } else {
+                    currentRateDepot = 1;
+                }
+
+                montantCibleCompteInput.value = montantFinal.toFixed(2);
+                tauxDepotInput.value = tauxUtilise.toFixed(6);
+
+                let feedbackMsg = '';
+                if (isConversion) {
+                    feedbackMsg = `Taux de conversion appliqué : <strong>1 ${deviseApporteeCode} = ${tauxUtilise.toFixed(4)} ${deviseCibleCompteCode}</strong>.`;
+                    feedbackMsg += `<br>Le client sera crédité de <strong>${montantFinal.toFixed(2)} ${deviseCibleCompteCode}</strong>.`;
+                } else {
+                    feedbackMsg = `Le client sera crédité de <strong>${montantFinal.toFixed(2)} ${deviseCibleCompteCode}</strong>.`;
+                }
+                feedbackDiv.innerHTML = `<div class="alert alert-info">${feedbackMsg}</div>`;
+
+                if (isConversion) {
+                    const balanceResponse = await fetch(checkBalanceUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: JSON.stringify({ devise: deviseCibleCompteId, montant: montantFinal })
+                    });
+
+                    if (!balanceResponse.ok) {
+                        throw new Error(`Erreur HTTP ${balanceResponse.status} lors de la vérification du solde de caisse.`);
+                    }
+
+                    const balanceData = await balanceResponse.json();
+
+                    if (balanceData.sufficient) {
+                        submitButton.disabled = false;
+                        feedbackDiv.innerHTML += `<div class="alert alert-success mt-1 p-2"><i class="fas fa-check-circle me-1"></i>Solde caisse suffisant pour le crédit en ${deviseCibleCompteCode}.</div>`;
+                    } else {
+                        feedbackDiv.innerHTML += `<div class="alert alert-danger mt-1 p-2"><i class="fas fa-times-circle me-1"></i><strong>Attention :</strong> ${balanceData.message || `Solde caisse insuffisant pour créditer ${montantFinal.toFixed(2)} ${deviseCibleCompteCode}.`}</div>`;
+                        submitButton.disabled = true;
+                    }
+                } else {
+                    submitButton.disabled = false;
+                    feedbackDiv.innerHTML += `<div class="alert alert-success mt-1 p-2"><i class="fas fa-check-circle me-1"></i>Dépôt possible (entrée caisse).</div>`;
+                }
+
+            } catch (error) {
+                console.error("Erreur dans updateDepotDetails:", error);
+                feedbackDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Erreur: ${error.message}</div>`;
+                submitButton.disabled = true;
+            }
+        }
+
+        const debouncedDepotUpdate = debounce(updateDepotDetails, 500);
+
+        // Écouteurs d'événements pour les changements des champs du formulaire de dépôt
+        deviseApporteeSelect.addEventListener('change', updateDepotDetails);
+        montantApporteInput.addEventListener('input', debouncedDepotUpdate);
+        deviseCibleCompteSelect.addEventListener('change', updateDepotDetails);
+
+        // --- Appel initial et écouteur pour le sélecteur de ProfilClient ---
+        // Expose la fonction globalement pour qu'elle puisse être appelée depuis d'autres scripts (e.g., le script principal de gestion du client/profil)
+        window.triggerDepotUpdate = updateDepotDetails; // Assurez-vous que cette fonction est bien appelée après la sélection du profil
+
+        // Appeler updateDepotDetails au changement du profil client (si le sélecteur existe)
+        if (profilClientSelect) {
+            profilClientSelect.addEventListener('change', updateDepotDetails);
+        }
+
+        // Appel initial pour désactiver le bouton au chargement si les champs ne sont pas remplis
+        // Note: L'appel de updateDepotDetails() gérera aussi la désactivation initiale.
+        setTimeout(() => {
+            updateDepotDetails(); // Lance la vérification initiale
+        }, 50);
+    });
+</script>

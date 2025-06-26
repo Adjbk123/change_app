@@ -1,0 +1,14 @@
+<div class="mb-3">
+    <label for="client" class="form-label fw-bold">Client</label>
+    <div class="input-group">
+        <select class="form-select-lg form-select" id="client" name="client" required>
+            <option value="">-- Sélectionnez un client existant --</option>
+            {% for client in clients %}
+                <option value="{{ client.id }}">{{ client.nomComplet }}</option> {# Adaptez "nomComplet" si besoin #}
+            {% endfor %}
+        </select>
+        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#clientModal">
+            <i class="fas fa-plus"></i> Nouveau Client
+        </button>
+    </div>
+</div>

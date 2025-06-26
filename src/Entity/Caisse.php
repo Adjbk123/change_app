@@ -36,10 +36,24 @@ class Caisse
     #[ORM\OneToMany(targetEntity: ApproCaisse::class, mappedBy: 'caisse')]
     private Collection $approCaisses;
 
+    /**
+     * @var Collection<int, AffectationCaisse>
+     */
+    #[ORM\OneToMany(targetEntity: AffectationCaisse::class, mappedBy: 'caisse')]
+    private Collection $affectationCaisses;
+
+    /**
+     * @var Collection<int, Operation>
+     */
+    #[ORM\OneToMany(targetEntity: Operation::class, mappedBy: 'caisse')]
+    private Collection $operations;
+
     public function __construct()
     {
         $this->compteCaisses = new ArrayCollection();
         $this->approCaisses = new ArrayCollection();
+        $this->affectationCaisses = new ArrayCollection();
+        $this->operations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -137,6 +151,66 @@ class Caisse
             // set the owning side to null (unless already changed)
             if ($approCaiss->getCaisse() === $this) {
                 $approCaiss->setCaisse(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AffectationCaisse>
+     */
+    public function getAffectationCaisses(): Collection
+    {
+        return $this->affectationCaisses;
+    }
+
+    public function addAffectationCaiss(AffectationCaisse $affectationCaiss): static
+    {
+        if (!$this->affectationCaisses->contains($affectationCaiss)) {
+            $this->affectationCaisses->add($affectationCaiss);
+            $affectationCaiss->setCaisse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAffectationCaiss(AffectationCaisse $affectationCaiss): static
+    {
+        if ($this->affectationCaisses->removeElement($affectationCaiss)) {
+            // set the owning side to null (unless already changed)
+            if ($affectationCaiss->getCaisse() === $this) {
+                $affectationCaiss->setCaisse(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Operation>
+     */
+    public function getOperations(): Collection
+    {
+        return $this->operations;
+    }
+
+    public function addOperation(Operation $operation): static
+    {
+        if (!$this->operations->contains($operation)) {
+            $this->operations->add($operation);
+            $operation->setCaisse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOperation(Operation $operation): static
+    {
+        if ($this->operations->removeElement($operation)) {
+            // set the owning side to null (unless already changed)
+            if ($operation->getCaisse() === $this) {
+                $operation->setCaisse(null);
             }
         }
 

@@ -1,0 +1,44 @@
+<div class="operation-group"
+     id="group-ACHAT"
+     data-get-rate-url="{{ path('api_get_exchange_rate') }}"
+     data-check-balance-url="{{ path('api_check_cash_desk_balance') }}">
+
+    <fieldset>
+        <legend>
+            <h5  class="border-primary  border-start border-3 ps-3 py-3 ">Détails de l'Opération de Change</h5>
+        </legend>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="op-deviseSource" class="form-label">Devise apportée par le client</label>
+                <select class="form-select form-select-lg" id="op-deviseSource" name="deviseSource" required>
+                    <option value="" selected disabled>-- Choisir --</option>
+                    {% for devise in devises %}<option value="{{ devise.id }}" data-code="{{ devise.codeIso }}">{{ devise.codeIso }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="op-montantSource" class="form-label">Montant apporté</label>
+                <input type="number" step="0.01" class="form-control form-control-lg" id="op-montantSource" name="montantSource" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="op-deviseCible" class="form-label">Devise souhaitée par le client</label>
+                <select class="form-select form-select-lg" id="op-deviseCible" name="deviseCible" required>
+                    <option value="" selected disabled>-- Choisir --</option>
+                    {% for devise in devises %}<option value="{{ devise.id }}" data-code="{{ devise.codeIso }}">{{ devise.codeIso }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="op-montantCible" class="form-label">Montant à remettre</label>
+                <input type="number" step="0.01" class="form-control form-control-lg" id="op-montantCible" name="montantCible" readonly>
+            </div>
+        </div>
+
+        <input type="hidden" id="op-typeOperation" name="typeOperation">
+        <input type="hidden" id="op-taux" name="taux">
+
+        <div id="operation-feedback" class="mt-2 rounded" style="min-height: 40px;">
+        </div>
+
+    </fieldset>
+</div>

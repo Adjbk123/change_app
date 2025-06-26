@@ -1,0 +1,138 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('group-ACHAT');
+        const deviseSourceSelect = document.getElementById('op-deviseSource');
+        const montantSourceInput = document.getElementById('op-montantSource');
+        const deviseCibleSelect = document.getElementById('op-deviseCible');
+        const montantCibleInput = document.getElementById('op-montantCible');
+        const feedbackDiv = document.getElementById('operation-feedback');
+        const submitButton = document.getElementById('submit-operation');
+        const typeOperationInput = document.getElementById('op-typeOperation');
+        const tauxInput = document.getElementById('op-taux');
+        const mainForm = document.getElementById('operationMainForm'); // Assurez-vous que cet ID correspond à votre balise <form>
+
+        const getRateUrl = container.dataset.getRateUrl;
+        const checkBalanceUrl = container.dataset.checkBalanceUrl;
+
+        let currentRate = null;
+        let currentOperationType = '';
+
+        // --- Fonction de Debounce ---
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        async function updateOperationDetails() {
+            const deviseSourceId = deviseSourceSelect.value;
+            const deviseCibleId = deviseCibleSelect.value;
+            const montantSource = parseFloat(montantSourceInput.value);
+
+            const deviseSourceCode = deviseSourceSelect.options[deviseSourceSelect.selectedIndex]?.dataset.code;
+            const deviseCibleCode = deviseCibleSelect.options[deviseCibleSelect.selectedIndex]?.dataset.code;
+
+            // Reset state if infos are incomplete or invalid
+            if (!deviseSourceId || !deviseCibleId || isNaN(montantSource) || montantSource <= 0) {
+                montantCibleInput.value = '';
+                typeOperationInput.value = '';
+                tauxInput.value = '';
+                feedbackDiv.innerHTML = '<p class="text-muted mb-0">Veuillez sélectionner les devises et entrer le montant source pour commencer.</p>';
+                submitButton.disabled = true;
+                return;
+            }
+
+            if (deviseSourceId === deviseCibleId) {
+                montantCibleInput.value = '';
+                typeOperationInput.value = '';
+                tauxInput.value = '';
+                feedbackDiv.innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>Les devises source et cible doivent être différentes.</div>`;
+                submitButton.disabled = true;
+                return;
+            }
+
+            feedbackDiv.innerHTML = `<div class="text-info"><i class="fas fa-spinner fa-spin me-2"></i>Recherche du taux...</div>`;
+            submitButton.disabled = true;
+
+            try {
+                const rateResponse = await fetch(getRateUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ deviseSource: deviseSourceId, deviseCible: deviseCibleId })
+                });
+
+                if (!rateResponse.ok) {
+                    throw new Error("Le service de taux est indisponible. Code: " + rateResponse.status);
+                }
+
+                const rateData = await rateResponse.json();
+
+                if (!rateData.success) {
+                    feedbackDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>${rateData.message}</div>`;
+                    return;
+                }
+
+                const taux = rateData.taux;
+                const typeOp = rateData.typeOperation;
+                const montantCible = montantSource * taux;
+
+                montantCibleInput.value = montantCible.toFixed(2);
+                currentRate = taux;
+                currentOperationType = typeOp;
+                typeOperationInput.value = typeOp;
+                tauxInput.value = taux.toFixed(6);
+
+                let feedbackMsg = `Taux appliqué : <strong>1 ${deviseSourceCode} = ${taux.toFixed(4)} ${deviseCibleCode}</strong>.`;
+                if (rateData.isPivot) {
+                    feedbackMsg += `<br><small class="text-muted"><i class="fas fa-info-circle me-1"></i>Opération croisée via XOF.</small>`;
+                }
+                feedbackMsg += `<br>Type d'opération : <strong>${typeOp === 'ACHAT' ? 'Achat' : 'Vente'}</strong>`;
+
+                feedbackDiv.innerHTML = `<div class="alert alert-info">${feedbackMsg}</div>`;
+
+                const balanceResponse = await fetch(checkBalanceUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ devise: deviseCibleId, montant: montantCible })
+                });
+
+                if (!balanceResponse.ok) {
+                    throw new Error("Le service de solde est indisponible. Code: " + balanceResponse.status);
+                }
+
+                const balanceData = await balanceResponse.json();
+
+                if (balanceData.sufficient) {
+                    submitButton.disabled = false;
+                    feedbackDiv.innerHTML += `<div class="alert alert-success mt-1 p-2"><i class="fas fa-check-circle me-1"></i>Solde caisse OK pour ${deviseCibleCode}.</div>`;
+                } else {
+                    feedbackDiv.innerHTML += `<div class="alert alert-danger mt-1 p-2"><i class="fas fa-times-circle me-1"></i><strong>Attention :</strong> Solde insuffisant en caisse pour remettre ${montantCible.toFixed(2)} ${deviseCibleCode}.</div>`;
+                    submitButton.disabled = true;
+                }
+
+            } catch (error) {
+                feedbackDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Erreur: ${error.message}</div>`;
+                submitButton.disabled = true;
+            }
+        }
+
+        const debouncedUpdate = debounce(updateOperationDetails, 500);
+
+        deviseSourceSelect.addEventListener('change', updateOperationDetails);
+        deviseCibleSelect.addEventListener('change', updateOperationDetails);
+        montantSourceInput.addEventListener('input', debouncedUpdate);
+
+        // --- Handle form submission (without SweetAlert2 confirmation) ---
+        mainForm.addEventListener('submit', function (e) {
+            // Si le bouton est désactivé, empêche la soumission du formulaire
+            if (submitButton.disabled) {
+                e.preventDefault(); // Empêche la soumission par défaut
+                // Optionnel: Vous pouvez ajouter ici une alerte simple du navigateur si vous voulez
+                // alert('Veuillez corriger les erreurs ou compléter les informations requises avant de valider.');
+            }
+        });
+    });
+</script>

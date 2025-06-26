@@ -61,6 +61,15 @@ class Operation
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\ManyToOne(inversedBy: 'operations')]
+    private ?Caisse $caisse = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $motif = null;
+
+    #[ORM\ManyToOne(inversedBy: 'operations')]
+    private ?Beneficiaire $beneficiaire = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -218,6 +227,42 @@ class Operation
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getCaisse(): ?Caisse
+    {
+        return $this->caisse;
+    }
+
+    public function setCaisse(?Caisse $caisse): static
+    {
+        $this->caisse = $caisse;
+
+        return $this;
+    }
+
+    public function getMotif(): ?string
+    {
+        return $this->motif;
+    }
+
+    public function setMotif(?string $motif): static
+    {
+        $this->motif = $motif;
+
+        return $this;
+    }
+
+    public function getBeneficiaire(): ?Beneficiaire
+    {
+        return $this->beneficiaire;
+    }
+
+    public function setBeneficiaire(?Beneficiaire $beneficiaire): static
+    {
+        $this->beneficiaire = $beneficiaire;
 
         return $this;
     }

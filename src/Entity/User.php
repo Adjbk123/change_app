@@ -123,6 +123,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
     #[ORM\OneToMany(targetEntity: Operation::class, mappedBy: 'agent')]
     private Collection $operations;
 
+    /**
+     * @var Collection<int, AffectationCaisse>
+     */
+    #[ORM\OneToMany(targetEntity: AffectationCaisse::class, mappedBy: 'caissier')]
+    private Collection $affectationCaisses;
+
     public function __construct()
     {
         $this->affectationAgences = new ArrayCollection();
@@ -136,6 +142,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
         $this->clients = new ArrayCollection();
         $this->mouvementCompteClients = new ArrayCollection();
         $this->operations = new ArrayCollection();
+        $this->affectationCaisses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -656,6 +663,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
             // set the owning side to null (unless already changed)
             if ($operation->getAgent() === $this) {
                 $operation->setAgent(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AffectationCaisse>
+     */
+    public function getAffectationCaisses(): Collection
+    {
+        return $this->affectationCaisses;
+    }
+
+    public function addAffectationCaiss(AffectationCaisse $affectationCaiss): static
+    {
+        if (!$this->affectationCaisses->contains($affectationCaiss)) {
+            $this->affectationCaisses->add($affectationCaiss);
+            $affectationCaiss->setCaissier($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAffectationCaiss(AffectationCaisse $affectationCaiss): static
+    {
+        if ($this->affectationCaisses->removeElement($affectationCaiss)) {
+            // set the owning side to null (unless already changed)
+            if ($affectationCaiss->getCaissier() === $this) {
+                $affectationCaiss->setCaissier(null);
             }
         }
 

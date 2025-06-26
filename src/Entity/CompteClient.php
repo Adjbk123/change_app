@@ -197,4 +197,15 @@ class CompteClient
 
         return $this;
     }
+
+    public function deposer(float $montant): void
+    {
+        $this->soldeActuel += $montant;
+        $this->soldeInitial += $montant;
+    }
+
+    public function retirer(float $montant): void
+    {
+        $this->soldeActuel -= $montant;
+    }
 }

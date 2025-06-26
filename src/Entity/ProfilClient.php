@@ -39,9 +39,16 @@ class ProfilClient
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    /**
+     * @var Collection<int, Beneficiaire>
+     */
+    #[ORM\OneToMany(targetEntity: Beneficiaire::class, mappedBy: 'profilClient')]
+    private Collection $beneficiaires;
+
     public function __construct()
     {
         $this->compteClients = new ArrayCollection();
+        $this->beneficiaires = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -147,6 +154,36 @@ class ProfilClient
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Beneficiaire>
+     */
+    public function getBeneficiaires(): Collection
+    {
+        return $this->beneficiaires;
+    }
+
+    public function addBeneficiaire(Beneficiaire $beneficiaire): static
+    {
+        if (!$this->beneficiaires->contains($beneficiaire)) {
+            $this->beneficiaires->add($beneficiaire);
+            $beneficiaire->setProfilClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBeneficiaire(Beneficiaire $beneficiaire): static
+    {
+        if ($this->beneficiaires->removeElement($beneficiaire)) {
+            // set the owning side to null (unless already changed)
+            if ($beneficiaire->getProfilClient() === $this) {
+                $beneficiaire->setProfilClient(null);
+            }
+        }
 
         return $this;
     }

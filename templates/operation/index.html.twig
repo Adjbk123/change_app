@@ -1,31 +1,43 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Operation index{% endblock %}
+{% block title %}Listes des opérations{% endblock %}
+{% block button %}
 
+    <div class="btn-group dropend my-3">
+        <button type="button" class="btn btn-info dropdown-toggle waves-effect waves-light" data-bs-toggle="dropdown" aria-expanded="false">
+            Effectuer une opération <i class="mdi mdi-chevron-right"></i>
+        </button>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="{{ path('app_operation_new', { type: 'achat-vente' }) }}">Achat - Vente</a>
+            <a class="dropdown-item" href="{{ path('app_operation_new', { type: 'depot' }) }}">Dépôt</a>
+            <a class="dropdown-item" href="{{ path('app_operation_new', { type: 'retrait' }) }}">Retrait(Espèce - Transfert)</a>
+        </div>
+    </div>
+
+{% endblock %}
 {% block body %}
-    <h1>Operation index</h1>
 
-    <table class="table">
-        <thead>
+    <table class="table datatable">
+        <thead class="table-secondary">
             <tr>
-                <th>Id</th>
-                <th>TypeOperation</th>
+                <th>N°</th>
+                <th>Type Opération</th>
                 <th>MontantSource</th>
                 <th>MontantCible</th>
-                <th>Taux</th>
+                <th>Taux utilisé</th>
                 <th>Sens</th>
-                <th>CreatedAt</th>
+                <th>Effectuée le</th>
                 <th>UpdatedAt</th>
-                <th>actions</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
         {% for operation in operations %}
             <tr>
-                <td>{{ operation.id }}</td>
+                <td>{{ loop.index }}</td>
                 <td>{{ operation.typeOperation }}</td>
-                <td>{{ operation.montantSource }}</td>
-                <td>{{ operation.montantCible }}</td>
+                <td>{{ operation.montantSource }} {{ operation.deviseSource.codeIso }}</td>
+                <td>{{ operation.montantCible }} {{ operation.deviseCible.codeIso }}</td>
                 <td>{{ operation.taux }}</td>
                 <td>{{ operation.sens }}</td>
                 <td>{{ operation.createdAt ? operation.createdAt|date('Y-m-d H:i:s') : '' }}</td>
@@ -35,13 +47,9 @@
                     <a href="{{ path('app_operation_edit', {'id': operation.id}) }}">edit</a>
                 </td>
             </tr>
-        {% else %}
-            <tr>
-                <td colspan="9">no records found</td>
-            </tr>
+
         {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ path('app_operation_new') }}">Create new</a>
 {% endblock %}
