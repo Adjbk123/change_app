@@ -1,38 +1,41 @@
-<!doctype html>
-<html lang="fr">
+{{ include('partials/main.html.twig') }}
+
 <head>
+
     <meta charset="utf-8" />
-    <title>{% block title %}Connexion{% endblock %} | Skote</title>
+    <title> {% block title %} Bienvenue {% endblock %} | MySwap - Money Change</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta content="Connectez-vous à votre compte" name="description" />
+    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" />
-    <base href="{{ app.request.getSchemeAndHttpHost() }}/">
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}"> {# <-- Correction ici #}
-    <link href="{{ asset('assets/css/bootstrap.min.css') }}" id="bootstrap-style" rel="stylesheet" type="text/css" /> {# <-- Correction ici #}
-    <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" /> {# <-- Correction ici #}
-    <link href="{{ asset('assets/css/app.min.css') }}" id="app-style" rel="stylesheet" type="text/css" /> {# <-- Correction ici #}
-    <script src="{{ asset('assets/js/plugin.js') }}"></script> {# <-- Correction ici #}
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{{ asset('/images/favicon.ico') }}">
+
+
+
+    {{ include('partials/head-css.html.twig') }}
+
 </head>
+
 <body>
 <div class="account-pages my-5 pt-sm-5">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6 col-xl-5">
                 <div class="card overflow-hidden">
-                    <div class="bg-primary-subtle">
+                    <div class="bg-primary bg-soft">
                         <div class="row">
                             <div class="col-7">
                                 <div class="text-primary p-4">
                                     <h5 class="text-primary">
                                         {% block pageTitle %}
-                                         Bienvenue
+                                            Bienvenue
                                         {% endblock %}
                                     </h5>
                                     <p>{% block description %}Connectez-vous à votre compte{% endblock %}</p>
                                 </div>
                             </div>
                             <div class="col-5 align-self-end">
-                                <img src="{{ asset('assets/images/profile-img.png') }}" alt="" class="img-fluid"> {# <-- Correction ici #}
+                                <img src="{{ asset('images/profile-img.png') }}" alt="" class="img-fluid">
                             </div>
                         </div>
                     </div>
@@ -41,38 +44,46 @@
                             <a href="{{ path('app_dashboard') }}" class="auth-logo-light">
                                 <div class="avatar-md profile-user-wid mb-4">
                                             <span class="avatar-title rounded-circle bg-light">
-                                                <img src="{{ asset('assets/images/logo-light.svg') }}" alt="" class="rounded-circle" height="34"> {# <-- Correction ici #}
+                                                <img src="{{ asset('images/logo-myswap.png') }}" alt="" class="rounded-circle" height="34">
                                             </span>
                                 </div>
                             </a>
+
                             <a href="{{ path('app_dashboard') }}" class="auth-logo-dark">
                                 <div class="avatar-md profile-user-wid mb-4">
                                             <span class="avatar-title rounded-circle bg-light">
-                                                <img src="{{ asset('assets/images/logo.svg') }}" alt="" class="rounded-circle" height="34"> {# <-- Correction ici #}
+                                                <img src="{{ asset('images/mini-logo-myswap.png') }}" alt="" class="rounded-circle" height="50">
                                             </span>
                                 </div>
                             </a>
                         </div>
                         <div class="p-2">
+
                             {% block body %}
                             {% endblock %}
                         </div>
+
                     </div>
                 </div>
                 <div class="mt-5 text-center">
+
                     <div>
-                        <p>© {{ date()|date('Y') }} Money Change. Conçu par <i class="mdi mdi-heart text-danger"></i> par SECS SARL</p>
+
+                        <div>
+                            <p>© {{ date()|date('Y') }} MySwap - Money Change. Conçu par <i class="mdi mdi-heart text-danger"></i> par SECS SARL</p>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
-<script src="{{ asset('assets/libs/jquery/jquery.min.js') }}"></script> {# <-- Correction ici #}
-<script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script> {# <-- Correction ici #}
-<script src="{{ asset('assets/libs/metismenu/metisMenu.min.js') }}"></script> {# <-- Correction ici #}
-<script src="{{ asset('assets/libs/simplebar/simplebar.min.js') }}"></script> {# <-- Correction ici #}
-<script src="{{ asset('assets/libs/node-waves/waves.min.js') }}"></script> {# <-- Correction ici #}
-<script src="{{ asset('assets/js/app.js') }}"></script> {# <-- Correction ici #}
+<!-- end account-pages -->
+
+{{ include('partials/vendor-scripts.html.twig') }}
+
+<!-- App js -->
+<script src="{{ asset('app.js') }}"></script>
 </body>
 </html>

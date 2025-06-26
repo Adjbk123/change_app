@@ -1,15 +1,15 @@
-<!doctype html>
-<html lang="en">
+{{ include('partials/main.html.twig') }}
 
 <head>
-    <meta charset="utf-8" />
-    <title>{%  block title %} MoneyChange {%  endblock %} | MASTEL - Application de Change</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta content="Application de gestion de change d'argent" name="description" />
-    <meta content="MASTEL Team" name="author" />
 
+    {{ include('partials/title-meta.html.twig') }}
 
-    {{ include('partials/_css.html.twig') }}
+    {{ include('partials/head-css.html.twig') }}
+    {% block stylesheets %}
+
+        {# Pas de script JavaScript spécifique pour cette vue, sauf si vous avez des fonctionnalités interactives supplémentaires #}
+    {% endblock %}
+
 
     <style>
         .progress-container {
@@ -64,29 +64,12 @@
     </style>
 </head>
 
-<body data-sidebar="dark">
-
-<!-- <body data-layout="horizontal" data-topbar="dark"> -->
+{{ include('partials/body.html.twig') }}
 
 <!-- Begin page -->
 <div id="layout-wrapper">
 
-
-{{ include('partials/_header.html.twig') }}
-
-    <!-- ========== Left Sidebar Start ========== -->
-    <div class="vertical-menu">
-
-        <div data-simplebar class="h-100">
-
-            <!--- Sidemenu -->
-            {{ include('partials/_sidebar.html.twig') }}
-            <!-- Sidebar -->
-        </div>
-    </div>
-    <!-- Left Sidebar End -->
-
-
+    {{ include('partials/menu.html.twig') }}
 
     <!-- ============================================================== -->
     <!-- Start right Content here -->
@@ -99,7 +82,8 @@
                 <!-- start page title -->
                 <div class="row">
                     <div class="col-12">
-                        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                        <div
+                            class="page-title-box d-sm-flex align-items-center justify-content-between">
                             <h4 class="mb-sm-0 font-size-18">
 
                                 {{ block('title') }}
@@ -107,7 +91,8 @@
 
                             <div class="page-title-right">
                                 <ol class="breadcrumb m-0">
-                                    <li class="breadcrumb-item"><a href="javascript: void(0);">
+                                    <li class="breadcrumb-item"><a
+                                            href="javascript: void(0);">
                                             {% block breadcrumd %}
                                                 Tableau de bord
                                             {% endblock %}
@@ -158,16 +143,15 @@
         <!-- End Page-content -->
 
 
-
         <footer class="footer">
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-sm-6">
-                      {{ date()|date('Y')}} © MoneyChange.
+                        {{ date()|date('Y') }} © MoneyChange.
                     </div>
                     <div class="col-sm-6">
                         <div class="text-sm-end d-none d-sm-block">
-                             Développé par SECS SARL
+                            Développé par SECS SARL
                         </div>
                     </div>
                 </div>
@@ -178,17 +162,12 @@
 
 </div>
 <!-- END layout-wrapper -->
+{{ include('partials/right-sidebar.html.twig') }}
 
-<!-- Right Sidebar -->
-{{ include('partials/_right_sidebar.html.twig') }}
-
-<!-- /Right-bar -->
-
-<!-- Right bar overlay-->
-<div class="rightbar-overlay"></div>
+        {{ include('partials/vendor-scripts.html.twig') }}
 
 
-{{ include('partials/_javascript.html.twig') }}
+
 {% block javascripts %}
 
     {# Pas de script JavaScript spécifique pour cette vue, sauf si vous avez des fonctionnalités interactives supplémentaires #}

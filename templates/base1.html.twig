@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>{%  block title %} MoneyChange {%  endblock %} | MASTEL - Application de Change</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Application de gestion de change d'argent" name="description" />
+    <meta content="MASTEL Team" name="author" />
+
+
+    {{ include('partials/_css.html.twig') }}
+
+    <style>
+        .progress-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .progress-step {
+            background-color: #e0e0e0;
+            color: #6c757d;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-weight: 700;
+            transition: background-color .3s ease, color .3s ease;
+            z-index: 1;
+            white-space: nowrap;
+        }
+
+        .progress-step.active {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+
+        .progress-line {
+            flex-grow: 1;
+            height: 4px;
+            background-color: #e0e0e0;
+            position: absolute;
+            width: calc(100% - 350px);
+            z-index: 0;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .is-invalid {
+            border-color: #dc3545;
+        }
+
+        .is-invalid:focus {
+            box-shadow: 0 0 0 .25rem rgba(220, 53, 69, .25);
+        }
+
+    </style>
+</head>
+
+<body data-sidebar="dark">
+
+<!-- <body data-layout="horizontal" data-topbar="dark"> -->
+
+<!-- Begin page -->
+<div id="layout-wrapper">
+
+
+{{ include('partials/_header.html.twig') }}
+
+    <!-- ========== Left Sidebar Start ========== -->
+    <div class="vertical-menu">
+
+        <div data-simplebar class="h-100">
+
+            <!--- Sidemenu -->
+            {{ include('partials/_sidebar.html.twig') }}
+            <!-- Sidebar -->
+        </div>
+    </div>
+    <!-- Left Sidebar End -->
+
+
+
+    <!-- ============================================================== -->
+    <!-- Start right Content here -->
+    <!-- ============================================================== -->
+    <div class="main-content">
+
+        <div class="page-content">
+            <div class="container-fluid">
+
+                <!-- start page title -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                            <h4 class="mb-sm-0 font-size-18">
+
+                                {{ block('title') }}
+                            </h4>
+
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="javascript: void(0);">
+                                            {% block breadcrumd %}
+                                                Tableau de bord
+                                            {% endblock %}
+                                        </a></li>
+                                    <li class="breadcrumb-item active">
+                                        {% block breadcrumdActive %}
+                                            Main
+                                        {% endblock %}
+                                    </li>
+                                </ol>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="text-end my-3">
+                            {% block button %}
+
+                            {% endblock %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        {% for label, messages in app.flashes %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ label }} my-3">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                        <div class="card">
+                            <div class="card-body">
+                                {% block body %}
+
+                                {% endblock %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <!-- container-fluid -->
+        </div>
+        <!-- End Page-content -->
+
+
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-6">
+                      {{ date()|date('Y')}} © MoneyChange.
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-sm-end d-none d-sm-block">
+                             Développé par SECS SARL
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <!-- end main content-->
+
+</div>
+<!-- END layout-wrapper -->
+
+<!-- Right Sidebar -->
+{{ include('partials/_right_sidebar.html.twig') }}
+
+<!-- /Right-bar -->
+
+<!-- Right bar overlay-->
+<div class="rightbar-overlay"></div>
+
+
+{{ include('partials/_javascript.html.twig') }}
+{% block javascripts %}
+
+    {# Pas de script JavaScript spécifique pour cette vue, sauf si vous avez des fonctionnalités interactives supplémentaires #}
+{% endblock %}
+</body>
+
+</html>

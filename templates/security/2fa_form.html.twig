@@ -5,8 +5,7 @@
 
 {% block body %}
 
-            <p class="py-2 text-center">Un code vous a été envoyé par email. Veuillez le saisir ci-dessous pour continuer.</p>
-
+    <p class=" text-center">Un code vous a été envoyé par email. Veuillez le saisir ci-dessous pour continuer.</p>
 
     <form method="post" action="{{ path('2fa_login_check') }}">
 
@@ -18,7 +17,7 @@
                             class ="form-control form-control-lg" required autofocus placeholder="Code de vérification">
                 </div>
         <div class="my-3">
-            <button type="submit" class="btn btn-primary btn-lg  btn-rounded w-100">
+            <button type="submit" class="btn btn-primary btn-lg   w-100">
                 <i class="fe-log-in"></i> Vérifier
             </button>
         </div>

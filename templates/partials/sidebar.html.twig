@@ -1,0 +1,175 @@
+<div class="vertical-menu">
+
+    <div data-simplebar class="h-100">
+
+        <div id="sidebar-menu">
+            <ul class="metismenu list-unstyled" id="side-menu">
+                <li class="menu-title" key="t-menu">Menu Principal</li>
+
+                <li>
+                    <a href="{{ path('app_dashboard') }}" class=" waves-effect">
+                        <i class="mdi mdi-home-circle"></i> {# Retour à l'original bx home-circle, mdi équivalent #}
+                        <span key="t-dashboards">Tableau de bord</span>
+                    </a>
+                </li>
+
+                <li class="menu-title" key="t-apps">Gestion des Opérations</li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="mdi mdi-currency-usd"></i> {# Équivalent MDI pour l'argent #}
+                        <span>Opérations</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ path('app_operation_index') }}">Toutes les opérations</a></li>
+                        <li><a href="{{ path('app_operation_new', { type: 'achat-vente' }) }}">Achat / Vente</a></li>
+                        <li><a href="{{ path('app_operation_new', { type: 'depot' }) }}">Versement</a></li>
+                        <li><a href="{{ path('app_operation_new', { type: 'retrait' }) }}">Retrait</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="mdi mdi-swap-horizontal"></i> {# Équivalent MDI pour le transfert/échange #}
+                        <span>Appro. Agences</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ path('app_appro_agence_index') }}">Historique des approvisionnements</a></li>
+                        <li><a href="{{ path('app_appro_agence_en_attente') }}">Demandes en attente</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="mdi mdi-cash-multiple"></i> {# MDI pour les pièces/argent #}
+                        <span>Appro. Caisses</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ path('app_appro_caisse_index') }}">Historique des approvisionnements</a></li>
+                        <li><a href="{{ path('app_appro_caisse_en_attente') }}">Demandes en attente</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-title" key="t-administration">Administration</li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="mdi mdi-office-building"></i> {# MDI pour les bâtiments/agences #}
+                        <span>Agences</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ path('app_agence_index') }}">Liste des agences</a></li>
+                        <li><a href="{{ path('app_agence_new') }}">Ajouter une agence</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="mdi mdi-bank"></i> {# MDI pour les banques #}
+                        <span>Banques</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ path('app_banque_index') }}">Liste des banques</a></li>
+                        <li><a href="{{ path('app_banque_new') }}">Ajouter une banque</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="{{ path('app_pays_compte_bancaire_index') }}" class="waves-effect">
+                        <i class="mdi mdi-bank-check"></i> {# MDI pour les comptes bancaires #}
+                        <span key="t-compte-bancaire">Comptes Bancaires</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('app_compte_general_index') }}" class="waves-effect">
+                        <i class="mdi mdi-account-cash"></i> {# MDI pour le compte général/registre #}
+                        <span key="t-compte-general">Compte Général</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="mdi mdi-account-group"></i> {# MDI pour les clients/utilisateurs #}
+                        <span>Clients</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ path('app_client_index') }}">Liste des clients</a></li>
+                        <li><a href="{{ path('app_client_new') }}">Ajouter un client</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="mdi mdi-format-list-bulleted"></i> {# MDI pour les listes/types #}
+                        <span>Types de clients</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ path('app_type_client_index') }}">Liste des types</a></li>
+                        <li><a href="{{ path('app_type_client_new') }}">Ajouter un type</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="mdi mdi-currency-ils"></i> {# MDI pour les devises #}
+                        <span>Devises</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ path('app_devise_index') }}">Liste des devises</a></li>
+                        <li><a href="{{ path('app_devise_new') }}">Ajouter une devise</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="mdi mdi-earth"></i> {# MDI pour les pays #}
+                        <span>Pays</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ path('app_pays_index') }}">Liste des pays</a></li>
+                        <li><a href="{{ path('app_pays_new') }}">Ajouter un pays</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="mdi mdi-card-account-details-outline"></i> {# MDI pour les pièces d'identité #}
+                        <span>Pièces d’identité</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ path('app_piece_identite_index') }}">Liste des pièces</a></li>
+                        <li><a href="{{ path('app_piece_identite_new') }}">Ajouter une pièce</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="mdi mdi-sync"></i> {# MDI pour les taux de change #}
+                        <span>Taux de change</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ path('app_taux_change_index') }}">Liste des taux</a></li>
+                        <li><a href="{{ path('app_taux_change_new') }}">Ajouter un taux</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="mdi mdi-account-circle"></i> {# MDI pour les utilisateurs #}
+                        <span>Utilisateurs</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ path('app_user_index') }}">Liste des utilisateurs</a></li>
+                        <li><a href="{{ path('app_register') }}">Ajouter un utilisateur</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-title" key="t-settings">Paramètres du Compte</li>
+
+                <li>
+                    <a href="{{ path('app_profil') }}" class="waves-effect">
+                        <i class="mdi mdi-account-box"></i> {# MDI pour le profil/compte #}
+                        <span key="t-file-manager">Mon compte</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('app_logout') }}" class="waves-effect">
+                        <i class="mdi mdi-logout"></i> {# MDI pour la déconnexion #}
+                        <span key="t-file-manager">Déconnexion</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>
