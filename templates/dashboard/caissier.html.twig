@@ -60,7 +60,7 @@
                             </div>
                             {% if card.data is not empty %}
                                 {% for currency, amount in card.data %}
-                                    <p class="mb-1 fw-bold">{{ amount|format_currency(currency) }}</p>
+                                    <p class="mb-1 fw-bold font-size-20">{{ amount|format_currency(currency) }}</p>
                                 {% endfor %}
                             {% else %}
                                 <p class="text-muted">0.00 {{ data.mainCurrencyCode }}</p>

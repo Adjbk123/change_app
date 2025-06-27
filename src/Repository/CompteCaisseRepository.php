@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Agence;
 use App\Entity\Caisse;
 use App\Entity\CompteCaisse;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -25,6 +26,17 @@ class CompteCaisseRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('cc')
             ->where('cc.caisse = :caisse')
             ->setParameter('caisse', $caisse)
+            ->getQuery()
+            ->getResult();
+    }
+
+    // src/Repository/CompteCaisseRepository.php
+    public function findByAgence(Agence $agence): array
+    {
+        return $this->createQueryBuilder('cc') // cc pour CompteCaisse
+        ->join('cc.caisse', 'c')
+            ->where('c.agence = :agence')
+            ->setParameter('agence', $agence)
             ->getQuery()
             ->getResult();
     }

@@ -5,6 +5,28 @@
         <i class="mdi mdi-account-cash"></i> {# MDI pour le compte général/registre #}
         <span key="t-compte-general">Compte Agence</span>
     </a>
+</li>
+<li>
+    <a href="javascript: void(0);" class="has-arrow waves-effect">
+        <i class="mdi mdi-swap-horizontal"></i> {# Équivalent MDI pour le transfert/échange #}
+        <span>Appro. Agences</span>
+    </a>
+    <ul class="sub-menu" aria-expanded="false">
+        <li><a href="{{ path('app_appro_agence_index') }}">Historique des approvisionnements</a></li>
+        <li><a href="{{ path('app_appro_agence_en_attente') }}">Demandes en attente</a></li>
+    </ul>
+</li>
+<li>
+    <a href="javascript: void(0);" class="has-arrow waves-effect">
+        <i class="mdi mdi-cash-multiple"></i> {# MDI pour les pièces/argent #}
+        <span>Appro. Caisses</span>
+    </a>
+    <ul class="sub-menu" aria-expanded="false">
+        <li><a href="{{ path('app_appro_caisse_index') }}">Historique des approvisionnements</a></li>
+        <li><a href="{{ path('app_appro_caisse_en_attente') }}">Demandes en attente</a></li>
+    </ul>
+</li>
+
 <li>
     <a href="javascript: void(0);" class="has-arrow waves-effect">
         <i class="mdi mdi-currency-usd"></i> {# Équivalent MDI pour l'argent #}

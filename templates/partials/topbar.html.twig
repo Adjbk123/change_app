@@ -217,7 +217,10 @@
                 <div class="dropdown-menu dropdown-menu-end">
                     <!-- item-->
                     <a class="dropdown-item" href="{{ path('app_profil') }}"><i class="bx bx-user font-size-16 align-middle me-1"></i> <span key="t-profile">Mon profil</span></a>
-                    <a class="dropdown-item" href="#"><i class="bx bx-wallet font-size-16 align-middle me-1"></i> <span key="t-my-wallet">Caisse</span></a>
+                    {% if is_granted('ROLE_CAISSE') %}
+                        <a class="dropdown-item" href="{{ path('app_compte_caisse_index') }}"><i class="bx bx-wallet font-size-16 align-middle me-1"></i> <span key="t-my-wallet">Caisse</span></a>
+                    {% endif %}
+
                     <a class="dropdown-item d-block" href="#"><span class="badge bg-success float-end">11</span><i class="bx bx-wrench font-size-16 align-middle me-1"></i> <span key="t-settings">Paramètres</span></a>
                     <a class="dropdown-item" href="#"><i class="bx bx-lock-open font-size-16 align-middle me-1"></i> <span key="t-lock-screen">Vérouiller mon compte</span></a>
                     <div class="dropdown-divider"></div>

@@ -1,10 +1,176 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Tableau de Bord - Agence{% endblock %}
+
+{# Pour la vue agence, on peut supposer que le responsable consulte les stats
+   plutôt que d'effectuer des opérations directement. On peut donc omettre le bouton.
+   Si besoin, il peut être rajouté ici. #}
+
 {% block body %}
 
+        {# ✅ ALERTES DE L'AGENCE #}
+        {# Celles-ci indiqueront maintenant de quelle caisse provient l'alerte, ce qui est parfait pour le responsable #}
+        <div class="row">
+            <div class="col-12">
+                {% if data.alerts is not empty %}
+                    {% for alert in data.alerts %}
+                        <div class="alert alert-{{ alert.type }} d-flex align-items-center mb-3 shadow-sm" role="alert">
+                            <i class="bx bx-{{ alert.type == 'danger' ? 'error' : (alert.type == 'warning' ? 'error-alt' : 'info-circle') }} me-2 fs-5"></i>
+                            <div>{{ alert.message }}</div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-secondary d-flex align-items-center shadow-sm" role="alert">
+                        <i class="bx bx-check-circle me-2 fs-5"></i>
+                        <div>Aucune alerte critique pour les caisses de l'agence.</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+
+        {# ✅ INDICATEURS CLÉS DE L'AGENCE #}
+        <div class="row">
+            {# J'ai juste modifié le titre de la première carte pour être plus précis #}
+            {% set resume_cards = [
+                {'title': 'Solde Global Agence', 'data': data.currentCashBalanceByCurrency, 'icon': 'bxs-bank', 'color': 'info'},
+                {'title': 'Total Reçu (Jour)', 'data': data.dailyReceivedByCurrency, 'icon': 'bx-download', 'color': 'success'},
+                {'title': 'Total Sorti (Jour)', 'data': data.dailyGivenByCurrency, 'icon': 'bx-upload', 'color': 'danger'}
+            ] %}
+            {% for card in resume_cards %}
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="avatar-sm me-3">
+                                <span class="avatar-title rounded-circle bg-{{ card.color }} text-white">
+                                    <i class="bx {{ card.icon }} font-size-24"></i>
+                                </span>
+                                </div>
+                                <h6 class="mb-0">{{ card.title }}</h6>
+                            </div>
+                            {% if card.data is not empty %}
+                                {% for currency, amount in card.data %}
+                                    <p class="mb-1 fw-bold font-size-20">{{ amount|format_currency(currency) }}</p>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">0.00 {{ data.mainCurrencyCode }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {# Le reste de la vue est identique, car les données sont agrégées de la même manière #}
+
+        {# ✅ VOLUMES ACHAT / VENTE DE L'AGENCE #}
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="bx bx-transfer-alt me-2 text-primary"></i> Volumes Achat / Vente (Agence)
+                        </h6>
+                        <ul class="list-group">
+                            {% set allCurrencies = data.dailyBuyVolumeByCurrency|keys|merge(data.dailySellVolumeByCurrency|keys)|sort|unique %}
+                            {% if allCurrencies is not empty %}
+                                {% for currency in allCurrencies %}
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <strong>{{ currency }}</strong>
+                                        <div class="text-end">
+                                            <span class="text-success me-2">Achat : {{ data.dailyBuyVolumeByCurrency[currency]|default(0)|format_currency(currency) }}</span>
+                                            <span class="text-danger">Vente : {{ data.dailySellVolumeByCurrency[currency]|default(0)|format_currency(currency) }}</span>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="list-group-item text-muted">Aucune opération de change aujourd'hui.</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            {# ✅ TAUX UTILISÉS DANS L'AGENCE #}
+            <div class="col-lg-6 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="bx bx-line-chart me-2 text-secondary"></i> Taux Appliqués (Agence)
+                        </h6>
+                        <ul class="list-group">
+                            {% if data.dailyRatesUsed is not empty %}
+                                {% for rate in data.dailyRatesUsed %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ rate.deviseSourceCode }} → {{ rate.deviseCibleCode }} :
+                                        <span class="fw-bold">{{ rate.taux|number_format(6, '.', ' ') }}</span>
+                                        <span class="badge bg-{{ rate.typeOperation == 'ACHAT' ? 'success' : 'primary' }} ms-2">{{ rate.typeOperation }}</span>
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="list-group-item text-muted">Aucun taux enregistré aujourd'hui.</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ✅ GRAPHIQUE DE L'AGENCE #}
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="bx bx-bar-chart-alt me-2 text-info"></i> Entrées vs Sorties par Devise (Agence)
+                        </h6>
+                        <div id="entries-exits-chart" style="min-height: 350px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
 {% endblock %}
 
-{% block title %}
+{% block javascripts %}
+    {# Ce bloc est strictement IDENTIQUE à celui de la vue caissier. #}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const chartData = {{ data.chartData.entriesExits|json_encode|raw }};
 
+            if (typeof ApexCharts !== 'undefined' && chartData.labels.length > 0) {
+                const options = {
+                    series: chartData.datasets,
+                    chart: { type: 'bar', height: 360, toolbar: { show: false } },
+                    plotOptions: { bar: { horizontal: false, columnWidth: '50%', borderRadius: 4, endingShape: 'rounded' } },
+                    dataLabels: { enabled: false },
+                    xaxis: {
+                        categories: chartData.labels,
+                        labels: { style: { fontSize: '13px', colors: '#6c757d' } },
+                        axisBorder: { show: false },
+                        axisTicks: { show: false }
+                    },
+                    yaxis: {
+                        labels: {
+                            formatter: val => val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }),
+                            style: { colors: '#6c757d', fontSize: '12px' }
+                        },
+                        title: { text: 'Montant', style: { fontSize: '13px' } }
+                    },
+                    fill: { type: 'gradient', gradient: { shade: 'light', type: 'vertical', shadeIntensity: 0.2, inverseColors: false, opacityFrom: 0.9, opacityTo: 1, stops: [0, 100] } },
+                    colors: ['#198754', '#dc3545'],
+                    legend: { position: 'top', horizontalAlign: 'right', labels: { colors: '#343a40' } },
+                    tooltip: { theme: 'light', y: { formatter: val => val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) } }
+                };
+
+                new ApexCharts(document.querySelector("#entries-exits-chart"), options).render();
+            } else {
+                document.querySelector("#entries-exits-chart").innerHTML =
+                    '<p class="text-muted text-center pt-4">Aucune donnée disponible pour le graphique aujourd\'hui.</p>';
+            }
+        });
+    </script>
 {% endblock %}
-

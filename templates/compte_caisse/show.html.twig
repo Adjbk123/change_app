@@ -1,7 +1,13 @@
 {% extends 'base.html.twig' %}
 {% block title %}Compte Caisse - {{ compte_caisse.devise.nom }}{% endblock %}
 {% block button %}
-    <a href="{{ path('app_caisse_show', {'id': compte_caisse.caisse.id}) }}" class="btn btn-outline-primary">Retour</a>
+    {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('app_caisse_show', {'id': compte_caisse.caisse.id}) }}" class="btn btn-outline-primary">Retour</a>
+
+    {% else %}
+        <a href="{{ path('app_caisse_index') }}" class="btn btn-outline-primary">Retour</a>
+
+    {% endif %}
     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addApproCaisseModal">
         Demander un approvisionnement
     </button>

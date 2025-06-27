@@ -6,6 +6,7 @@ use App\Entity\ApproCaisse;
 use App\Entity\MouvementCaisse;
 use App\Form\ApproCaisseForm;
 use App\Repository\ApproCaisseRepository;
+use App\Service\CaisseService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,10 +19,47 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 final class ApproCaisseController extends AbstractController
 {
     #[Route(name: 'app_appro_caisse_index', methods: ['GET'])]
-    public function index(ApproCaisseRepository $approCaisseRepository): Response
+    public function index(ApproCaisseRepository $approCaisseRepository, CaisseService $caisseService): Response
     {
+        // On s'assure que l'utilisateur est bien connecté
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $user = $this->getUser();
+        $approvisionnements = [];
+
+        // Cas 1 : Le responsable d'agence
+        if ($this->isGranted('ROLE_RESPONSABLE')) {
+            $agence = $user->getAgence(); // Suppose que votre entité User a une méthode getAgence()
+
+            if (!$agence) {
+                // Erreur de configuration : un responsable doit être lié à une agence
+                throw new \LogicException('Cet utilisateur responsable n\'est associé à aucune agence.');
+            }
+
+            // On cherche les approvisionnements pour toutes les caisses de son agence
+            $approvisionnements = $approCaisseRepository->findByAgence($agence);
+
+        }
+        // Cas 2 : Le caissier
+        elseif ($this->isGranted('ROLE_CAISSE')) {
+            $caisse = $caisseService->getCaisseAffectee($this->getUser()); // Suppose que votre entité User a une méthode getCaisse()
+
+            if (!$caisse) {
+                // Erreur de configuration : un caissier doit être lié à une caisse
+                throw new \LogicException('Cet utilisateur caissier n\'est associé à aucune caisse.');
+            }
+
+            // On cherche les approvisionnements uniquement pour sa caisse
+            $approvisionnements = $approCaisseRepository->findBy(['caisse' => $caisse], ['dateDemande' => 'DESC']);
+
+        }
+        // Cas 3 : L'administrateur (ou un rôle supérieur) voit tout
+        elseif ($this->isGranted('ROLE_ADMIN')) {
+            $approvisionnements = $approCaisseRepository->findBy([], ['dateDemande' => 'DESC']);
+        }
+
         return $this->render('appro_caisse/index.html.twig', [
-            'appro_caisses' => $approCaisseRepository->findAll(),
+            'appro_caisses' => $approvisionnements,
         ]);
     }
 

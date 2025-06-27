@@ -3,6 +3,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Agence;
 use App\Entity\Operation;
 use App\Entity\Caisse;
 use DateTimeImmutable;
@@ -149,6 +150,130 @@ class OperationRepository extends ServiceEntityRepository
             ->setParameter('startDate', $startDate)
             ->setParameter('endDate', $endDate)
             ->groupBy('sourceId', 'cibleId', 'o.taux', 'o.typeOperation') // Grouper par paire, taux et type pour obtenir les taux uniques
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+
+
+    // --- NOUVELLES MÉTHODES PAR AGENCE ---
+
+    /**
+     * Calcule la somme des montants cibles pour un type d'opération donné, pour toutes les caisses d'une agence.
+     */
+    public function getSumMontantCibleByAgenceAndType(Agence $agence, string $typeOperation, DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
+    {
+        return $this->createQueryBuilder('o')
+            ->select('SUM(o.montantCible) AS totalMontant, IDENTITY(o.deviseCible) AS deviseId')
+            ->join('o.caisse', 'c')
+            ->where('c.agence = :agence')
+            ->andWhere('o.typeOperation = :typeOperation')
+            ->andWhere('o.createdAt BETWEEN :startDate AND :endDate')
+            ->setParameter('agence', $agence)
+            ->setParameter('typeOperation', $typeOperation)
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->groupBy('deviseId')
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    /**
+     * Calcule la somme des montants SOURCE pour les opérations de VENTE pour toutes les caisses d'une agence.
+     */
+    public function getSumMontantSourceForVenteByAgence(Agence $agence, DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
+    {
+        return $this->createQueryBuilder('o')
+            ->select('SUM(o.montantSource) AS totalMontant, IDENTITY(o.deviseSource) AS deviseId')
+            ->join('o.caisse', 'c')
+            ->where('c.agence = :agence')
+            ->andWhere('o.typeOperation = :typeOperation')
+            ->andWhere('o.createdAt BETWEEN :startDate AND :endDate')
+            ->setParameter('agence', $agence)
+            ->setParameter('typeOperation', 'VENTE')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->groupBy('deviseId')
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    /**
+     * Calcule la somme des montants CIBLE pour les opérations d'ACHAT pour toutes les caisses d'une agence.
+     */
+    public function getSumMontantCibleForAchatByAgence(Agence $agence, DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
+    {
+        return $this->createQueryBuilder('o')
+            ->select('SUM(o.montantCible) AS totalMontant, IDENTITY(o.deviseCible) AS deviseId')
+            ->join('o.caisse', 'c')
+            ->where('c.agence = :agence')
+            ->andWhere('o.typeOperation = :typeOperation')
+            ->andWhere('o.createdAt BETWEEN :startDate AND :endDate')
+            ->setParameter('agence', $agence)
+            ->setParameter('typeOperation', 'ACHAT')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->groupBy('deviseId')
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    /**
+     * Calcule la somme des montants SOURCE pour les opérations d'ACHAT pour toutes les caisses d'une agence.
+     */
+    public function getSumMontantSourceForAchatByAgence(Agence $agence, DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
+    {
+        return $this->createQueryBuilder('o')
+            ->select('SUM(o.montantSource) AS totalMontant, IDENTITY(o.deviseSource) AS deviseId')
+            ->join('o.caisse', 'c')
+            ->where('c.agence = :agence')
+            ->andWhere('o.typeOperation = :typeOperation')
+            ->andWhere('o.createdAt BETWEEN :startDate AND :endDate')
+            ->setParameter('agence', $agence)
+            ->setParameter('typeOperation', 'ACHAT')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->groupBy('deviseId')
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    /**
+     * Calcule la somme des montants CIBLE pour les opérations de VENTE pour toutes les caisses d'une agence.
+     */
+    public function getSumMontantCibleForVenteByAgence(Agence $agence, DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
+    {
+        return $this->createQueryBuilder('o')
+            ->select('SUM(o.montantCible) AS totalMontant, IDENTITY(o.deviseCible) AS deviseId')
+            ->join('o.caisse', 'c')
+            ->where('c.agence = :agence')
+            ->andWhere('o.typeOperation = :typeOperation')
+            ->andWhere('o.createdAt BETWEEN :startDate AND :endDate')
+            ->setParameter('agence', $agence)
+            ->setParameter('typeOperation', 'VENTE')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->groupBy('deviseId')
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    /**
+     * Récupère les taux de change uniques utilisés par toutes les caisses d'une agence.
+     */
+    public function getDailyUsedExchangeRatesByAgence(Agence $agence, DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
+    {
+        return $this->createQueryBuilder('o')
+            ->select('IDENTITY(o.deviseSource) AS sourceId, IDENTITY(o.deviseCible) AS cibleId, o.taux, o.typeOperation')
+            ->join('o.caisse', 'c')
+            ->where('c.agence = :agence')
+            ->andWhere('o.typeOperation IN (:types)')
+            ->andWhere('o.createdAt BETWEEN :startDate AND :endDate')
+            ->setParameter('agence', $agence)
+            ->setParameter('types', ['ACHAT', 'VENTE'])
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->groupBy('sourceId', 'cibleId', 'o.taux', 'o.typeOperation')
             ->getQuery()
             ->getArrayResult();
     }
