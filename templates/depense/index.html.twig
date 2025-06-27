@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des dépenses{% endblock %}
+{% block button %}
+    <a href="{{ path('app_depense_new') }}">Create new</a>
+
+{% endblock %}
+
+{% block body %}
+    <table class="table datatable">
+        <thead>
+            <tr>
+                <th>N°</th>
+                <th>Type de dépense</th>
+
+                <th>Montant</th>
+                <th>Motif</th>
+                <th>CreatedAt</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for depense in depenses %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ depense.typeDepense.libelle }}</td>
+                <td>{{ depense.montant }} {{ depense.devise.codeIso }}</td>
+                <td>{{ depense.motif }}</td>
+                <td>{{ depense.createdAt ? depense.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_depense_show', {'id': depense.id}) }}">show</a>
+                    <a href="{{ path('app_depense_edit', {'id': depense.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Caisse;
 use App\Entity\CompteCaisse;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,6 +17,17 @@ class CompteCaisseRepository extends ServiceEntityRepository
         parent::__construct($registry, CompteCaisse::class);
     }
 
+    /**
+     * Récupère tous les comptes de caisse pour une caisse donnée.
+     */
+    public function findByCaisse(Caisse $caisse): array
+    {
+        return $this->createQueryBuilder('cc')
+            ->where('cc.caisse = :caisse')
+            ->setParameter('caisse', $caisse)
+            ->getQuery()
+            ->getResult();
+    }
     //    /**
     //     * @return CompteCaisse[] Returns an array of CompteCaisse objects
     //     */

@@ -1,8 +1,17 @@
-{{ include('partials/main.html.twig') }}
+<!doctype html>
+<html lang="fr">
+
 
 <head>
 
-    {{ include('partials/title-meta.html.twig') }}
+    <meta charset="utf-8" />
+    <title>{%  block title %} MySwap {%  endblock %} | MASTEL - Application de Change</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
+    <meta content="Themesbrand" name="author" />
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{{ asset('images/mini-logo-myswap.png') }}">
+
 
     {{ include('partials/head-css.html.twig') }}
     {% block stylesheets %}
@@ -62,6 +71,7 @@
         }
 
     </style>
+
 </head>
 
 {{ include('partials/body.html.twig') }}
@@ -110,13 +120,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-12">
-                        <div class="text-end my-3">
-                            {% block button %}
 
-                            {% endblock %}
-                        </div>
-                    </div>
 
                     <div class="col-md-12">
                         {% for label, messages in app.flashes %}
@@ -126,13 +130,25 @@
                                 </div>
                             {% endfor %}
                         {% endfor %}
+                        {% if app.current_route !="app_dashboard" %}
                         <div class="card">
                             <div class="card-body">
+                        {% endif %}
+                                <div class="col-md-12">
+                                    <div class="text-end my-3">
+                                        {% block button %}
+
+                                        {% endblock %}
+                                    </div>
+                                </div>
                                 {% block body %}
 
                                 {% endblock %}
-                            </div>
+                                {% if app.current_route !="app_dashboard" %}
+                                    </div>
                         </div>
+                                        {% endif %}
+
                     </div>
 
                 </div>

@@ -114,6 +114,12 @@ class Devise
     #[ORM\OneToMany(targetEntity: Operation::class, mappedBy: 'deviseSource')]
     private Collection $operations;
 
+    /**
+     * @var Collection<int, Depense>
+     */
+    #[ORM\OneToMany(targetEntity: Depense::class, mappedBy: 'devise')]
+    private Collection $depenses;
+
     public function __construct()
     {
         $this->compteCaisses = new ArrayCollection();
@@ -130,6 +136,7 @@ class Devise
         $this->compteClients = new ArrayCollection();
         $this->mouvementCompteClients = new ArrayCollection();
         $this->operations = new ArrayCollection();
+        $this->depenses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -611,6 +618,36 @@ class Devise
             // set the owning side to null (unless already changed)
             if ($operation->getDeviseSource() === $this) {
                 $operation->setDeviseSource(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Depense>
+     */
+    public function getDepenses(): Collection
+    {
+        return $this->depenses;
+    }
+
+    public function addDepense(Depense $depense): static
+    {
+        if (!$this->depenses->contains($depense)) {
+            $this->depenses->add($depense);
+            $depense->setDevise($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDepense(Depense $depense): static
+    {
+        if ($this->depenses->removeElement($depense)) {
+            // set the owning side to null (unless already changed)
+            if ($depense->getDevise() === $this) {
+                $depense->setDevise(null);
             }
         }
 

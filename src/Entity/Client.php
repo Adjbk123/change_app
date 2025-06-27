@@ -62,6 +62,9 @@ class Client
     #[ORM\OneToMany(targetEntity: Operation::class, mappedBy: 'client')]
     private Collection $operations;
 
+    #[ORM\ManyToOne(inversedBy: 'clients')]
+    private ?Agence $agence = null;
+
 
     public function __construct()
     {
@@ -280,6 +283,18 @@ class Client
     public function getNomComplet(): string
     {
         return trim($this->nom . ' ' . $this->prenoms);
+    }
+
+    public function getAgence(): ?Agence
+    {
+        return $this->agence;
+    }
+
+    public function setAgence(?Agence $agence): static
+    {
+        $this->agence = $agence;
+
+        return $this;
     }
 
 }

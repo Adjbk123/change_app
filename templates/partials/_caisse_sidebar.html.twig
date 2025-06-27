@@ -1,0 +1,33 @@
+
+<li class="menu-title" key="t-apps">Gestion des Opérations</li>
+<li>
+    <a href="{{ path('app_compte_caisse_index') }}" class="waves-effect">
+        <i class="mdi mdi-account-cash"></i> {# MDI pour le compte général/registre #}
+        <span key="t-compte-general">Compte Caisse</span>
+    </a>
+<li>
+<li>
+    <a href="javascript: void(0);" class="has-arrow waves-effect">
+        <i class="mdi mdi-currency-usd"></i> {# Équivalent MDI pour l'argent #}
+        <span>Opérations</span>
+    </a>
+    <ul class="sub-menu" aria-expanded="false">
+        <li><a href="{{ path('app_operation_index') }}">Toutes les opérations</a></li>
+        <li><a href="{{ path('app_operation_new', { type: 'achat-vente' }) }}">Achat / Vente</a></li>
+        <li><a href="{{ path('app_operation_new', { type: 'depot' }) }}">Versement</a></li>
+        <li><a href="{{ path('app_operation_new', { type: 'retrait' }) }}">Retrait</a></li>
+    </ul>
+</li>
+
+<li class="menu-title" key="t-administration">Administration</li>
+<li>
+    <a href="javascript: void(0);" class="has-arrow waves-effect">
+        <i class="mdi mdi-cash-minus"></i> {# Icône pour les dépenses #}
+        <span>Dépenses</span>
+    </a>
+    <ul class="sub-menu" aria-expanded="false">
+        <li><a href="{{ path('app_depense_index') }}">Toutes les dépenses</a></li>
+        <li><a href="{{ path('app_depense_new') }}">Nouvelle dépense</a></li>
+        <li><a href="{{ path('app_type_depense_index') }}">Catégories de dépenses</a></li>
+    </ul>
+</li>

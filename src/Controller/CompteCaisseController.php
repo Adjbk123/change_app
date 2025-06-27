@@ -8,6 +8,7 @@ use App\Entity\CompteCaisse;
 use App\Form\ApproCaisseForm;
 use App\Form\CompteCaisseForm;
 use App\Repository\CompteCaisseRepository;
+use App\Service\CaisseService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,8 +19,13 @@ use Symfony\Component\Routing\Attribute\Route;
 final class CompteCaisseController extends AbstractController
 {
     #[Route(name: 'app_compte_caisse_index', methods: ['GET'])]
-    public function index(CompteCaisseRepository $compteCaisseRepository): Response
+    public function index(CompteCaisseRepository $compteCaisseRepository, CaisseService $caisseService): Response
     {
+        $compteCaisses = $compteCaisseRepository->findAll();
+        if ($this->isGranted('ROLE_CAISSE')) {
+            $caisse = $caisseService->getCaisseAffectee($this->getUser());
+            $compteCaisses = $compteCaisseRepository->findBy(['caisse'=>$caisse]);
+        }
         return $this->render('compte_caisse/index.html.twig', [
             'compte_caisses' => $compteCaisseRepository->findAll(),
         ]);

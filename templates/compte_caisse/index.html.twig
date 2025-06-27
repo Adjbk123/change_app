@@ -1,39 +1,38 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}CompteCaisse index{% endblock %}
+{% block title %}Liste des comptes caisse{% endblock %}
+{% block button %}
+    <a href="{{ path('app_compte_caisse_new') }}" class="btn btn-outline-primary">Ajouter un compte</a>
+{% endblock %}
 
 {% block body %}
-    <h1>CompteCaisse index</h1>
 
-    <table class="table">
-        <thead>
+    <table class="table datatable">
+        <thead class="table-secondary">
             <tr>
-                <th>Id</th>
-                <th>SoldeInitial</th>
-                <th>SoldeRestant</th>
-                <th>SeuilAlerte</th>
-                <th>actions</th>
+                <th>N°</th>
+                <th>Devise</th>
+                <th>Solde Initial</th>
+                <th>Solde Restant</th>
+                <th>Seuil Alerte</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
         {% for compte_caisse in compte_caisses %}
             <tr>
-                <td>{{ compte_caisse.id }}</td>
+                <td>{{ loop.index }}</td>
+                <td>{{ compte_caisse.devise.codeIso }}</td>
                 <td>{{ compte_caisse.soldeInitial }}</td>
                 <td>{{ compte_caisse.soldeRestant }}</td>
                 <td>{{ compte_caisse.seuilAlerte }}</td>
                 <td>
-                    <a href="{{ path('app_compte_caisse_show', {'id': compte_caisse.id}) }}">show</a>
-                    <a href="{{ path('app_compte_caisse_edit', {'id': compte_caisse.id}) }}">edit</a>
+                    <a href="{{ path('app_compte_caisse_show', {'id': compte_caisse.id}) }}" class="btn btn-outline-primary">Gérer</a>
                 </td>
             </tr>
-        {% else %}
-            <tr>
-                <td colspan="5">no records found</td>
-            </tr>
+
         {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ path('app_compte_caisse_new') }}">Create new</a>
 {% endblock %}

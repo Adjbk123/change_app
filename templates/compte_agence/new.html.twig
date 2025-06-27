@@ -1,11 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New CompteAgence{% endblock %}
+{% block title %}Ajout d'un compte{% endblock %}
+{% block button %}
+    <a href="{{ path('app_compte_agence_index') }}" class="btn btn-outline-primary">Retour</a>
+
+{% endblock %}
 
 {% block body %}
-    <h1>Create new CompteAgence</h1>
+
 
     {{ include('compte_agence/_form.html.twig') }}
 
-    <a href="{{ path('app_compte_agence_index') }}">back to list</a>
 {% endblock %}

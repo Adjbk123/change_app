@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New TypeDepense{% endblock %}
+
+{% block body %}
+    <h1>Create new TypeDepense</h1>
+
+    {{ include('type_depense/_form.html.twig') }}
+
+    <a href="{{ path('app_type_depense_index') }}">back to list</a>
+{% endblock %}

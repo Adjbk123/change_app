@@ -13,7 +13,8 @@ services:
     acme.custom_form_renderer_service:
         class: App\Service\Custom2FAFormRenderer
         tags: [ 'scheb_two_factor.form_renderer' ]
-
+    App\Twig\AppExtension:
+        tags: ['twig.extension']
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.

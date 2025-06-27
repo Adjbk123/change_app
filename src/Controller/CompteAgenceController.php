@@ -20,8 +20,13 @@ final class CompteAgenceController extends AbstractController
     #[Route(name: 'app_compte_agence_index', methods: ['GET'])]
     public function index(CompteAgenceRepository $compteAgenceRepository): Response
     {
+       $compteAgences = $compteAgenceRepository->findAll();
+        if ($this->isGranted('ROLE_RESPONSABLE')){
+            $compteAgences = $compteAgenceRepository->findBy(['agence' => $this->getUser()->getAgence()]);
+        }
+
         return $this->render('compte_agence/index.html.twig', [
-            'compte_agences' => $compteAgenceRepository->findAll(),
+            'compte_agences' => $compteAgences,
         ]);
     }
 

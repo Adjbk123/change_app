@@ -1,7 +1,13 @@
 {% extends 'base.html.twig' %}
 {% block title %}Compte Agence - {{ compte_agence.devise.nom }}{% endblock %}
 {% block button %}
-    <a href="{{ path('app_agence_show', {'id': compte_agence.agence.id}) }}" class="btn btn-outline-primary">Retour</a>
+    {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('app_agence_show', {'id': compte_agence.agence.id}) }}" class="btn btn-outline-primary">Retour</a>
+
+    {% else %}
+        <a href="{{ path('app_compte_agence_index') }}" class="btn btn-outline-primary">Retour</a>
+
+    {% endif %}
     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addApproAgenceModal">
         Faire une demande d'approvisionnement
     </button>

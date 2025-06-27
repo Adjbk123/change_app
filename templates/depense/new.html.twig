@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajout d'une nouvelle dépense{% endblock %}
+{% block button %}
+
+    <a href="{{ path('app_depense_index') }}" class="btn btn-outline-primary">Retour</a>
+
+{% endblock %}
+
+{% block body %}
+
+
+    {{ include('depense/_form.html.twig') }}
+
+{% endblock %}

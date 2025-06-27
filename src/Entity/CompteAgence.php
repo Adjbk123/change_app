@@ -45,10 +45,17 @@ class CompteAgence
     #[ORM\OneToMany(targetEntity: ApproCaisse::class, mappedBy: 'compteAgence')]
     private Collection $approCaisses;
 
+    /**
+     * @var Collection<int, Depense>
+     */
+    #[ORM\OneToMany(targetEntity: Depense::class, mappedBy: 'compteAgence')]
+    private Collection $depenses;
+
     public function __construct()
     {
         $this->approAgences = new ArrayCollection();
         $this->approCaisses = new ArrayCollection();
+        $this->depenses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -170,6 +177,36 @@ class CompteAgence
             // set the owning side to null (unless already changed)
             if ($approCaiss->getCompteAgence() === $this) {
                 $approCaiss->setCompteAgence(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Depense>
+     */
+    public function getDepenses(): Collection
+    {
+        return $this->depenses;
+    }
+
+    public function addDepense(Depense $depense): static
+    {
+        if (!$this->depenses->contains($depense)) {
+            $this->depenses->add($depense);
+            $depense->setCompteAgence($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDepense(Depense $depense): static
+    {
+        if ($this->depenses->removeElement($depense)) {
+            // set the owning side to null (unless already changed)
+            if ($depense->getCompteAgence() === $this) {
+                $depense->setCompteAgence(null);
             }
         }
 
