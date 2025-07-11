@@ -1,28 +1,36 @@
-<!doctype html>
-<html lang="fr">
-
+<!DOCTYPE html>
+<html lang="zxx" class="js">
 
 <head>
-
-    <meta charset="utf-8" />
-    <title>{% block title %}MySwap{% endblock %} | MySwap - Plateforme de Change Intelligente</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Optimisez vos opérations de change avec précision et efficacité.">
-    <meta name="author" content="SECS SARL" />
-    <meta name="keywords" content="change, devise, agence de change, XOF, USD, EUR, NGN, fintech, Bénin, caisse, transfert, myswap" />
-    <meta name="robots" content="index, follow" />
-
-    <!-- Favicon -->
-    <link rel="shortcut icon" href="{{ asset('images/mini-logo-myswap.png') }}">
-
-
-    {{ include('partials/head-css.html.twig') }}
+    <base href="../">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="fr">
+    <meta name="author" content="SECS SARL">
+    <meta name="description" content="{% block meta_description %}Application de gestion de change, prêts et opérations financières pour agences et caisses.{% endblock %}">
+    <meta name="keywords" content="change, prêt, caisse, agence, gestion, finance, client, relevé, remboursement, MySwap">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ app.request.uri }}">
+    <meta property="og:image" content="{{ asset('images/logo-dark-small.png') }}">
+    <meta name="twitter:card" content="summary_large_image">
+>
+    <meta name="twitter:image" content="{{ asset('images/logo-dark-small.png') }}">
+    <!-- Fav Icon  -->
+    <link rel="shortcut icon" href="{{ asset('images/favicon.png') }}">
+    <!-- Page Title  -->
+    <title>{% block title %}{% endblock %} | MySwap</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>html, body { font-family: 'Poppins', Arial, Helvetica, sans-serif; }</style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
     {% block stylesheets %}
 
-        {# Pas de script JavaScript spécifique pour cette vue, sauf si vous avez des fonctionnalités interactives supplémentaires #}
     {% endblock %}
 
 
+    <!-- StyleSheets  -->
+    {{ include('partials/_css.html.twig') }}
     <style>
         .progress-container {
             display: flex;
@@ -77,120 +85,94 @@
 
 </head>
 
-{{ include('partials/body.html.twig') }}
+<body class="nk-body bg-white has-sidebar ">
+<div class="nk-app-root">
+    <!-- main @s -->
+    <div class="nk-main ">
+        <!-- sidebar @s -->
+            {{ include('partials/_sidebar.html.twig') }}
+        <!-- sidebar @e -->
+        <!-- wrap @s -->
+        <div class="nk-wrap ">
+            <!-- main header @s -->
+         {{ include('partials/_header.html.twig') }}
+            <!-- main header @e -->
+            <!-- content @s -->
+            <div class="nk-content nk-content-fluid ">
+                <div class="container-xl wide-lg">
+                    <div class="nk-content-body">
+                        <div class="nk-block-head nk-block-head-sm">
+                            <div class="nk-block-between">
+                                <div class="nk-block-head-content">
+                                    <h3 class="nk-block-title page-title">
+                                        {{ block('title') }}
+                                    </h3>
+                                    <div class="nk-block-des text-soft">
+                                        <p>
+                                            {% block page_description %}
+                                            {% endblock  %}
+                                        </p>
+                                    </div>
+                                </div><!-- .nk-block-head-content -->
+                                <div class="nk-block-head-content">
+                                    <div class="toggle-wrap nk-block-tools-toggle">
+                                        <a href="#" class="btn btn-icon btn-trigger toggle-expand me-n1" data-target="pageMenu"><em class="icon ni ni-more-v"></em></a>
+                                        <div class="toggle-expand-content" data-content="pageMenu">
+                                            <ul class="nk-block-tools g-3">
+                                                <li>
+                                                    {% block button %}
 
-<!-- Begin page -->
-<div id="layout-wrapper">
+                                                    {% endblock %}
+                                                </li>
 
-    {{ include('partials/menu.html.twig') }}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div><!-- .nk-block-head-content -->
+                            </div><!-- .nk-block-between -->
+                        </div><!-- .nk-block-head -->
+                        <div class="nk-block">
 
-    <!-- ============================================================== -->
-    <!-- Start right Content here -->
-    <!-- ============================================================== -->
-    <div class="main-content">
+                            <div class="row g-gs">
+                                <div class="col-sm-12 col-lg-12 col-xxl-12">
+                                    <div class="card card-bordered">
+                                        <div class="card-inner">
+                                            {% block body %} {% endblock %}
+                                        </div>
+                                    </div><!-- .card -->
+                                </div><!-- .col -->
 
-        <div class="page-content">
-            <div class="container-fluid">
-
-                <!-- start page title -->
-                <div class="row">
-                    <div class="col-12">
-                        <div
-                            class="page-title-box d-sm-flex align-items-center justify-content-between">
-                            <h4 class="mb-sm-0 font-size-18">
-
-                                {{ block('title') }}
-                            </h4>
-
-                            <div class="page-title-right">
-                                <ol class="breadcrumb m-0">
-                                    <li class="breadcrumb-item"><a
-                                            href="javascript: void(0);">
-                                            {% block breadcrumd %}
-                                                Tableau de bord
-                                            {% endblock %}
-                                        </a></li>
-                                    <li class="breadcrumb-item active">
-                                        {% block breadcrumdActive %}
-                                            Main
-                                        {% endblock %}
-                                    </li>
-                                </ol>
                             </div>
-
-                        </div>
+                        </div><!-- .nk-block -->
                     </div>
                 </div>
-
-                <div class="row">
-
-
-                    <div class="col-md-12">
-                        {% for label, messages in app.flashes %}
-                            {% for message in messages %}
-                                <div class="alert alert-{{ label }} my-3">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        {% endfor %}
-                        {% if app.current_route !="app_dashboard" %}
-                        <div class="card">
-                            <div class="card-body">
-                        {% endif %}
-                                <div class="col-md-12">
-                                    <div class="text-end my-3">
-                                        {% block button %}
-
-                                        {% endblock %}
-                                    </div>
-                                </div>
-                                {% block body %}
-
-                                {% endblock %}
-                                {% if app.current_route !="app_dashboard" %}
-                                    </div>
-                        </div>
-                                        {% endif %}
-
-                    </div>
-
-                </div>
-
             </div>
-            <!-- container-fluid -->
+            <!-- content @e -->
+            <!-- footer @s -->
+            <div class="nk-footer">
+                <div class="container-fluid">
+                    <div class="nk-footer-wrap">
+                        <div class="nk-footer-copyright"> &copy; {{ date()|date('Y')}} MySwap. Template by <a href="https://softnio.com" target="_blank">SECS SARL</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- footer @e -->
         </div>
-        <!-- End Page-content -->
-
-
-        <footer class="footer">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-sm-6">
-                        {{ date()|date('Y') }} © MoneyChange.
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="text-sm-end d-none d-sm-block">
-                            Développé par SECS SARL
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </footer>
+        <!-- wrap @e -->
     </div>
-    <!-- end main content-->
-
+    <!-- main @e -->
 </div>
-<!-- END layout-wrapper -->
-{{ include('partials/right-sidebar.html.twig') }}
+<!-- app-root @e -->
 
-        {{ include('partials/vendor-scripts.html.twig') }}
-
-
-
+<!-- JavaScript -->
+{{ include('partials/_script.html.twig') }}
 {% block javascripts %}
 
-    {# Pas de script JavaScript spécifique pour cette vue, sauf si vous avez des fonctionnalités interactives supplémentaires #}
 {% endblock %}
+
+    {{ include('partials/_chat.html.twig') }}
+
 </body>
 
-</html>
+</html>"

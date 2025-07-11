@@ -63,6 +63,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $avatar = null;
+
     /**
      * @var Collection<int, Agence>
      */
@@ -129,6 +132,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
     #[ORM\OneToMany(targetEntity: AffectationCaisse::class, mappedBy: 'caissier')]
     private Collection $affectationCaisses;
 
+    /**
+     * @var Collection<int, Pret>
+     */
+    #[ORM\OneToMany(targetEntity: Pret::class, mappedBy: 'agentOctroi')]
+    private Collection $prets;
+
+    /**
+     * @var Collection<int, Remboursement>
+     */
+    #[ORM\OneToMany(targetEntity: Remboursement::class, mappedBy: 'agent')]
+    private Collection $remboursements;
+
     public function __construct()
     {
         $this->affectationAgences = new ArrayCollection();
@@ -143,6 +158,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
         $this->mouvementCompteClients = new ArrayCollection();
         $this->operations = new ArrayCollection();
         $this->affectationCaisses = new ArrayCollection();
+        $this->prets = new ArrayCollection();
+        $this->remboursements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -299,6 +316,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
     public function getNomComplet(): string
     {
         return trim($this->prenoms . ' ' . $this->nom);
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?string $avatar): static
+    {
+        $this->avatar = $avatar;
+        return $this;
     }
 
     // === 2FA - EMAIL ===
@@ -693,6 +721,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
             // set the owning side to null (unless already changed)
             if ($affectationCaiss->getCaissier() === $this) {
                 $affectationCaiss->setCaissier(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Pret>
+     */
+    public function getPrets(): Collection
+    {
+        return $this->prets;
+    }
+
+    public function addPret(Pret $pret): static
+    {
+        if (!$this->prets->contains($pret)) {
+            $this->prets->add($pret);
+            $pret->setAgentOctroi($this);
+        }
+
+        return $this;
+    }
+
+    public function removePret(Pret $pret): static
+    {
+        if ($this->prets->removeElement($pret)) {
+            // set the owning side to null (unless already changed)
+            if ($pret->getAgentOctroi() === $this) {
+                $pret->setAgentOctroi(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Remboursement>
+     */
+    public function getRemboursements(): Collection
+    {
+        return $this->remboursements;
+    }
+
+    public function addRemboursement(Remboursement $remboursement): static
+    {
+        if (!$this->remboursements->contains($remboursement)) {
+            $this->remboursements->add($remboursement);
+            $remboursement->setAgent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRemboursement(Remboursement $remboursement): static
+    {
+        if ($this->remboursements->removeElement($remboursement)) {
+            // set the owning side to null (unless already changed)
+            if ($remboursement->getAgent() === $this) {
+                $remboursement->setAgent(null);
             }
         }
 

@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Remboursement{% endblock %}
+
+{% block body %}
+    <h1>Edit Remboursement</h1>
+
+    {{ include('remboursement/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_remboursement_index') }}">back to list</a>
+
+    {{ include('remboursement/_delete_form.html.twig') }}
+{% endblock %}

@@ -16,20 +16,20 @@
 
 {% endblock %}
 {% block body %}
-
+<div class="table-responsive">
     <table class="table datatable">
         <thead class="table-secondary">
-            <tr>
-                <th>N°</th>
-                <th>Type Opération</th>
-                <th>MontantSource</th>
-                <th>MontantCible</th>
-                <th>Taux utilisé</th>
-                <th>Sens</th>
-                <th>Effectuée le</th>
-                <th>UpdatedAt</th>
-                <th>Actions</th>
-            </tr>
+        <tr>
+            <th>N°</th>
+            <th>Type Opération</th>
+            <th>MontantSource</th>
+            <th>MontantCible</th>
+            <th>Taux utilisé</th>
+            <th>Sens</th>
+            <th>Effectuée le</th>
+            <th>UpdatedAt</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
         {% for operation in operations %}
@@ -42,14 +42,19 @@
                 <td>{{ operation.sens }}</td>
                 <td>{{ operation.createdAt ? operation.createdAt|date('Y-m-d H:i:s') : '' }}</td>
                 <td>{{ operation.updatedAt ? operation.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+                {# CORRIGÉ: Affichage du statut basé sur 'finalise' #}
+
                 <td>
-                    <a href="{{ path('app_operation_show', {'id': operation.id}) }}">show</a>
-                    <a href="{{ path('app_operation_edit', {'id': operation.id}) }}">edit</a>
+                    <a href="{{ path('app_operation_show', {'id': operation.id}) }}" class="btn btn-sm btn-outline-primary mb-1">Voir</a>
+                    <a href="{{ path('app_operation_edit', {'id': operation.id}) }}" class="btn btn-sm btn-outline-secondary mb-1">Modifier</a>
+
+
                 </td>
             </tr>
-
         {% endfor %}
         </tbody>
     </table>
+
+</div>
 
 {% endblock %}

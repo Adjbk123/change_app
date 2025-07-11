@@ -1,0 +1,60 @@
+<div class="nk-sidebar nk-sidebar-fixed" data-content="sidebarMenu">
+    <div class="nk-sidebar-element nk-sidebar-head">
+        <div class="nk-sidebar-brand">
+            <a href="{{ path('app_dashboard') }}" class="logo-link nk-sidebar-logo">
+                <img class="logo-light logo-img" src="{{ asset('images/logo.png') }}" srcset="{{ asset('images/logo2x.png') }} 2x" alt="logo">
+                <img class="logo-dark logo-img" src="{{ asset('images/logo-dark.png') }}" srcset="{{ asset('images/logo-dark2x.png') }} 2x" alt="logo-dark">
+            </a>
+        </div>
+        <div class="nk-menu-trigger me-n2">
+            <a href="#" class="nk-nav-toggle nk-quick-nav-icon d-xl-none" data-target="sidebarMenu"><em class="icon mdi mdi-arrow-left"></em></a>
+        </div>
+    </div>
+    <div class="nk-sidebar-element">
+        <div class="nk-sidebar-body" data-simplebar>
+            <div class="nk-sidebar-content">
+                <div class="nk-sidebar-menu">
+                    <ul class="nk-menu">
+                        <li class="nk-menu-heading">
+                            <h6 class="overline-title text-primary-alt">Menu Principal</h6>
+                        </li>
+                        <li class="nk-menu-item">
+                            <a href="{{ path('app_dashboard') }}" class="nk-menu-link">
+                                <span class="nk-menu-icon"><em class="icon mdi mdi-view-dashboard"></em></span>
+                                <span class="nk-menu-text">Tableau de bord</span>
+                            </a>
+                        </li>
+                        <li class="nk-menu-item">
+                            <a href="{{ path('app_bilan') }}" class="nk-menu-link">
+                                <span class="nk-menu-icon"><em class="icon mdi mdi-file-document"></em></span>
+                                <span class="nk-menu-text">Bilans</span>
+                            </a>
+                        </li>
+                        {% if is_granted('ROLE_CAISSE') %}
+                            {{ include('partials/_caisse_sidebar.html.twig') }}
+                        {% elseif is_granted('ROLE_RESPONSABLE') %}
+                            {{ include('partials/_agence_sidebar.html.twig') }}
+                        {% elseif is_granted('ROLE_ADMIN') %}
+                            {{ include('partials/_admin_sidebar.html.twig') }}
+                        {% endif %}
+                        <li class="nk-menu-heading">
+                            <h6 class="overline-title text-primary-alt">Paramètres du Compte</h6>
+                        </li>
+                        <li class="nk-menu-item">
+                            <a href="{{ path('app_profil') }}" class="nk-menu-link">
+                                <span class="nk-menu-icon"><em class="icon mdi mdi-account"></em></span>
+                                <span class="nk-menu-text">Mon compte</span>
+                            </a>
+                        </li>
+                        <li class="nk-menu-item">
+                            <a href="{{ path('app_logout') }}" class="nk-menu-link">
+                                <span class="nk-menu-icon"><em class="icon mdi mdi-logout"></em></span>
+                                <span class="nk-menu-text">Déconnexion</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

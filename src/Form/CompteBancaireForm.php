@@ -19,6 +19,12 @@ class CompteBancaireForm extends AbstractType
             ->add('numeroBancaire', null, [
                 'label' => 'Numéro bancaire',
             ])
+            ->add('banque', null, [
+                'label' => 'Banque',
+                'class' => Banque::class,
+                'choice_label' => 'nom',
+                'placeholder' => '-- Selectionner une banque --',
+            ])
             ->add('pays', EntityType::class, [
                 'class' => Pays::class,
                 'choice_label' => 'nom',

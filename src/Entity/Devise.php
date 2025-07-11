@@ -120,6 +120,12 @@ class Devise
     #[ORM\OneToMany(targetEntity: Depense::class, mappedBy: 'devise')]
     private Collection $depenses;
 
+    /**
+     * @var Collection<int, Pret>
+     */
+    #[ORM\OneToMany(targetEntity: Pret::class, mappedBy: 'devise')]
+    private Collection $prets;
+
     public function __construct()
     {
         $this->compteCaisses = new ArrayCollection();
@@ -137,6 +143,7 @@ class Devise
         $this->mouvementCompteClients = new ArrayCollection();
         $this->operations = new ArrayCollection();
         $this->depenses = new ArrayCollection();
+        $this->prets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -648,6 +655,36 @@ class Devise
             // set the owning side to null (unless already changed)
             if ($depense->getDevise() === $this) {
                 $depense->setDevise(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Pret>
+     */
+    public function getPrets(): Collection
+    {
+        return $this->prets;
+    }
+
+    public function addPret(Pret $pret): static
+    {
+        if (!$this->prets->contains($pret)) {
+            $this->prets->add($pret);
+            $pret->setDevise($this);
+        }
+
+        return $this;
+    }
+
+    public function removePret(Pret $pret): static
+    {
+        if ($this->prets->removeElement($pret)) {
+            // set the owning side to null (unless already changed)
+            if ($pret->getDevise() === $this) {
+                $pret->setDevise(null);
             }
         }
 

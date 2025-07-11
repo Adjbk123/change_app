@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reçu de dépôt</title>
+    <style>
+        @page {
+            margin: 0; /* Supprime toutes les marges */
+        }
+
+        body {
+            margin: auto; /* Supprime les marges internes */
+            padding-top: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #fff;
+            width: 227px; /* 80 mm en pixels */
+        }
+
+        .receipt {
+            width: 100%;
+            padding: 0; /* Supprime le padding */
+            border: none;
+            text-align: center;
+        }
+
+        .receipt-header {
+            border-bottom: 1px dashed #000;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .receipt-header h1 {
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .receipt-header p {
+            margin: 2px 0;
+            font-size: 0.8rem;
+        }
+
+        .receipt-body {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .receipt-body .line-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin: 3px 0;
+        }
+
+        .receipt-footer {
+            border-top: 1px dashed #000;
+            padding-top: 10px;
+            font-size: 0.7rem;
+        }
+
+        .receipt-footer p {
+            margin: 3px 0;
+        }
+
+        .thank-you {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .qr-code {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .qr-code img {
+            width: 80px;
+            height: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt">
+        <!-- Header -->
+        <div class="receipt-header">
+            <p style="margin-bottom: 3px;">
+                <img src="{{ absolute_url(asset('images/logo-dark.png')) }}" alt="">
+
+            </p>
+            <h1>{{ transaction.caisse.bureau.nom|upper }} </h1>
+            <p>Email : {{ transaction.caisse.bureau.email ?? 'example@gmail.com' }}</p>
+            <p>Tél : {{ transaction.caisse.bureau.telephone }}</p>
+        </div>
+
+
+        <!-- Body -->
+        <div class="receipt-body">
+            <div class="line-item">
+                <span><strong>Reçu :</strong></span>
+                <span>#{{ date()|date('Y') }}{{ transaction.typeOperation|first }}{{ transaction.id }}{{date()|date('m')  }}</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Période:</strong></span>
+                <span style="font-size: 0.7rem;">{{ transaction.createdAt|date('Y/m/d : H:s:i') }}</span>
+            </div>
+
+            <div class="line-item">
+                   <span>
+                       <strong>Client :</strong> {{ transaction.client.nom }}  {{ transaction.client.prenoms }}
+                   </span>
+            </div>
+            <div class="line-item">
+                   <span>
+                       <strong>Téléphone :</strong> {{ transaction.client.telephone }}
+                   </span>
+            </div>
+            <div style="border-top: 1px dashed #000; margin-top: 10px;">
+
+            </div>
+
+
+
+            <h3 style="margin-top: 10px; font-size: 0.9rem;">Détails</h3>
+
+            <div class="line-item">
+                <span> <b>Montant dépôt  :</b></span>
+                <span>{{ transaction.montantSource }} {{ transaction.deviseSource.code }}</span>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="receipt-footer">
+            <p> <b>Montant Total</b> : {{ transaction.montantSource}} {{ transaction.deviseSource.code }}</p>
+            <p>Merci pour votre confiance !</p>
+            <!-- QR Code -->
+            <div class="qr-code">
+                <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+            </div>
+            <p class="thank-you">A bientôt !</p>
+
+        </div>
+    </div>
+</body>
+</html>

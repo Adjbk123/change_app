@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des prêts{% endblock %}
+{% block button %}
+    <a href="{{ path('app_pret_new') }}" class="btn btn-outline-primary">Nouveau pret</a>
+
+{% endblock %}
+
+{% block body %}
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>MontantPrincipal</th>
+                <th>MontantRestant</th>
+                <th>TauxInteretAnnuel</th>
+                <th>DureeMois</th>
+                <th>MontantTotalRembourse</th>
+                <th>Statut</th>
+                <th>Commentaire</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for pret in prets %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ pret.montantPrincipal }}</td>
+                <td>{{ pret.montantRestant }}</td>
+                <td>{{ pret.tauxInteretAnnuel }}</td>
+                <td>{{ pret.dureeMois }}</td>
+                <td>{{ pret.montantTotalRembourse }}</td>
+                <td>{{ pret.statut }}</td>
+                <td>{{ pret.commentaire }}</td>
+                <td>
+                    <a href="{{ path('app_pret_show', {'id': pret.id}) }}">show</a>
+                    <a href="{{ path('app_pret_edit', {'id': pret.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

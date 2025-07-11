@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Relevé de compte - {{ profil_client.nom }}{% endblock %}
+
+{% block body %}
+<h1>Relevé de compte de {{ profil_client.nom }} {{ profil_client.prenoms }}</h1>
+<p>Email : {{ profil_client.email }}</p>
+<p>Téléphone : {{ profil_client.telephone }}</p>
+
+<h2>Comptes</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Devise</th>
+            <th>Solde initial</th>
+            <th>Solde actuel</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for compte in comptes %}
+        <tr>
+            <td>{{ compte.devise.codeIso }}</td>
+            <td>{{ compte.soldeInitial }}</td>
+            <td>{{ compte.soldeActuel }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h2>Mouvements</h2>
+{% for compte in comptes %}
+    <h3>Compte {{ compte.devise.codeIso }}</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Sens</th>
+                <th>Montant</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for mvt in mouvements[compte.id] %}
+            <tr>
+                <td>{{ mvt.dateMouvement ? mvt.dateMouvement|date('d/m/Y H:i') : '' }}</td>
+                <td>{{ mvt.typeMouvement }}</td>
+                <td>{{ mvt.sens }}</td>
+                <td>{{ mvt.montant }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4">Aucun mouvement</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}
+
+<a href="{{ path('app_profil_client_releve_pdf', {'id': profil_client.id}) }}" class="btn btn-primary" target="_blank">Générer le PDF</a>
+<a href="{{ path('app_profil_client_index') }}" class="btn btn-secondary">Retour à la liste</a>
+{% endblock %} 

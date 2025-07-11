@@ -20,6 +20,15 @@ class AgenceForm extends AbstractType
             ->add('nom', TextType::class, [
                 'label' => 'Nom de l’agence',
             ])
+            ->add('pays', EntityType::class, [
+                'class' => Pays::class,
+                'choice_label' => 'nom',
+                'label' => 'Pays',
+                'placeholder' => 'Choisir un pays',
+                'attr' => [
+                    'class' => 'form-control',
+                ]
+            ])
             ->add('ville', TextType::class, [
                 'label' => 'Ville',
             ])
@@ -37,20 +46,11 @@ class AgenceForm extends AbstractType
                 'class' => Entreprise::class,
                 'choice_label' => 'nom',
                 'label' => 'Entreprise associée',
-                'placeholder' => 'Choisir une entreprise',
                 'attr' => [
                     'class' => 'form-control',
                 ]
             ])
-            ->add('pays', EntityType::class, [
-                'class' => Pays::class,
-                'choice_label' => 'nom',
-                'label' => 'Pays',
-                'placeholder' => 'Choisir un pays',
-                'attr' => [
-                    'class' => 'form-control',
-                ]
-            ]);
+       ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

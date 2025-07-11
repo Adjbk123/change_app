@@ -1,89 +1,98 @@
-<!doctype html>
-<html lang="fr">
+
+<!DOCTYPE html>
+<html lang="zxx" class="js">
 
 <head>
+    <base href="../../../">
+    <meta charset="utf-8">
+    <meta name="author" content="Softnio">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A powerful and conceptual apps base dashboard template that especially build for developers and programmers.">
+    <!-- Fav Icon  -->
+    <link rel="shortcut icon" href="{{ asset('images/favicon.png') }}">
+    <!-- Page Title  -->
+    <title>  {% block title %} {% endblock %} | MySwap </title>
+    <!-- StyleSheets  -->
 
-    <meta charset="utf-8" />
-    <title>{% block title %}MySwap{% endblock %} | MySwap - Plateforme de Change Intelligente</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Optimisez vos opérations de change avec précision et efficacité.">
-    <meta name="author" content="SECS SARL" />
-    <meta name="keywords" content="change, devise, agence de change, XOF, USD, EUR, NGN, fintech, Bénin, caisse, transfert, myswap" />
-    <meta name="robots" content="index, follow" />
-
-
-    {{ include('partials/head-css.html.twig') }}
+    {{ include('partials/_css.html.twig') }}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>html, body { font-family: 'Poppins', Arial, Helvetica, sans-serif; }</style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
 
 </head>
 
-<body>
-<div class="account-pages my-5 pt-sm-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6 col-xl-5">
-                <div class="card overflow-hidden">
-                    <div class="bg-primary bg-soft">
-                        <div class="row">
-                            <div class="col-7">
-                                <div class="text-primary p-4">
-                                    <h5 class="text-primary">
-                                        {% block pageTitle %}
-                                            Bienvenue
-                                        {% endblock %}
-                                    </h5>
-                                    <p>{% block description %}Connectez-vous à votre compte{% endblock %}</p>
-                                </div>
-                            </div>
-                            <div class="col-5 align-self-end">
-                                <img src="{{ asset('images/profile-img.png') }}" alt="" class="img-fluid">
-                            </div>
-                        </div>
+<body class="nk-body bg-white npc-general pg-auth">
+<div class="nk-app-root">
+    <!-- main @s -->
+    <div class="nk-main ">
+        <!-- wrap @s -->
+        <div class="nk-wrap nk-wrap-nosidebar">
+            <!-- content @s -->
+            <div class="nk-content ">
+                <div class="nk-block nk-block-middle nk-auth-body  wide-xs">
+                    <div class="brand-logo pb-4 text-center">
+                        <a href="{{ path('app_dashboard') }}" class="logo-link">
+                            <img class="logo-light logo-img logo-img-lg" src="./images/logo.png" srcset="./images/logo2x.png 2x" alt="logo">
+                            <img class="logo-dark logo-img logo-img-lg" src="./images/logo-dark.png" srcset="./images/logo-dark2x.png 2x" alt="logo-dark">
+                        </a>
                     </div>
-                    <div class="card-body pt-0">
-                        <div class="auth-logo">
-                            <a href="{{ path('app_dashboard') }}" class="auth-logo-light">
-                                <div class="avatar-md profile-user-wid mb-4">
-                                            <span class="avatar-title rounded-circle bg-light">
-                                                <img src="{{ asset('images/mini-logo-noir.png') }}" alt="" class="rounded-circle" height="34">
-                                            </span>
+                    <div class="card card-bordered">
+                        <div class="card-inner card-inner-lg">
+                            <div class="nk-block-head">
+                                <div class="nk-block-head-content">
+                                    <h4 class="nk-block-title">
+                                        {% block page_title %} {% endblock %}
+                                    </h4>
+                                    <div class="nk-block-des">
+                                        <p>
+                                            {% block page_description %} {% endblock %}
+                                        </p>
+                                    </div>
                                 </div>
-                            </a>
-
-                            <a href="{{ path('app_dashboard') }}" class="auth-logo-dark">
-                                <div class="avatar-md profile-user-wid mb-4">
-                                            <span class="avatar-title rounded-circle bg-light">
-                                                <img src="{{ asset('images/mini-logo-noir.png') }}" alt="" class="rounded-circle" height="40">
-                                            </span>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="p-2">
+                            </div>
 
                             {% block body %}
+
                             {% endblock %}
-                        </div>
 
-                    </div>
-                </div>
-                <div class="mt-5 text-center">
-
-                    <div>
-
-                        <div>
-                            <p>© {{ date()|date('Y') }} MySwap - Money Change. Conçu par <i class="mdi mdi-heart text-danger"></i> par SECS SARL</p>
                         </div>
                     </div>
                 </div>
+                <div class="nk-footer nk-auth-footer-full">
+                    <div class="container wide-lg">
+                        <div class="row g-3">
+                            <div class="col-lg-6 order-lg-last">
+                                <ul class="nav nav-sm justify-content-center justify-content-lg-end">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#">Terms & Condition</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#">Privacy Policy</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#">Help</a>
+                                    </li>
 
+                                </ul>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="nk-block-content text-center text-lg-left">
+                                    <p class="text-soft">&copy; {{ date()|date('Y') }} MySwap</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+            <!-- wrap @e -->
         </div>
+        <!-- content @e -->
     </div>
+    <!-- main @e -->
 </div>
-<!-- end account-pages -->
-
-{{ include('partials/vendor-scripts.html.twig') }}
-
-<!-- App js -->
-<script src="{{ asset('app.js') }}"></script>
+<!-- app-root @e -->
+<!-- JavaScript -->
+{{ include('partials/_script.html.twig') }}
+<!-- select region modal -->
 </body>
 </html>

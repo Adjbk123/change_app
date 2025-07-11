@@ -1,7 +1,36 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello ProfilController!{% endblock %}
+{% block title %}Mon profil{% endblock %}
 
 {% block body %}
+<div class="container" style="max-width:500px;margin:40px auto;">
 
+    <div class="text-center mb-4">
+        {% if user.avatar %}
+            <img src="{{ user.avatar }}" alt="Avatar" style="width:110px;height:110px;border-radius:50%;object-fit:cover;box-shadow:0 2px 8px #0001;">
+        {% else %}
+            <div style="width:110px;height:110px;border-radius:50%;background:#e0eaff;color:#0d6efd;display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin:auto;box-shadow:0 2px 8px #0001;">
+                {{ user.nom[0]|default('?') }}
+            </div>
+        {% endif %}
+    </div>
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+        <div class="mb-3">
+            {{ form_row(form.email) }}
+        </div>
+        <div class="mb-3">
+            {{ form_row(form.nom) }}
+        </div>
+        <div class="mb-3">
+            {{ form_row(form.prenoms) }}
+        </div>
+        <div class="mb-3">
+            {{ form_row(form.telephone) }}
+        </div>
+        <div class="mb-3">
+            {{ form_row(form.avatar) }}
+        </div>
+        <button class="btn btn-primary">Enregistrer</button>
+    {{ form_end(form) }}
+</div>
 {% endblock %}

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reçu d'Opération - {{ operation.typeOperation }}</title>
+    <style>
+        @page {
+            margin: 0; /* Supprime toutes les marges */
+        }
+
+        body {
+            margin: auto; /* Supprime les marges internes */
+            padding-top: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #fff;
+            width: 227px; /* Environ 80 mm en pixels */
+            box-sizing: border-box; /* Inclure padding dans la largeur */
+            font-size: 0.8rem; /* Taille de police de base */
+            line-height: 1.2;
+        }
+
+        .receipt {
+            width: 100%;
+            padding: 0 5px; /* Petit padding pour éviter que le texte ne touche les bords */
+            border: none;
+            text-align: center;
+        }
+
+        .receipt-header {
+            border-bottom: 1px dashed #000;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .receipt-header img {
+            max-width: 80px; /* Taille du logo */
+            margin-bottom: 5px;
+        }
+
+        .receipt-header h1 {
+            font-size: 1rem;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .receipt-header p {
+            margin: 2px 0;
+            font-size: 0.75rem;
+        }
+
+        .receipt-body {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .receipt-body .line-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin: 3px 0;
+            word-break: break-word; /* Pour les longs textes */
+        }
+        .receipt-body .line-item span:first-child {
+            font-weight: bold;
+            min-width: 80px; /* Pour aligner les libellés */
+        }
+        .receipt-body .line-item span:last-child {
+            text-align: right;
+            flex-grow: 1; /* Permet au contenu de prendre l'espace restant */
+        }
+
+        .receipt-body h3 {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            text-align: center;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .receipt-footer {
+            border-top: 1px dashed #000;
+            padding-top: 10px;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        .receipt-footer p {
+            margin: 3px 0;
+        }
+
+        .qr-code {
+            margin: 10px auto; /* Centrer le QR code */
+            text-align: center;
+        }
+
+        .qr-code img {
+            width: 80px; /* Taille fixe pour le QR code */
+            height: 80px;
+            display: block; /* Supprime l'espace sous l'image */
+            margin: 0 auto; /* Centrer l'image */
+        }
+
+        .thank-you {
+            margin-top: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+<div class="receipt">
+    <!-- Header -->
+    <div class="receipt-header">
+        {# Assurez-vous que transaction.caisse.agence a bien les propriétés nom, email, telephone #}
+        {% if operation.caisse is defined and operation.caisse.agence is defined %}
+            <p style="margin-bottom: 3px;">
+                {# Le chemin de l'image doit être accessible par Dompdf. absolute_url est crucial. #}
+                {# Assurez-vous que 'images/logo-dark.png' existe dans votre dossier 'public' #}
+                <img src="{{ absolute_url(asset('images/logo-myswap.png')) }}" alt="Logo Agence">
+            </p>
+            <h1>{{ operation.caisse.agence.nom|upper }}</h1>
+            <p>Agence : {{ operation.caisse.nom }}</p>
+            <p>Email : {{ operation.caisse.agence.email ?? 'contact@agence.com' }}</p> {# Assurez-vous que l'agence a un email #}
+            <p>Tél : {{ operation.caisse.agence.telephone }}</p>
+            <p>Adresse : {{ operation.caisse.agence.adresse }}</p>
+        {% else %}
+            <h1>NOM DE L'AGENCE</h1>
+            <p>Caisse : Nom Caisse</p>
+            <p>Email : contact@example.com</p>
+            <p>Tél : (000) 000-0000</p>
+        {% endif %}
+    </div>
+
+    <!-- Body -->
+    <div class="receipt-body">
+        <div class="line-item">
+            <span><strong>Reçu N°:</strong></span>
+            {# Format du numéro de reçu : ANNEE + TypeOp (1ère lettre) + ID Opération + Mois #}
+            <span>#{{ operation.createdAt|date('Y') }}{{ operation.typeOperation|first }}{{ operation.id }}{{ operation.createdAt|date('m') }}</span>
+        </div>
+        <div class="line-item">
+            <span><strong>Date/Heure:</strong></span>
+            <span>{{ operation.createdAt|date('Y/m/d H:i:s') }}</span>
+        </div>
+        <div class="line-item">
+            <span><strong>Caissier:</strong></span>
+            <span>{{ operation.agent.prenoms }} {{ operation.agent.nom }}</span>
+        </div>
+
+        <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+
+        {# Informations Client / Bénéficiaire #}
+        {% if operation.profilClient is defined and operation.profilClient %}
+            <div class="line-item">
+                <span><strong>Client:</strong></span>
+                <span>{{ operation.profilClient.client.prenoms }} {{ operation.profilClient.client.nom }}</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Profil:</strong></span>
+                <span>{{ operation.profilClient.numeroProfilCompte }} ({{ operation.profilClient.typeClient.libelle }})</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Contact:</strong></span>
+                <span>{{ operation.profilClient.client.contact }}</span>
+            </div>
+        {% elseif operation.client is defined and operation.client %} {# Pour les anciennes opérations sans ProfilClient #}
+            <div class="line-item">
+                <span><strong>Client:</strong></span>
+                <span>{{ operation.client.prenoms }} {{ operation.client.nom }}</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Contact:</strong></span>
+                <span>{{ operation.client.contact }}</span>
+            </div>
+        {% endif %}
+
+        {% if operation.beneficiaire is defined and operation.beneficiaire %}
+            <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+            <div class="line-item">
+                <span><strong>Bénéficiaire:</strong></span>
+                <span>{{ operation.beneficiaire.nomComplet }}</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Type Cpte:</strong></span>
+                <span>{{ operation.beneficiaire.typeCompte }}</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Détail Cpte:</strong></span>
+                <span>{{ operation.beneficiaire.detailCompte }} ({{ operation.beneficiaire.institutionFinanciere }})</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Pays:</strong></span>
+                <span>{{ operation.beneficiaire.pays.nom }}</span>
+            </div>
+        {% endif %}
+
+        <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+
+        <h3 style="margin-top: 10px; font-size: 0.9rem;">Détails de l'Opération</h3>
+
+        <div class="line-item">
+            <span><strong>Type:</strong></span>
+            <span>{{ operation.typeOperation|replace({'DEPOT': 'Dépôt', 'RETRAIT_ESPECES': 'Retrait Espèces', 'RETRAIT_TRANSFERT_EN_ATTENTE': 'Transfert (Attente)', 'ACHAT': 'Achat Devise', 'VENTE': 'Vente Devise'}) }}</span>
+        </div>
+
+        {% if operation.typeOperation == 'DEPOT' %}
+            <div class="line-item">
+                <span><strong>Montant Apporté:</strong></span>
+                <span>{{ operation.montantSource|format_currency(operation.deviseSource.codeIso) }}</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Montant Créditeur:</strong></span>
+                <span>{{ operation.montantCible|format_currency(operation.deviseCible.codeIso) }}</span>
+            </div>
+            {% if operation.deviseSource.id != operation.deviseCible.id %}
+                <div class="line-item">
+                    <span><strong>Taux:</strong></span>
+                    <span>1 {{ operation.deviseSource.codeIso }} = {{ operation.taux|number_format(6, '.', ' ') }} {{ operation.deviseCible.codeIso }}</span>
+                </div>
+            {% endif %}
+
+        {% elseif operation.typeOperation in ['RETRAIT_ESPECES', 'RETRAIT_TRANSFERT_EN_ATTENTE'] %}
+            <div class="line-item">
+                <span><strong>Débit Compte:</strong></span>
+                <span>{{ operation.montantSource|format_currency(operation.deviseSource.codeIso) }}</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Montant Donné:</strong></span>
+                <span>{{ operation.montantCible|format_currency(operation.deviseCible.codeIso) }}</span>
+            </div>
+            {% if operation.deviseSource.id != operation.deviseCible.id %}
+                <div class="line-item">
+                    <span><strong>Taux:</strong></span>
+                    <span>1 {{ operation.deviseSource.codeIso }} = {{ operation.taux|number_format(6, '.', ' ') }} {{ operation.deviseCible.codeIso }}</span>
+                </div>
+            {% endif %}
+            {% if operation.motif is defined and operation.motif %}
+                <div class="line-item">
+                    <span><strong>Motif:</strong></span>
+                    <span>{{ operation.motif }}</span>
+                </div>
+            {% endif %}
+
+        {% elseif operation.typeOperation == 'ACHAT' %}
+            <div class="line-item">
+                <span><strong>Client apporte:</strong></span>
+                <span>{{ operation.montantSource|format_currency(operation.deviseSource.codeIso) }}</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Agence donne:</strong></span>
+                <span>{{ operation.montantCible|format_currency(operation.deviseCible.codeIso) }}</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Taux:</strong></span>
+                <span>1 {{ operation.deviseSource.codeIso }} = {{ operation.taux|number_format(6, '.', ' ') }} {{ operation.deviseCible.codeIso }}</span>
+            </div>
+        {% elseif operation.typeOperation == 'VENTE' %}
+            <div class="line-item">
+                <span><strong>Client apporte:</strong></span>
+                <span>{{ operation.montantSource|format_currency(operation.deviseSource.codeIso) }}</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Agence donne:</strong></span>
+                <span>{{ operation.montantCible|format_currency(operation.deviseCible.codeIso) }}</span>
+            </div>
+            <div class="line-item">
+                <span><strong>Taux:</strong></span>
+                <span>1 {{ operation.deviseSource.codeIso }} = {{ operation.taux|number_format(6, '.', ' ') }} {{ operation.deviseCible.codeIso }}</span>
+            </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Footer -->
+    <div class="receipt-footer">
+        <p> <b>Opération validée par</b> : {{ operation.agent.prenoms }} {{ operation.agent.nom }}</p>
+        <p>Merci pour votre confiance !</p>
+        <!-- QR Code -->
+        <div class="qr-code">
+            {% if qr_code is defined and qr_code %}
+                <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+            {% endif %}
+        </div>
+        <p class="thank-you">A bientôt !</p>
+    </div>
+</div>
+</body>
+</html>

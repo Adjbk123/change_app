@@ -10,6 +10,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\CompteClientRepository;
+use App\Repository\MouvementCompteClientRepository;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 #[Route('/profil-client')]
 final class ProfilClientController extends AbstractController
@@ -77,5 +81,51 @@ final class ProfilClientController extends AbstractController
         }
 
         return $this->redirectToRoute('app_profil_client_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/releve', name: 'app_profil_client_releve', methods: ['GET'])]
+    public function releve(ProfilClient $profilClient, CompteClientRepository $compteClientRepository, MouvementCompteClientRepository $mouvementCompteClientRepository): Response
+    {
+        $comptes = $compteClientRepository->findBy(['profilClient' => $profilClient]);
+        $mouvements = [];
+        foreach ($comptes as $compte) {
+            $mouvements[$compte->getId()] = $mouvementCompteClientRepository->findBy(['compteClient' => $compte], ['dateMouvement' => 'ASC']);
+        }
+        return $this->render('profil_client/releve.html.twig', [
+            'profil_client' => $profilClient,
+            'comptes' => $comptes,
+            'mouvements' => $mouvements,
+        ]);
+    }
+
+    #[Route('/{id}/releve/pdf', name: 'app_profil_client_releve_pdf', methods: ['GET'])]
+    public function relevePdf(ProfilClient $profilClient, CompteClientRepository $compteClientRepository, MouvementCompteClientRepository $mouvementCompteClientRepository): Response
+    {
+        $comptes = $compteClientRepository->findBy(['profilClient' => $profilClient]);
+        $mouvements = [];
+        foreach ($comptes as $compte) {
+            $mouvements[$compte->getId()] = $mouvementCompteClientRepository->findBy(['compteClient' => $compte], ['dateMouvement' => 'ASC']);
+        }
+
+        $html = $this->renderView('profil_client/releve_pdf.html.twig', [
+            'profil_client' => $profilClient,
+            'comptes' => $comptes,
+            'mouvements' => $mouvements,
+        ]);
+
+        $options = new Options();
+        $options->set('defaultFont', 'DejaVu Sans');
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        return new Response(
+            $dompdf->stream('releve_compte_'.$profilClient->getNom().'.pdf', ["Attachment" => true]),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+            ]
+        );
     }
 }

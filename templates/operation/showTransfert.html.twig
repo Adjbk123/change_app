@@ -1,0 +1,123 @@
+{# templates/operation/show.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}
+
+   Détails de l'opération #{{ operation.id }}
+{% endblock %}
+{% block button %}
+<a href="{{ path('app_transfert_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+
+{% endblock %}
+
+{% block body %}
+    <table class="table">
+        <tbody>
+
+        <tr>
+            <th>Type Opération</th>
+            <td>{{ operation.typeOperation }}</td>
+        </tr>
+        <tr>
+            <th>Statut</th>
+            <td>
+                {% if operation.finalise == 'FINALISE' %}
+                    <span class="badge bg-success">Finalisé</span>
+                {% else %}
+                    <span class="badge bg-warning">En attente</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Montant Source</th>
+            <td>{{ operation.montantSource }} {{ operation.deviseSource.codeIso }}</td>
+        </tr>
+        <tr>
+            <th>Montant Cible</th>
+            <td>{{ operation.montantCible }} {{ operation.deviseCible.codeIso }}</td>
+        </tr>
+        <tr>
+            <th>Taux utilisé</th>
+            <td>{{ operation.taux }}</td>
+        </tr>
+        <tr>
+            <th>Sens</th>
+            <td>{{ operation.sens }}</td>
+        </tr>
+        <tr>
+            <th>Effectuée le</th>
+            <td>{{ operation.createdAt ? operation.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+        </tr>
+        <tr>
+            <th>UpdatedAt</th>
+            <td>{{ operation.updatedAt ? operation.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+        </tr>
+        {% if operation.beneficiaire %}
+            <tr>
+                <th>Bénéficiaire</th>
+                <td>{{ operation.beneficiaire.nomComplet }}</td>
+            </tr>
+            <tr>
+                <th>Type Compte Bénéficiaire</th>
+                <td>{{ operation.beneficiaire.typeCompte }}</td>
+            </tr>
+            <tr>
+                <th>Détail Compte Bénéficiaire</th>
+                <td>{{ operation.beneficiaire.detailCompte }}</td>
+            </tr>
+            <tr>
+                <th>Institution Financière</th>
+                <td>{{ operation.beneficiaire.institutionFinanciere }}</td>
+            </tr>
+            <tr>
+                <th>Pays Bénéficiaire</th>
+                <td>{{ operation.beneficiaire.pays.nom }}</td>
+            </tr>
+            {% if operation.motif %}
+                <tr>
+                    <th>Motif</th>
+                    <td>{{ operation.motif }}</td>
+                </tr>
+            {% endif %}
+        {% endif %}
+        {% if operation.dateFinalisation %}
+            <tr>
+                <th>Date de Finalisation</th>
+                <td>{{ operation.dateFinalisation|date('Y-m-d H:i:s') }}</td>
+            </tr>
+            {% if operation.compteBancaire %}
+                <tr>
+                    <th>Compte Bancaire de sortie</th>
+                    <td>{{ operation.compteBancaire.banque.nom }} ({{ operation.compteBancaire.numeroBancaire }})</td>
+                </tr>
+            {% endif %}
+        {% endif %}
+        </tbody>
+    </table>
+
+    {# Formulaire de Finalisation du Transfert #}
+    {% if showFinalisationForm %}
+        <hr>
+        <div class="card bg-light p-3 mt-4">
+            <h5 class="card-title">Finaliser le Transfert de Retrait</h5>
+            <p>Veuillez sélectionner le compte bancaire de l'agence depuis lequel le montant sera envoyé.</p>
+            <form action="{{ path('transfert_finaliser_retrait', {'id': operation.id}) }}" method="POST">
+                <input type="hidden" name="_token" value="{{ csrf_token('finaliser_retrait_transfert_token') }}">
+
+                <div class="mb-3">
+                    <label for="compteBancaireSortieId" class="form-label">Compte Bancaire de l'Agence à débiter</label>
+                    <select class="form-select" id="compteBancaireSortieId" name="compteBancaireSortieId" required>
+                        <option value="">-- Sélectionnez un compte bancaire --</option>
+                        {% for compteBancaire in comptesBancaires %}
+                            <option value="{{ compteBancaire.id }}">
+                                {{ compteBancaire.banque.nom }} - {{ compteBancaire.numeroBancaire }} (Solde: {{ compteBancaire.soldeRestant|number_format(2, '.', ',') }} {{ compteBancaire.devise.codeIso }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success">Confirmer la Finalisation du Transfert</button>
+            </form>
+        </div>
+    {% endif %}
+
+{% endblock %}

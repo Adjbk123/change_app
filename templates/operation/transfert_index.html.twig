@@ -1,0 +1,79 @@
+{# templates/operation/transfert_index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Listes des Transferts{% endblock %}
+{% block button %}
+    <div class="btn-group dropend my-3">
+        <button type="button" class="btn btn-info dropdown-toggle waves-effect waves-light" data-bs-toggle="dropdown" aria-expanded="false">
+            Effectuer une opération <i class="mdi mdi-chevron-right"></i>
+        </button>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="{{ path('app_operation_new', { type: 'achat-vente' }) }}">Achat - Vente</a>
+            <a class="dropdown-item" href="{{ path('app_operation_new', { type: 'depot' }) }}">Dépôt</a>
+            <a class="dropdown-item" href="{{ path('app_operation_new', { type: 'retrait' }) }}">Retrait(Espèce - Transfert)</a>
+        </div>
+    </div>
+    {# NOUVEAU: Bouton pour revenir à la liste complète des opérations si besoin #}
+    <a href="{{ path('app_operation_index') }}" class="btn btn-secondary my-3 ms-2">Voir toutes les opérations</a>
+{% endblock %}
+
+{% block body %}
+
+    <h1>Liste des Transferts</h1>
+
+    <table class="table datatable">
+        <thead class="table-secondary">
+        <tr>
+            <th>N°</th>
+            <th>Type Opération</th>
+            <th>Client</th> {# Ajout de la colonne client #}
+            <th>Bénéficiaire</th> {# Ajout de la colonne bénéficiaire #}
+            <th>Montant Débité</th>
+            <th>Montant Envoyer</th>
+            <th>Devise</th> {# On peut simplifier la devise ici si source et cible sont souvent les mêmes #}
+            <th>Effectuée le</th>
+            <th>Statut</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for operation in operations %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ operation.typeOperation }}</td>
+                <td>{{ operation.profilClient ? operation.profilClient.client.nomComplet : 'N/A' }}</td>
+                <td>{{ operation.beneficiaire ? operation.beneficiaire.nomComplet : 'N/A' }}</td>
+                <td>{{ operation.montantSource }} {{ operation.deviseSource.codeIso }}</td>
+                <td>{{ operation.montantCible }} {{ operation.deviseCible.codeIso }}</td>
+                <td>{{ operation.deviseCible.codeIso }}</td> {# Afficher la devise cible pour le transfert #}
+                <td>{{ operation.createdAt ? operation.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    {% if operation.finalise %}
+                        <span class="badge bg-success">Finalisé</span>
+                    {% else %}
+                        <span class="badge bg-warning">En attente</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path('app_operation_show_transfert', {'id': operation.id}) }}" class="btn btn-sm btn-outline-primary mb-1">Voir Détails</a>
+
+                    {# Bouton de finalisation pour les transferts en attente #}
+                    {% if operation.typeOperation == 'RETRAIT_TRANSFERT_EN_ATTENTE' and not operation.finalise %}
+                        <a href="{{ path('app_operation_show_transfert', {'id': operation.id, 'action': 'finaliser_transfert'}) }}" class="btn btn-sm btn-warning mb-1">Finaliser</a>
+                    {% endif %}
+                    {# Si l'opération est finalisée, on peut proposer de voir le reçu final #}
+                    {% if operation.finalise %}
+                        {# Si vous avez un template PDF spécifique pour les transferts finalisés, utilisez-le ici #}
+                        {# <a href="{{ path('app_operation_print', {'id': operation.id, 'type': 'transfert'}) }}" class="btn btn-sm btn-info mb-1">Imprimer Reçu</a> #}
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="10">Aucun transfert trouvé.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

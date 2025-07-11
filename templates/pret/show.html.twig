@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Pret{% endblock %}
+
+{% block body %}
+    <h1>Pret</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ pret.id }}</td>
+            </tr>
+            <tr>
+                <th>MontantPrincipal</th>
+                <td>{{ pret.montantPrincipal }}</td>
+            </tr>
+            <tr>
+                <th>MontantRestant</th>
+                <td>{{ pret.montantRestant }}</td>
+            </tr>
+            <tr>
+                <th>TauxInteretAnnuel</th>
+                <td>{{ pret.tauxInteretAnnuel }}</td>
+            </tr>
+            <tr>
+                <th>DureeMois</th>
+                <td>{{ pret.dureeMois }}</td>
+            </tr>
+            <tr>
+                <th>MontantTotalRembourse</th>
+                <td>{{ pret.montantTotalRembourse }}</td>
+            </tr>
+            <tr>
+                <th>Statut</th>
+                <td>{{ pret.statut }}</td>
+            </tr>
+            <tr>
+                <th>Commentaire</th>
+                <td>{{ pret.commentaire }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Remboursements</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Montant</th>
+                <th>Type de paiement</th>
+                <th>Agent</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for remboursement in pret.remboursements %}
+            <tr>
+                <td>{{ remboursement.dateRemboursement ? remboursement.dateRemboursement|date('d/m/Y H:i') : '' }}</td>
+                <td>{{ remboursement.montantRembourse }}</td>
+                <td>{{ remboursement.typePaiement }}</td>
+                <td>{{ remboursement.agent ? remboursement.agent.nomComplet : '' }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4">Aucun remboursement enregistré pour ce prêt.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_pret_index') }}">back to list</a>
+
+    <a href="{{ path('app_pret_edit', {'id': pret.id}) }}">edit</a>
+
+    {{ include('pret/_delete_form.html.twig') }}
+{% endblock %}

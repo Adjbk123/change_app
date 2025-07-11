@@ -1,37 +1,61 @@
+{# templates/affectation_caisse/index.html.twig #}
+
 {% extends 'base.html.twig' %}
 
-{% block title %}AffectationCaisse index{% endblock %}
+{% block title %}Liste des affectations de caisse{% endblock %}
+{% block button %}
+
+    <a href="{{ path('app_affectation_caisse_new') }}">Créer une nouvelle affectation</a>
+
+{% endblock %}
 
 {% block body %}
-    <h1>AffectationCaisse index</h1>
 
     <table class="table">
         <thead>
-            <tr>
-                <th>Id</th>
-                <th>Date</th>
-                <th>IsActive</th>
-                <th>actions</th>
-            </tr>
+        <tr>
+            <th>N°</th>
+            <th>Caissier</th> {# Nouvelle colonne pour le caissier #}
+            <th>Caisse</th>   {# Nouvelle colonne pour la caisse #}
+            <th>Date Début</th>
+            <th>Date Fin</th>  {# Assurez-vous que cette colonne est présente si vous gérez la date de fin #}
+            <th>Statut</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
         {% for affectation_caisse in affectation_caisses %}
             <tr>
                 <td>{{ affectation_caisse.id }}</td>
+                {# Affiche le nom du caissier. Assurez-vous que votre entité User a une méthode getNom() #}
+                <td>{{ affectation_caisse.caissier ? affectation_caisse.caissier.nom : 'N/A' }}</td>
+                {# Affiche le nom de la caisse. Assurez-vous que votre entité Caisse a une méthode getNom() #}
+                <td>{{ affectation_caisse.caisse ? affectation_caisse.caisse.nom : 'N/A' }}</td>
                 <td>{{ affectation_caisse.dateDebut ? affectation_caisse.dateDebut|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ affectation_caisse.isActive ? 'Yes' : 'No' }}</td>
+                {# Affichage de la date de fin, si elle existe #}
+                <td>{{ affectation_caisse.dateFin ? affectation_caisse.dateFin|date('Y-m-d H:i:s') : 'Non clôturée' }}</td>
+                <td>{{ affectation_caisse.isActive ? 'Active' : 'Clôturée' }}</td>
                 <td>
-                    <a href="{{ path('app_affectation_caisse_show', {'id': affectation_caisse.id}) }}">show</a>
-                    <a href="{{ path('app_affectation_caisse_edit', {'id': affectation_caisse.id}) }}">edit</a>
+                    <a href="{{ path('app_affectation_caisse_show', {'id': affectation_caisse.id}) }}">Afficher</a>
+                    <a href="{{ path('app_affectation_caisse_edit', {'id': affectation_caisse.id}) }}">Modifier</a>
+
+                    {# Bouton pour désactiver/clôturer la session #}
+                    {% if affectation_caisse.isActive %} {# Afficher le bouton seulement si la session est active #}
+                        <form method="post" action="{{ path('app_affectation_caisse_deactivate', {'id': affectation_caisse.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir clôturer cette session ?');" style="display: inline-block;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('deactivate' ~ affectation_caisse.id) }}">
+                            <button class="btn btn-warning btn-sm">Clôturer</button>
+                        </form>
+                    {% else %}
+                        <span class="badge bg-secondary">Clôturée</span>
+                    {% endif %}
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">no records found</td>
+                <td colspan="7">Aucune affectation trouvée</td> {# Augmente le colspan pour correspondre aux nouvelles colonnes #}
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ path('app_affectation_caisse_new') }}">Create new</a>
 {% endblock %}

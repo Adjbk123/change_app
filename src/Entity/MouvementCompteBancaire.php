@@ -33,7 +33,13 @@ class MouvementCompteBancaire
     private ?User $effectuePar = null;
 
     #[ORM\Column]
-    private ?\DateTime $dateMouvement = null;
+    private ?\DateTimeImmutable $dateMouvement = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $dateValeur = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $referenceBancaire = null;
 
     public function getId(): ?int
     {
@@ -112,14 +118,38 @@ class MouvementCompteBancaire
         return $this;
     }
 
-    public function getDateMouvement(): ?\DateTime
+    public function getDateMouvement(): ?\DateTimeImmutable
     {
         return $this->dateMouvement;
     }
 
-    public function setDateMouvement(\DateTime $dateMouvement): static
+    public function setDateMouvement(\DateTimeImmutable $dateMouvement): static
     {
         $this->dateMouvement = $dateMouvement;
+
+        return $this;
+    }
+
+    public function getDateValeur(): ?\DateTimeImmutable
+    {
+        return $this->dateValeur;
+    }
+
+    public function setDateValeur(\DateTimeImmutable $dateValeur): static
+    {
+        $this->dateValeur = $dateValeur;
+
+        return $this;
+    }
+
+    public function getReferenceBancaire(): ?string
+    {
+        return $this->referenceBancaire;
+    }
+
+    public function setReferenceBancaire(?string $referenceBancaire): static
+    {
+        $this->referenceBancaire = $referenceBancaire;
 
         return $this;
     }

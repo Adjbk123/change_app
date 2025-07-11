@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\AffectationCaisse;
+use App\Entity\Agence;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -17,6 +18,17 @@ class AffectationCaisseRepository extends ServiceEntityRepository
         parent::__construct($registry, AffectationCaisse::class);
     }
 
+    public function findByAgenceCaisses(Agence $agence): array
+    {
+        return $this->createQueryBuilder('ac')
+            ->join('ac.caisse', 'c') // Joindre l'entité Caisse
+            ->andWhere('c.agence = :agence') // Filtrer par l'agence de la caisse
+            ->setParameter('agence', $agence)
+            ->orderBy('ac.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
     public function findActiveAffectationForUser(User $user): ?AffectationCaisse
     {
         $qb = $this->createQueryBuilder('ac');

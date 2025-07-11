@@ -1,0 +1,448 @@
+{# Overlay flou derrière le chat #}
+<div id="chat-blur-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9998;background:rgba(0,0,0,0.18);backdrop-filter:blur(4px);transition:opacity 0.25s;"></div>
+
+{# Bouton flottant de chat #}
+<button id="chat-float-btn" style="position:fixed;bottom:32px;right:32px;z-index:9999;background:#0d6efd;color:#fff;border:none;border-radius:50%;width:60px;height:60px;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+    <em class="mdi mdi-chat" style="font-size:2rem;"></em>
+</button>
+
+{# Panneau de chat style WhatsApp #}
+<div id="chat-panel" style="display:none;position:fixed;bottom:100px;right:40px;z-index:10000;width:850px;max-width:98vw;height:500px;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.18);overflow:hidden;animation:chatPanelIn 0.28s cubic-bezier(.4,1.4,.6,1);">
+  <!-- Liste des discussions -->
+  <div style="width:240px;background:#f7f7f7;border-right:1px solid #eee;overflow-y:auto;display:flex;flex-direction:column;">
+    <div style="padding:16px;font-weight:bold;display:flex;align-items:center;justify-content:space-between;">
+      <span>Discussions</span>
+      <button id="chat-new-btn" title="Nouveau chat" style="background:none;border:none;color:#0d6efd;font-size:1.3rem;cursor:pointer;"><em class="mdi mdi-account-plus"></em></button>
+    </div>
+    <div id="chat-discussions-list">
+      <div style="color:#888;text-align:center;margin-top:40px;">Chargement...</div>
+    </div>
+    <div id="chat-users-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);z-index:10010;"></div>
+    <div id="chat-users-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:350px;max-width:95vw;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:10011;overflow:hidden;">
+      <div style="padding:16px 20px 8px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;">
+        <span style="font-weight:bold;font-size:1.1rem;"><em class="mdi mdi-account-plus"></em> Nouveau chat</span>
+        <button id="chat-users-close" style="background:none;border:none;color:#0d6efd;font-size:1.5rem;cursor:pointer;">&times;</button>
+      </div>
+      <div style="padding:10px 20px 0 20px;">
+        <input id="chat-users-search" type="text" placeholder="Rechercher un collègue..." style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #ccc;">
+      </div>
+      <div id="chat-users-list" style="max-height:260px;overflow-y:auto;padding:8px 0 0 0;"><div style="color:#888;text-align:center;">Chargement...</div></div>
+      <div style="padding:10px 20px 12px 20px;text-align:right;border-top:1px solid #eee;">
+        <button id="chat-users-cancel" style="background:none;border:none;color:#0d6efd;cursor:pointer;font-weight:bold;">Annuler</button>
+      </div>
+    </div>
+  </div>
+  <!-- Messages de la discussion -->
+  <div style="flex:1;display:flex;flex-direction:column;">
+    <div id="chat-discussion-header" style="background:#0d6efd;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;justify-content:space-between;min-height:56px;">
+      <div id="chat-discussion-user" style="display:flex;align-items:center;gap:10px;">
+        <span id="chat-discussion-avatar" style="display:none;width:36px;height:36px;border-radius:50%;background:#e0eaff;color:#0d6efd;align-items:center;justify-content:center;font-size:1.2rem;"></span>
+        <span id="chat-discussion-title"><em class="mdi mdi-chat"></em> Sélectionnez une discussion</span>
+      </div>
+      <button onclick="closeChatPanel()" id="chat-close-btn" style="background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;">&times;</button>
+    </div>
+    <div id="chat-messages-list" style="flex:1;padding:16px 8px 16px 16px;overflow-y:auto;background:#f9f9f9;">
+      <div id="chat-no-discussion" style="color:#888;text-align:center;font-size:1.1rem;">Aucune discussion sélectionnée.</div>
+    </div>
+    <div style="padding:8px 16px;border-top:1px solid #eee;display:flex;gap:8px;background:#fff;">
+      <input id="chat-message-input" type="text" placeholder="Écrire un message..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;">
+      <button id="chat-message-send" style="background:#0d6efd;color:#fff;border:none;border-radius:6px;padding:8px 12px;">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes chatPanelIn {
+    0% { opacity: 0; transform: translateY(30px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  #chat-panel {
+    animation: chatPanelIn 0.28s cubic-bezier(.4,1.4,.6,1);
+  }
+  #chat-blur-overlay {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #chat-blur-overlay.active {
+    display: block;
+    opacity: 1;
+    pointer-events: all;
+  }
+  #chat-messages-list {
+    min-height: 180px;
+  }
+  #chat-no-discussion {
+    margin: auto;
+    color: #888;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+  #chat-users-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(2px);
+    z-index: 10010;
+    transition: opacity 0.2s;
+  }
+  #chat-users-modal {
+    display: none;
+    position: fixed;
+    top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0.98);
+    width: 370px; max-width: 95vw;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    z-index: 10011;
+    overflow: hidden;
+    animation: chatModalIn 0.22s cubic-bezier(.4,1.4,.6,1) 1;
+  }
+  @keyframes chatModalIn {
+    0% { opacity: 0; transform: translate(-50%,-48%) scale(0.95); }
+    100% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  }
+  #chat-users-modal .chat-modal-header {
+    background: #0d6efd;
+    color: #fff;
+    padding: 18px 22px 12px 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #e3e3e3;
+  }
+  #chat-users-modal .chat-modal-header span {
+    font-weight: bold; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;
+  }
+  #chat-users-modal .chat-modal-header button {
+    background: none; border: none; color: #fff; font-size: 1.6rem; cursor: pointer; transition: color 0.15s;
+  }
+  #chat-users-modal .chat-modal-header button:hover { color: #ffc107; }
+  #chat-users-modal .chat-modal-search {
+    padding: 12px 22px 0 22px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  #chat-users-modal .chat-modal-search input {
+    width: 100%; padding: 8px 12px 8px 34px; border-radius: 7px; border: 1.5px solid #d0d7e6;
+    font-size: 1rem; transition: border 0.15s;
+    background: #f7faff url('data:image/svg+xml;utf8,<svg fill="%23999" height="18" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>') no-repeat 10px center;
+  }
+  #chat-users-modal .chat-modal-search input:focus {
+    border: 1.5px solid #0d6efd;
+    outline: none;
+    background-color: #fff;
+  }
+  #chat-users-list {
+    max-height: 260px; overflow-y: auto; padding: 8px 0 0 0;
+  }
+  .chat-user-row {
+    display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-radius: 9px;
+    transition: background 0.15s;
+    cursor: pointer;
+    margin-bottom: 2px;
+  }
+  .chat-user-row:hover { background: #f0f4ff; }
+  .chat-user-avatar {
+    background: #e0eaff; color: #0d6efd; border-radius: 50%; width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+  }
+  .chat-user-name {
+    font-size: 1.05rem; font-weight: 500; flex: 1;
+  }
+  .chat-user-create-btn {
+    background: #fff; color: #0d6efd; border: 1.5px solid #0d6efd; border-radius: 7px;
+    padding: 5px 14px; font-size: 0.97rem; font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s;
+  }
+  .chat-user-create-btn:hover { background: #0d6efd; color: #fff; }
+  #chat-users-modal .chat-modal-footer {
+    padding: 12px 22px 16px 22px; text-align: right; border-top: 1px solid #eee;
+  }
+  #chat-users-modal .chat-modal-footer button {
+    background: none; border: none; color: #0d6efd; cursor: pointer; font-weight: bold; font-size: 1rem;
+  }
+</style>
+
+<div id="chat-users-overlay"></div>
+<div id="chat-users-modal">
+  <div class="chat-modal-header">
+    <span><em class="mdi mdi-account-plus"></em> Nouveau chat</span>
+    <button id="chat-users-close">&times;</button>
+  </div>
+  <div class="chat-modal-search">
+    <input id="chat-users-search" type="text" placeholder="Rechercher un collègue...">
+  </div>
+  <div id="chat-users-list"><div style="color:#888;text-align:center;">Chargement...</div></div>
+  <div class="chat-modal-footer">
+    <button id="chat-users-cancel">Annuler</button>
+  </div>
+</div>
+
+<script>
+const chatBtn = document.getElementById('chat-float-btn');
+const chatPanel = document.getElementById('chat-panel');
+const chatClose = document.getElementById('chat-close-btn');
+const chatNewBtn = document.getElementById('chat-new-btn');
+const chatUsersModal = document.getElementById('chat-users-modal');
+const chatUsersList = document.getElementById('chat-users-list');
+const chatUsersClose = document.getElementById('chat-users-close');
+const chatUsersCancel = document.getElementById('chat-users-cancel');
+const chatUsersOverlay = document.getElementById('chat-users-overlay');
+const chatUsersSearch = document.getElementById('chat-users-search');
+const chatDiscussionsList = document.getElementById('chat-discussions-list');
+const chatDiscussionTitle = document.getElementById('chat-discussion-title');
+const chatMessagesList = document.getElementById('chat-messages-list');
+const chatMessageInput = document.getElementById('chat-message-input');
+const chatMessageSend = document.getElementById('chat-message-send');
+const chatBlurOverlay = document.getElementById('chat-blur-overlay');
+
+let currentDiscussionId = null;
+let discussionsById = {};
+
+function openChatPanel() {
+  chatPanel.style.display = 'flex';
+  if(chatBlurOverlay) {
+    chatBlurOverlay.classList.add('active');
+  }
+  loadDiscussions();
+}
+function closeChatPanel() {
+  chatPanel.style.display = 'none';
+  if(chatBlurOverlay) {
+    chatBlurOverlay.classList.remove('active');
+    setTimeout(()=>{chatBlurOverlay.style.display='none';},250);
+  }
+  // Réinitialiser l'affichage
+  currentDiscussionId = null;
+  chatDiscussionTitle.innerHTML = '<em class="mdi mdi-chat"></em> Sélectionnez une discussion';
+  document.getElementById('chat-discussion-avatar').style.display = 'none';
+  chatMessagesList.innerHTML = '<div id="chat-no-discussion" style="color:#888;text-align:center;font-size:1.1rem;">Aucune discussion sélectionnée.</div>';
+}
+if(chatBtn && chatPanel) {
+    chatBtn.onclick = () => { 
+      if(chatBlurOverlay) chatBlurOverlay.style.display = 'block';
+      setTimeout(()=>{if(chatBlurOverlay) chatBlurOverlay.classList.add('active');},10);
+      openChatPanel();
+    };
+}
+if(chatClose && chatPanel) {
+    chatClose.onclick = closeChatPanel;
+}
+if(chatNewBtn && chatUsersModal && chatUsersOverlay) {
+    chatNewBtn.onclick = () => {
+        chatUsersOverlay.style.display = 'block';
+        chatUsersModal.style.display = 'block';
+        chatUsersList.innerHTML = '<div style="color:#888;text-align:center;">Chargement...</div>';
+        fetch('/chat/utilisateurs').then(r=>r.json()).then(users => {
+            chatUsersModal.dataset.allUsers = JSON.stringify(users);
+            renderUserList(users);
+        });
+        if(chatUsersSearch) chatUsersSearch.value = '';
+    };
+}
+if(chatUsersClose && chatUsersModal && chatUsersOverlay) {
+    chatUsersClose.onclick = chatUsersCancel.onclick = () => {
+        chatUsersModal.style.display = 'none';
+        chatUsersOverlay.style.display = 'none';
+    };
+}
+if(chatUsersOverlay && chatUsersModal) {
+    chatUsersOverlay.onclick = () => {
+        chatUsersModal.style.display = 'none';
+        chatUsersOverlay.style.display = 'none';
+    };
+}
+if(chatUsersSearch && chatUsersModal) {
+    chatUsersSearch.oninput = function() {
+        const all = JSON.parse(chatUsersModal.dataset.allUsers || '[]');
+        const q = this.value.trim().toLowerCase();
+        renderUserList(all.filter(u => u.nom.toLowerCase().includes(q)));
+    };
+}
+if(chatBlurOverlay) {
+    chatBlurOverlay.onclick = closeChatPanel;
+}
+
+function loadDiscussions(callback) {
+    chatDiscussionsList.innerHTML = '<div style="color:#888;text-align:center;">Chargement...</div>';
+    fetch('/chat/discussions').then(r=>r.json()).then(discussions => {
+        discussionsById = {};
+        if(discussions.length === 0) {
+            chatDiscussionsList.innerHTML = '<div style="color:#888;text-align:center;padding:24px 0;">Aucune discussion.</div>';
+        } else {
+            chatDiscussionsList.innerHTML = discussions.map(d => {
+                discussionsById[d.id] = d;
+                return `
+                <div style='cursor:pointer;padding:12px 16px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:12px;' data-id='${d.id}'>
+                  <span style="width:38px;height:38px;border-radius:50%;background:#e0eaff;color:#0d6efd;display:flex;align-items:center;justify-content:center;font-size:1.1rem;overflow:hidden;">
+                    ${d.avatar ? `<img src='${d.avatar}' style='width:100%;height:100%;object-fit:cover;border-radius:50%;'>` : (d.other ? d.other[0] : '?')}
+                  </span>
+                  <div style="flex:1;min-width:0;">
+                    <div style='font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'>${d.other}</div>
+                    <div style='font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'>${d.lastMessage}</div>
+                  </div>
+                  <div style='font-size:11px;color:#bbb;text-align:right;min-width:70px;position:relative;'>
+                    ${d.lastDate ? humanDate(d.lastDate) : ''}
+                    ${d.unread && d.unread > 0 ? `<span style="position:absolute;top:-6px;right:-18px;background:#0d6efd;color:#fff;border-radius:12px;padding:2px 8px;font-size:12px;min-width:22px;display:inline-block;text-align:center;box-shadow:0 1px 4px #0002;">${d.unread}</span>` : ''}
+                  </div>
+                </div>
+                `;
+            }).join('');
+            chatDiscussionsList.querySelectorAll('div[data-id]').forEach(div => {
+                div.onclick = () => selectDiscussion(div.getAttribute('data-id'));
+            });
+        }
+        if(callback) callback();
+    });
+}
+
+function selectDiscussion(id) {
+    currentDiscussionId = id;
+    const d = discussionsById[id];
+    // Affichage dynamique du header
+    if(d) {
+      chatDiscussionTitle.textContent = d.other;
+      const avatar = document.getElementById('chat-discussion-avatar');
+      if(d.avatar) {
+        avatar.style.display = 'flex';
+        avatar.innerHTML = '<img src="'+d.avatar+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+      } else {
+        avatar.style.display = 'flex';
+        avatar.textContent = (d.other||'?')[0];
+      }
+      // Badge non lu : on le retire dès l'ouverture
+      d.unread = 0;
+      const div = chatDiscussionsList.querySelector(`div[data-id='${id}']`);
+      if(div) {
+        const badge = div.querySelector('span[style*="background:#0d6efd"]');
+        if(badge) badge.remove();
+      }
+    } else {
+      chatDiscussionTitle.innerHTML = `<em class='mdi mdi-chat'></em> Discussion`;
+      document.getElementById('chat-discussion-avatar').style.display = 'none';
+    }
+    // Charger les messages
+    fetch(`/chat/discussion/${id}/messages`).then(r=>r.json()).then(messages => {
+        if(messages.length === 0) {
+            chatMessagesList.innerHTML = '<div style="color:#888;text-align:center;margin-top:40px;">Aucun message.</div>';
+        } else {
+            chatMessagesList.innerHTML = messages.map(m => `
+                <div style="margin-bottom:12px;${m.isMe ? 'text-align:right;' : ''}">
+                    ${!m.isMe ? `<div style=\"font-size:12px;color:#888;\">${m.auteur} • ${humanDate(m.createdAt)}</div>` : ''}
+                    <div style="display:inline-block;background:${m.isMe ? '#e0eaff' : '#e6ffe0'};padding:8px 12px;border-radius:8px;max-width:70%;min-width:36px;word-break:break-word;${m.isMe ? 'margin-left:auto;' : ''}">${m.contenu}</div>
+                </div>
+            `).join('');
+            chatMessagesList.scrollTop = chatMessagesList.scrollHeight;
+        }
+        // Masquer le message "Aucune discussion sélectionnée"
+        const noDisc = document.getElementById('chat-no-discussion');
+        if(noDisc) noDisc.style.display = 'none';
+    });
+}
+
+function renderUserList(users) {
+    if(users.length === 0) {
+        chatUsersList.innerHTML = '<div style="color:#888;text-align:center;padding:24px 0;">Aucun collègue trouvé.</div>';
+    } else {
+        chatUsersList.innerHTML = users.map(u => `
+            <div class='chat-user-row' data-id='${u.id}'>
+                <span class="chat-user-avatar"><em class="mdi mdi-account"></em></span>
+                <span class="chat-user-name">${u.nom}</span>
+                <button class="chat-user-create-btn" onclick="event.stopPropagation();createDiscussionWith(${u.id})">Créer</button>
+            </div>
+        `).join('');
+        chatUsersList.querySelectorAll('div[data-id]').forEach(div => {
+            div.onclick = () => {
+                createDiscussionWith(div.getAttribute('data-id'));
+            };
+        });
+    }
+}
+
+function createDiscussionWith(userId) {
+    fetch('/chat/discussion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId })
+    })
+    .then(r=>r.json())
+    .then(disc => {
+        chatUsersModal.style.display = 'none';
+        chatUsersOverlay.style.display = 'none';
+        loadDiscussions(() => selectDiscussion(disc.id));
+    });
+}
+
+if(chatMessageSend && chatMessageInput) {
+    chatMessageSend.onclick = sendMessage;
+    chatMessageInput.addEventListener('keydown', function(e) { if(e.key === 'Enter') sendMessage(); });
+}
+function sendMessage() {
+    if(!currentDiscussionId) return;
+    const contenu = chatMessageInput.value.trim();
+    if(!contenu) return;
+    fetch(`/chat/discussion/${currentDiscussionId}/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contenu })
+    })
+    .then(r=>r.json())
+    .then(res => {
+        if(res.success) {
+            chatMessageInput.value = '';
+            chatMessageInput.focus();
+            // Ajout direct du message dans le DOM (sans recharger toute la discussion)
+            const now = new Date();
+            const msgHtml = `
+                <div style=\"margin-bottom:12px;text-align:right;\">
+                    <div style=\"display:inline-block;background:#e0eaff;padding:8px 12px;border-radius:8px;max-width:70%;min-width:36px;word-break:break-word;margin-left:auto;\">${contenu}</div>
+                </div>
+            `;
+            chatMessagesList.innerHTML += msgHtml;
+            chatMessagesList.scrollTop = chatMessagesList.scrollHeight;
+            // Mise à jour de l'aperçu dans la liste des discussions
+            if(discussionsById[currentDiscussionId]) {
+                discussionsById[currentDiscussionId].lastMessage = contenu;
+                discussionsById[currentDiscussionId].lastDate = now.toISOString();
+                discussionsById[currentDiscussionId].unread = 0;
+                // Met à jour la ligne dans le DOM
+                const div = chatDiscussionsList.querySelector(`div[data-id='${currentDiscussionId}']`);
+                if(div) {
+                    div.querySelector('div[style*="font-size:12px"]').textContent = contenu;
+                    div.querySelector('div[style*="font-size:11px"]').textContent = humanDate(now.toISOString());
+                    const badge = div.querySelector('span[style*="background:#0d6efd"]');
+                    if(badge) badge.remove();
+                }
+            }
+        } else if(res.error) {
+            alert('Erreur : ' + res.error);
+        }
+    })
+    .catch(() => {
+        alert('Erreur lors de l\'envoi du message.');
+    });
+}
+
+// Ajout d'une fonction utilitaire JS pour le format humain :
+function humanDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const now = new Date();
+    if (now.toDateString() === d.toDateString()) {
+        return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+    const diff = now - d;
+    const diffDays = Math.floor(diff / (1000*60*60*24));
+    if (diffDays === 1) {
+        return 'Hier';
+    } else if (diffDays < 7) {
+        return `il y a ${diffDays} jours`;
+    } else {
+        return d.toLocaleDateString();
+    }
+}
+
+// Fermer le chat avec la touche Échap
+window.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && chatPanel.style.display === 'flex') {
+        closeChatPanel();
+    }
+});
+</script> 

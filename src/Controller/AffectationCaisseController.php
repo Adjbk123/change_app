@@ -10,15 +10,34 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[Route('/affectation-caisse')]
 final class AffectationCaisseController extends AbstractController
 {
-    #[Route(name: 'app_affectation_caisse_index', methods: ['GET'])]
-    public function index(AffectationCaisseRepository $affectationCaisseRepository): Response
+    #[Route('/', name: 'app_affectation_caisse_index', methods: ['GET'])]
+    public function index(AffectationCaisseRepository $affectationCaisseRepository, UserInterface $user = null): Response
     {
+        $affectationCaisses = [];
+
+        // Vérifiez si l'utilisateur est connecté et a le rôle 'ROLE_RESPONSABLE'
+        if ($user && $this->isGranted('ROLE_RESPONSABLE')) {
+
+            if (method_exists($user, 'getAgence') && $user->getAgence()) {
+                $agence = $user->getAgence();
+
+                $affectationCaisses = $affectationCaisseRepository->findByAgenceCaisses($agence);
+            } else {
+                // Gérer le cas où le responsable n'a pas d'agence associée (optionnel)
+                $this->addFlash('warning', 'Votre compte responsable n\'est pas associé à une agence.');
+            }
+        } else {
+
+            $affectationCaisses = $affectationCaisseRepository->findAll();
+        }
+
         return $this->render('affectation_caisse/index.html.twig', [
-            'affectation_caisses' => $affectationCaisseRepository->findAll(),
+            'affectation_caisses' => $affectationCaisses,
         ]);
     }
 
@@ -42,6 +61,23 @@ final class AffectationCaisseController extends AbstractController
             'affectation_caisse' => $affectationCaisse,
             'form' => $form,
         ]);
+    }
+
+    #[Route('/{id}/deactivate', name: 'app_affectation_caisse_deactivate', methods: ['POST'])]
+    public function deactivate(Request $request, AffectationCaisse $affectationCaisse, EntityManagerInterface $entityManager): Response
+    {
+        // Vérifier le jeton CSRF pour la sécurité
+        if ($this->isCsrfTokenValid('deactivate' . $affectationCaisse->getId(), $request->request->get('_token'))) {
+            $affectationCaisse->setIsActive(false); // Passe isActive à false
+            $affectationCaisse->setDateFin(new \DateTime()); // Enregistre la date de fin
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La session a été clôturée avec succès.');
+        } else {
+            $this->addFlash('error', 'Token CSRF invalide.');
+        }
+
+        return $this->redirectToRoute('app_affectation_caisse_index', [], Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/{id}', name: 'app_affectation_caisse_show', methods: ['GET'])]

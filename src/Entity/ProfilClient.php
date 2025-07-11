@@ -45,10 +45,24 @@ class ProfilClient
     #[ORM\OneToMany(targetEntity: Beneficiaire::class, mappedBy: 'profilClient')]
     private Collection $beneficiaires;
 
+    /**
+     * @var Collection<int, Operation>
+     */
+    #[ORM\OneToMany(targetEntity: Operation::class, mappedBy: 'profilClient')]
+    private Collection $operations;
+
+    /**
+     * @var Collection<int, Pret>
+     */
+    #[ORM\OneToMany(targetEntity: Pret::class, mappedBy: 'profilClient')]
+    private Collection $prets;
+
     public function __construct()
     {
         $this->compteClients = new ArrayCollection();
         $this->beneficiaires = new ArrayCollection();
+        $this->operations = new ArrayCollection();
+        $this->prets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -182,6 +196,66 @@ class ProfilClient
             // set the owning side to null (unless already changed)
             if ($beneficiaire->getProfilClient() === $this) {
                 $beneficiaire->setProfilClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Operation>
+     */
+    public function getOperations(): Collection
+    {
+        return $this->operations;
+    }
+
+    public function addOperation(Operation $operation): static
+    {
+        if (!$this->operations->contains($operation)) {
+            $this->operations->add($operation);
+            $operation->setProfilClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOperation(Operation $operation): static
+    {
+        if ($this->operations->removeElement($operation)) {
+            // set the owning side to null (unless already changed)
+            if ($operation->getProfilClient() === $this) {
+                $operation->setProfilClient(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Pret>
+     */
+    public function getPrets(): Collection
+    {
+        return $this->prets;
+    }
+
+    public function addPret(Pret $pret): static
+    {
+        if (!$this->prets->contains($pret)) {
+            $this->prets->add($pret);
+            $pret->setProfilClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removePret(Pret $pret): static
+    {
+        if ($this->prets->removeElement($pret)) {
+            // set the owning side to null (unless already changed)
+            if ($pret->getProfilClient() === $this) {
+                $pret->setProfilClient(null);
             }
         }
 

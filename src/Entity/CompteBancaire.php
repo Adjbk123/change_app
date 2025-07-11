@@ -51,10 +51,17 @@ class CompteBancaire
     #[ORM\OneToMany(targetEntity: MouvementCompteBancaire::class, mappedBy: 'compteBancaire')]
     private Collection $mouvementCompteBancaires;
 
+    /**
+     * @var Collection<int, Operation>
+     */
+    #[ORM\OneToMany(targetEntity: Operation::class, mappedBy: 'compteBancaire')]
+    private Collection $operations;
+
     public function __construct()
     {
         $this->approCompteBancaires = new ArrayCollection();
         $this->mouvementCompteBancaires = new ArrayCollection();
+        $this->operations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -200,6 +207,36 @@ class CompteBancaire
             // set the owning side to null (unless already changed)
             if ($mouvementCompteBancaire->getCompteBancaire() === $this) {
                 $mouvementCompteBancaire->setCompteBancaire(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Operation>
+     */
+    public function getOperations(): Collection
+    {
+        return $this->operations;
+    }
+
+    public function addOperation(Operation $operation): static
+    {
+        if (!$this->operations->contains($operation)) {
+            $this->operations->add($operation);
+            $operation->setCompteBancaire($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOperation(Operation $operation): static
+    {
+        if ($this->operations->removeElement($operation)) {
+            // set the owning side to null (unless already changed)
+            if ($operation->getCompteBancaire() === $this) {
+                $operation->setCompteBancaire(null);
             }
         }
 

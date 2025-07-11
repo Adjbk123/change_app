@@ -1,0 +1,28 @@
+<script src="{{ asset('assets/js/bundle.js') }}?ver=3.2.2"></script>
+<script src="{{ asset('assets/js/scripts.js') }}?ver=3.2.2"></script>
+<script src="{{ asset('assets/js/charts/gd-default.js') }}?ver=3.2.2"></script>
+<script src="{{ asset('assets/js/libs/datatable-btns.js') }}?ver=3.2.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const moneyInputs = document.querySelectorAll('.money-input');
+
+        // Format visuel à chaque frappe
+        moneyInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                let raw = input.value.replace(/\D/g, ''); // Supprime tout sauf les chiffres
+                input.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ' '); // Espace insécable
+            });
+        });
+
+        // Avant soumission, on nettoie les champs
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', () => {
+                moneyInputs.forEach(input => {
+                    input.value = input.value.replace(/\s/g, '').replace(/[^\d.,]/g, '');
+                });
+            });
+        });
+    });
+</script>

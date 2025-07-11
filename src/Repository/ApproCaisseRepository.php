@@ -22,7 +22,7 @@ class ApproCaisseRepository extends ServiceEntityRepository
         ->join('ac.caisse', 'c')          // Jointure avec l'entité Caisse, alias 'c'
         ->where('c.agence = :agence')     // Condition : l'agence de la caisse doit être celle passée en paramètre
         ->setParameter('agence', $agence) // Lier le paramètre pour la sécurité
-        ->orderBy('ac.createdAt', 'DESC') // Trier par date de création, du plus récent au plus ancien
+        ->orderBy('ac.dateDemande', 'DESC') // Trier par date de création, du plus récent au plus ancien
         ->getQuery()
             ->getResult();
     }

@@ -70,6 +70,18 @@ class Operation
     #[ORM\ManyToOne(inversedBy: 'operations')]
     private ?Beneficiaire $beneficiaire = null;
 
+    #[ORM\ManyToOne(inversedBy: 'operations')]
+    private ?ProfilClient $profilClient = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $dateFinalisation = null;
+
+    #[ORM\ManyToOne(inversedBy: 'operations')]
+    private ?CompteBancaire $compteBancaire = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $isFinalise = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -263,6 +275,54 @@ class Operation
     public function setBeneficiaire(?Beneficiaire $beneficiaire): static
     {
         $this->beneficiaire = $beneficiaire;
+
+        return $this;
+    }
+
+    public function getProfilClient(): ?ProfilClient
+    {
+        return $this->profilClient;
+    }
+
+    public function setProfilClient(?ProfilClient $profilClient): static
+    {
+        $this->profilClient = $profilClient;
+
+        return $this;
+    }
+
+    public function getDateFinalisation(): ?\DateTimeImmutable
+    {
+        return $this->dateFinalisation;
+    }
+
+    public function setDateFinalisation(\DateTimeImmutable $dateFinalisation): static
+    {
+        $this->dateFinalisation = $dateFinalisation;
+
+        return $this;
+    }
+
+    public function getCompteBancaire(): ?CompteBancaire
+    {
+        return $this->compteBancaire;
+    }
+
+    public function setCompteBancaire(?CompteBancaire $compteBancaire): static
+    {
+        $this->compteBancaire = $compteBancaire;
+
+        return $this;
+    }
+
+    public function isFinalise(): ?bool
+    {
+        return $this->isFinalise;
+    }
+
+    public function setIsFinalise(?bool $isFinalise): static
+    {
+        $this->isFinalise = $isFinalise;
 
         return $this;
     }

@@ -4,11 +4,16 @@
     document.addEventListener('DOMContentLoaded', function () {
         const depotContainer = document.getElementById('group-DEPOT');
 
-        // Vérifier si le conteneur du dépôt existe pour s'assurer que le script s'exécute sur la bonne page.
         if (!depotContainer) {
             console.warn("Conteneur 'group-DEPOT' non trouvé. Le script de dépôt ne s'exécutera pas.");
             return;
         }
+
+        const typeDepotSelect = document.getElementById('typeDepot'); // NOUVEAU
+        const depotBancaireFields = document.getElementById('depotBancaireFields'); // NOUVEAU
+        const compteBancaireAgenceSelect = document.getElementById('compteBancaireAgence'); // NOUVEAU
+        const referenceBancaireInput = document.getElementById('referenceBancaire'); // NOUVEAU
+        const dateValeurInput = document.getElementById('dateValeur'); // NOUVEAU
 
         const deviseApporteeSelect = document.getElementById('op-deviseApportee');
         const montantApporteInput = document.getElementById('op-montantApporte');
@@ -18,9 +23,7 @@
         const feedbackDiv = document.getElementById('operation-feedback');
         const submitButton = document.getElementById('submit-operation');
 
-        // Ajout du sélecteur de profil client ici
         const profilClientSelect = document.getElementById('profilClient-select');
-        // NOTE: le `clientSelect` est géré dans le script principal de `new.html.twig` pour déclencher la logique de profil.
 
         const getRateUrl = depotContainer.dataset.getRateUrl;
         const checkBalanceUrl = depotContainer.dataset.checkBalanceUrl;
@@ -36,17 +39,45 @@
             };
         }
 
+        // NOUVELLE FONCTION: Gérer la visibilité des champs selon le type de dépôt
+        function toggleDepotFields() {
+            const selectedType = typeDepotSelect.value;
+            if (selectedType === 'bancaire') {
+                depotBancaireFields.style.display = 'block';
+                // Rendre les champs spécifiques au dépôt bancaire requis
+                compteBancaireAgenceSelect.setAttribute('required', 'required');
+                dateValeurInput.setAttribute('required', 'required');
+                // Désactiver ou masquer les champs de taux et de solde caisse non pertinents
+                tauxDepotInput.value = '1.0'; // Pas de conversion manuelle ici
+                montantCibleCompteInput.value = montantApporteInput.value; // Par défaut, même montant
+                montantCibleCompteInput.readOnly = true; // Empêcher la modification
+                deviseCibleCompteSelect.disabled = true; // On force la devise cible à être la même que l'apportée pour le moment
+                feedbackDiv.innerHTML = '<p class="text-muted mb-0 alert alert-info">Pour un dépôt bancaire, la devise cible du compte client doit correspondre à la devise apportée.</p>';
+
+            } else {
+                depotBancaireFields.style.display = 'none';
+                // Retirer l'attribut required pour les champs bancaires
+                compteBancaireAgenceSelect.removeAttribute('required');
+                dateValeurInput.removeAttribute('required');
+                // Réactiver les champs pour les dépôts classiques/conversion
+                montantCibleCompteInput.readOnly = false;
+                deviseCibleCompteSelect.disabled = false;
+            }
+            updateDepotDetails(); // Mettre à jour les détails après le changement de type
+        }
+
+
         async function updateDepotDetails() {
+            const selectedType = typeDepotSelect.value; // Récupérer le type de dépôt
             const deviseApporteeId = deviseApporteeSelect.value;
             const montantApporte = parseFloat(montantApporteInput.value);
             const deviseCibleCompteId = deviseCibleCompteSelect.value;
-            const profilClientId = profilClientSelect ? profilClientSelect.value : null; // Récupérer l'ID du profil client
+            const profilClientId = profilClientSelect ? profilClientSelect.value : null;
 
-            // Récupérer les codes ISO pour l'affichage (avec fallback si non trouvé)
             const deviseApporteeCode = deviseApporteeSelect.options[deviseApporteeSelect.selectedIndex]?.dataset.code || '???';
             const deviseCibleCompteCode = deviseCibleCompteSelect.options[deviseCibleCompteSelect.selectedIndex]?.dataset.code || '???';
 
-            // --- Condition de désactivation du bouton AJOUTÉE : `!profilClientId` ---
+            // Validation de base pour tous les types de dépôt
             if (!profilClientId || !deviseApporteeId || !deviseCibleCompteId || isNaN(montantApporte) || montantApporte <= 0) {
                 montantCibleCompteInput.value = '';
                 tauxDepotInput.value = '';
@@ -55,8 +86,32 @@
                 return;
             }
 
+            // NOUVELLE VALIDATION SPÉCIFIQUE AU DÉPÔT BANCAIRE
+            if (selectedType === 'bancaire') {
+                const compteBancaireAgenceId = compteBancaireAgenceSelect.value;
+                const dateValeur = dateValeurInput.value;
+
+                if (!compteBancaireAgenceId || !dateValeur) {
+                    feedbackDiv.innerHTML = '<p class="text-muted mb-0 alert alert-warning">Veuillez sélectionner le compte bancaire de l\'agence et la date de valeur.</p>';
+                    submitButton.disabled = true;
+                    return;
+                }
+                // Pour un dépôt bancaire, forcer deviseApportee == deviseCibleCompte
+                if (deviseApporteeId !== deviseCibleCompteId) {
+                    feedbackDiv.innerHTML = '<p class="text-muted mb-0 alert alert-danger">Pour un dépôt bancaire, la devise apportée et la devise cible doivent être identiques.</p>';
+                    submitButton.disabled = true;
+                    return;
+                }
+                montantCibleCompteInput.value = montantApporte.toFixed(2);
+                tauxDepotInput.value = '1.000000';
+                feedbackDiv.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle me-1"></i>Dépôt bancaire de <strong>${montantApporte.toFixed(2)} ${deviseApporteeCode}</strong>.</div>`;
+                submitButton.disabled = false; // Le solde de la caisse n'est pas un facteur bloquant ici
+                return; // Fin de la fonction pour le cas bancaire
+            }
+
+            // Logique existante pour Dépôt Classique et Dépôt avec Conversion
             feedbackDiv.innerHTML = `<div class="text-info"><i class="fas fa-spinner fa-spin me-2"></i>Calcul en cours...</div>`;
-            submitButton.disabled = true; // Désactiver pendant le calcul
+            submitButton.disabled = true;
 
             let montantFinal = montantApporte;
             let tauxUtilise = 1;
@@ -136,24 +191,29 @@
 
         const debouncedDepotUpdate = debounce(updateDepotDetails, 500);
 
-        // Écouteurs d'événements pour les changements des champs du formulaire de dépôt
+        // NOUVEAU: Écouteur pour le changement du type de dépôt
+        typeDepotSelect.addEventListener('change', toggleDepotFields);
+
         deviseApporteeSelect.addEventListener('change', updateDepotDetails);
         montantApporteInput.addEventListener('input', debouncedDepotUpdate);
         deviseCibleCompteSelect.addEventListener('change', updateDepotDetails);
 
-        // --- Appel initial et écouteur pour le sélecteur de ProfilClient ---
-        // Expose la fonction globalement pour qu'elle puisse être appelée depuis d'autres scripts (e.g., le script principal de gestion du client/profil)
-        window.triggerDepotUpdate = updateDepotDetails; // Assurez-vous que cette fonction est bien appelée après la sélection du profil
+        // NOUVEAU: Écouteurs pour les champs de dépôt bancaire
+        compteBancaireAgenceSelect.addEventListener('change', updateDepotDetails);
+        referenceBancaireInput.addEventListener('input', updateDepotDetails);
+        dateValeurInput.addEventListener('change', updateDepotDetails);
 
-        // Appeler updateDepotDetails au changement du profil client (si le sélecteur existe)
+
+        window.triggerDepotUpdate = updateDepotDetails;
+
         if (profilClientSelect) {
             profilClientSelect.addEventListener('change', updateDepotDetails);
         }
 
-        // Appel initial pour désactiver le bouton au chargement si les champs ne sont pas remplis
-        // Note: L'appel de updateDepotDetails() gérera aussi la désactivation initiale.
+        // Appel initial pour gérer la visibilité et la validation au chargement
         setTimeout(() => {
-            updateDepotDetails(); // Lance la vérification initiale
+            toggleDepotFields(); // Appelle d'abord pour configurer les champs
+            updateDepotDetails(); // Puis pour valider
         }, 50);
     });
 </script>

@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Relevé de compte PDF - {{ profil_client.nom }}{% endblock %}
+
+{% block body %}
+<h2 style="text-align:center;">Relevé de compte</h2>
+<p><strong>Client :</strong> {{ profil_client.nom }} {{ profil_client.prenoms }}</p>
+<p><strong>Email :</strong> {{ profil_client.email }}</p>
+<p><strong>Téléphone :</strong> {{ profil_client.telephone }}</p>
+
+<h3>Comptes</h3>
+<table border="1" cellspacing="0" cellpadding="4" width="100%">
+    <thead>
+        <tr>
+            <th>Devise</th>
+            <th>Solde initial</th>
+            <th>Solde actuel</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for compte in comptes %}
+        <tr>
+            <td>{{ compte.devise.codeIso }}</td>
+            <td>{{ compte.soldeInitial }}</td>
+            <td>{{ compte.soldeActuel }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h3>Mouvements</h3>
+{% for compte in comptes %}
+    <h4>Compte {{ compte.devise.codeIso }}</h4>
+    <table border="1" cellspacing="0" cellpadding="4" width="100%">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Sens</th>
+                <th>Montant</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for mvt in mouvements[compte.id] %}
+            <tr>
+                <td>{{ mvt.dateMouvement ? mvt.dateMouvement|date('d/m/Y H:i') : '' }}</td>
+                <td>{{ mvt.typeMouvement }}</td>
+                <td>{{ mvt.sens }}</td>
+                <td>{{ mvt.montant }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4">Aucun mouvement</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}
+{% endblock %} 

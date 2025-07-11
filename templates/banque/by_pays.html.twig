@@ -4,6 +4,9 @@
     <a href="{{ path('app_pays_compte_bancaire_index') }}" class="btn btn-outline-primary mb-3">
         <i class="bx bx-arrow-back"></i> Retour à la liste des pays
     </a>
+    <a href="{{ path('app_compte_bancaire_new') }}" class="btn btn-outline-primary mb-3">
+        <i class="bx bx-arrow-back"></i> Ajouter un compte
+    </a>
 {% endblock %}
 {% block body %}
 
@@ -11,7 +14,7 @@
         {% for banqueId, banqueData in banques %}
             <div class="card border shadow-sm mb-4">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bx bxs-bank me-2"></i> {{ banqueData['banque'].nom }}</h5>
+                    <h5 class="mb-0 text-white"><i class="bx bxs-bank me-2"></i> {{ banqueData['banque'].nom }}</h5>
                 </div>
                 <div class="card-body">
                     {% if banqueData['comptes'] is not empty %}

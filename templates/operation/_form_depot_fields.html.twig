@@ -8,8 +8,17 @@
             <h5 class="border-primary border-start border-3 ps-3 py-3 ">Détails du Dépôt</h5>
         </legend>
 
+        {# NOUVEAU: Type de Dépôt #}
+        <div class="mb-3">
+            <label for="typeDepot" class="form-label fw-bold">Type de Dépôt</label>
+            <select class="form-select form-select-lg" id="typeDepot" name="typeDepot" required>
+                <option value="classique">Dépôt Physique (Caisse)</option>
+                <option value="bancaire">Dépôt par Virement Bancaire</option>
+            </select>
+        </div>
+
         {# Conteneur du sélecteur de ProfilClient (UNIQUEMENT pour le dépôt) #}
-        <div class="mb-3" id="profilClientSelectContainer" style="display: none;">
+        <div class="mb-3" id="profilClientSelectContainer"> {# Affiché par défaut, pas besoin de display: none initial #}
             <label for="profilClient-select" class="form-label fw-bold">Profil Client Associé</label>
             {# Le `name` du select visible est maintenant `profilClient_display` #}
             {# Il ne sera PAS soumis. Sa valeur sera copiée dans le champ caché #}
@@ -58,5 +67,32 @@
 
         <input type="hidden" id="op-tauxDepot" name="tauxDepot">
         <div id="operation-feedback" class="mt-2 rounded" style="min-height: 40px;"></div>
+
+        {# NOUVEAU: Champs spécifiques au dépôt bancaire #}
+        <div id="depotBancaireFields" style="display: none;">
+            <hr>
+            <legend>
+                <h5 class="border-primary border-start border-3 ps-3 py-3 ">Détails du Virement Bancaire</h5>
+            </legend>
+            <div class="mb-3">
+                <label for="compteBancaireAgence" class="form-label">Compte Bancaire de l'Agence</label>
+                <select class="form-select form-select-lg" id="compteBancaireAgence" name="compteBancaireAgence">
+                    <option value="">-- Sélectionnez un compte bancaire --</option>
+                    {# Vous devrez passer vos comptes bancaires de l'agence au template #}
+                    {% for compteBancaire in comptesBancairesAgence %}
+                        <option value="{{ compteBancaire.id }}">{{ compteBancaire.banque.nom }} ({{ compteBancaire.numeroBancaire }} - {{ compteBancaire.devise.codeIso }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="referenceBancaire" class="form-label">Référence du Virement (Optionnel)</label>
+                <input type="text" class="form-control form-control-lg" id="referenceBancaire" name="referenceBancaire">
+            </div>
+            <div class="mb-3">
+                <label for="dateValeur" class="form-label">Date de Valeur Bancaire</label>
+                <input type="date" class="form-control form-control-lg" id="dateValeur" name="dateValeur" value="{{ 'now'|date('Y-m-d') }}">
+            </div>
+        </div>
+
     </fieldset>
 </div>

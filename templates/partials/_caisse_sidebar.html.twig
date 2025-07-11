@@ -1,30 +1,39 @@
-
-<li class="menu-title" key="t-apps">Gestion des Opérations</li>
-<li>
-    <a href="{{ path('app_compte_caisse_index') }}" class="waves-effect">
-        <i class="mdi mdi-account-cash"></i> {# MDI pour le compte général/registre #}
-        <span key="t-compte-general">Compte Caisse</span>
+<li class="nk-menu-heading">
+    <h6 class="overline-title text-primary-alt">Gestion des Opérations</h6>
+</li>
+<li class="nk-menu-item">
+    <a href="{{ path('app_compte_caisse_index') }}" class="nk-menu-link">
+        <span class="nk-menu-icon"><em class="icon mdi mdi-wallet"></em></span> {# ni-wallet remplacé par mdi-wallet #}
+        <span class="nk-menu-text">Compte Caisse</span>
     </a>
-<li>
-
-<li>
-    <a href="{{ path('app_appro_caisse_index') }}" class="waves-effect">
-        <i class="mdi mdi-view-list-outline"></i> {# MDI pour le compte général/registre #}
-        <span key="t-compte-general">Historique des Appros</span>
+</li>
+<li class="nk-menu-item">
+    <a href="{{ path('app_appro_caisse_index') }}" class="nk-menu-link">
+        <span class="nk-menu-icon"><em class="icon mdi mdi-history"></em></span> {# ni-view-list remplacé par mdi-history pour un historique #}
+        <span class="nk-menu-text">Historique des Appros</span>
     </a>
-<li>
-
-<li>
-    <a href="javascript: void(0);" class="has-arrow waves-effect">
-        <i class="mdi mdi-currency-usd"></i> {# Équivalent MDI pour l'argent #}
-        <span>Opérations</span>
+</li>
+<li class="nk-menu-item">
+    <a href="{{ path('app_transfert_index') }}" class="nk-menu-link">
+        <span class="nk-menu-icon"><em class="icon mdi mdi-bank-transfer"></em></span> {# ni-swap remplacé par mdi-bank-transfer pour les transferts #}
+        <span class="nk-menu-text">Liste des Transferts</span>
     </a>
-    <ul class="sub-menu" aria-expanded="false">
-        <li><a href="{{ path('app_operation_index') }}">Toutes les opérations</a></li>
-        <li><a href="{{ path('app_operation_new', { type: 'achat-vente' }) }}">Achat / Vente</a></li>
-        <li><a href="{{ path('app_operation_new', { type: 'depot' }) }}">Versement</a></li>
-        <li><a href="{{ path('app_operation_new', { type: 'retrait' }) }}">Retrait</a></li>
+</li>
+<li class="nk-menu-item">
+    <a href="{{ path('app_pret_index') }}" class="nk-menu-link">
+        <span class="nk-menu-icon"><em class="icon mdi mdi-cash-multiple"></em></span>
+        <span class="nk-menu-text">Prêts</span>
+    </a>
+</li>
+<li class="nk-menu-item has-sub">
+    <a href="#" class="nk-menu-link nk-menu-toggle">
+        <span class="nk-menu-icon"><em class="icon mdi mdi-currency-usd"></em></span> {# ni-currency remplacé par mdi-currency-usd #}
+        <span class="nk-menu-text">Opérations</span>
+    </a>
+    <ul class="nk-menu-sub">
+        <li class="nk-menu-item"><a href="{{ path('app_operation_index') }}" class="nk-menu-link"><span class="nk-menu-text">Toutes les opérations</span></a></li>
+        <li class="nk-menu-item"><a href="{{ path('app_operation_new', { type: 'achat-vente' }) }}" class="nk-menu-link"><span class="nk-menu-text">Achat / Vente</span></a></li>
+        <li class="nk-menu-item"><a href="{{ path('app_operation_new', { type: 'depot' }) }}" class="nk-menu-link"><span class="nk-menu-text">Versement</span></a></li>
+        <li class="nk-menu-item"><a href="{{ path('app_operation_new', { type: 'retrait' }) }}" class="nk-menu-link"><span class="nk-menu-text">Retrait</span></a></li>
     </ul>
 </li>
-
-

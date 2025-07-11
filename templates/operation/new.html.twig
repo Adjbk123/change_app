@@ -10,11 +10,15 @@
         '#')) %}
 
         <div class="container-fluid py-4">
-            <h1 class="display-5 fw-bold text-primary mb-4">
-                <i class="bi bi-cash-stack me-3"></i> Nouvelle Opération de <span class="text-secondary">{{ type|capitalize }}</span>
-                    </h1>
+            <div class="bg-light p-4 rounded shadow-sm mb-4 border-start border-4 border-primary">
+                <h2 class="h4 text-dark mb-1">
+                    <i class="fa fa-cash-register text-primary me-2"></i> Nouvelle Opération
+                </h2>
+                <p class="mb-0 text-muted">Type : <span class="fw-bold text-secondary">{{ type|capitalize }}</span></p>
+            </div>
 
-                    <form method="POST" action="{{ routeAction }}" id="exchangeOperationForm" class="card shadow-sm p-4">
+
+            <form method="POST" action="{{ routeAction }}" id="exchangeOperationForm" class="card shadow-sm p-4">
                     <input type="hidden" name="_token" value="{{ csrf_token('new_operation_token') }}">
 
                     {% include 'operation/_form_client.html.twig' %}
@@ -41,6 +45,7 @@
 
     {% block javascripts %}
         {{ parent() }}
+        {% include 'operation/_client_modal_script.html.twig' %}
 
 
         {# Inclusion des scripts spécifiques #}
