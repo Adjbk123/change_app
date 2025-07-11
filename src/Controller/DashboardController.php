@@ -12,7 +12,11 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 final class DashboardController extends AbstractController
 {
-
+    #[Route('/', name: 'app_accueil')]
+    public function indexA(): Response
+    {
+     return $this->redirectToRoute('app_dashboard');
+    }
     #[Route('/dashboard', name: 'app_dashboard')]
     public function index(Security $security, StatistiqueService $statService, CaisseService $caisseService): Response
     {
