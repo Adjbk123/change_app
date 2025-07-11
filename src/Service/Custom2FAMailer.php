@@ -30,7 +30,7 @@ class Custom2FAMailer implements AuthCodeMailerInterface
         ]);
 
         $email = (new Email())
-            ->from('change@septetoilesconseilsolution.com')
+            ->from('contact@retouralasource-fx.com')
             ->to($recipient)
             ->subject('Votre code de vérification ChangeMoney')
             ->html($html);
