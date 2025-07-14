@@ -13,6 +13,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Update;
+use Firebase\JWT\JWT;
 
 #[Route('/chat')]
 class ChatController extends AbstractController
@@ -78,7 +81,7 @@ class ChatController extends AbstractController
     }
 
     #[Route('/discussion/{id}/message', name: 'chat_send_message', methods: ['POST'])]
-    public function sendMessage(Discussion $discussion, Request $request, EntityManagerInterface $em): JsonResponse
+    public function sendMessage(Discussion $discussion, Request $request, EntityManagerInterface $em, HubInterface $hub): JsonResponse
     {
         $user = $this->getUser();
         $data = json_decode($request->getContent(), true);
@@ -94,6 +97,20 @@ class ChatController extends AbstractController
         $message->setType($type);
         $em->persist($message);
         $em->flush();
+
+        // Publier l'événement Mercure
+        $update = new Update(
+            sprintf('/chat/discussion/%d', $discussion->getId()),
+            json_encode([
+                'id' => $message->getId(),
+                'auteur' => $user ? $user->getNomComplet() : '',
+                'contenu' => $message->getContenu(),
+                'type' => $message->getType(),
+                'createdAt' => $message->getCreatedAt()->format('c'),
+                'isMe' => true,
+            ])
+        );
+        $hub->publish($update);
         return $this->json(['success' => true]);
     }
 
@@ -169,4 +186,21 @@ class ChatController extends AbstractController
         }
         return $this->json(['id' => $discussion->getId()]);
     }
-} 
+
+    #[Route('/token', name: 'chat_mercure_token', methods: ['GET'])]
+    public function mercureToken(): JsonResponse
+    {
+        $secret ='ma-cle-secrete-super-longue-mais-sans-caracteres-bizarres-123456';
+        $payload = [
+            'mercure' => [
+                'subscribe' => ['*'], // Autorise tous les topics
+                "publish"=> ["*"]
+            ]
+        ];
+        $jwt = JWT::encode($payload, $secret, 'HS256');
+        // Log le token pour vérif (à enlever en prod)
+        error_log("JWT Mercure généré : " . $jwt);
+        return $this->json(['token' => $jwt]);
+    }
+
+}

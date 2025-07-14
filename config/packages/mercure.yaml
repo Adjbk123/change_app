@@ -1,0 +1,9 @@
+mercure:
+    hubs:
+        default:
+            url: '%env(MERCURE_URL)%'
+            public_url: '%env(MERCURE_PUBLIC_URL)%'
+            jwt:
+                secret: 'ma-cle-secrete-super-longue-mais-sans-caracteres-bizarres-123456'
+                publish: '*'
+                algorithm: 'hmac.sha256'
