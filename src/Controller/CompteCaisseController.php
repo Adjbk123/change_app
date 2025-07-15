@@ -21,13 +21,28 @@ final class CompteCaisseController extends AbstractController
     #[Route(name: 'app_compte_caisse_index', methods: ['GET'])]
     public function index(CompteCaisseRepository $compteCaisseRepository, CaisseService $caisseService): Response
     {
-        $compteCaisses = $compteCaisseRepository->findAll();
+        $user = $this->getUser();
+        $compteCaisses = [];
         if ($this->isGranted('ROLE_CAISSE')) {
-            $caisse = $caisseService->getCaisseAffectee($this->getUser());
-            $compteCaisses = $compteCaisseRepository->findBy(['caisse'=>$caisse]);
+            $caisse = $caisseService->getCaisseAffectee($user);
+            if ($caisse) {
+                $compteCaisses = $compteCaisseRepository->findBy(['caisse' => $caisse]);
+            }
+        } elseif ($this->isGranted('ROLE_RESPONSABLE')) {
+            $agence = method_exists($user, 'getAgence') ? $user->getAgence() : null;
+            if ($agence) {
+                $compteCaisses = $compteCaisseRepository->createQueryBuilder('cc')
+                    ->join('cc.caisse', 'c')
+                    ->andWhere('c.agence = :agence')
+                    ->setParameter('agence', $agence)
+                    ->getQuery()
+                    ->getResult();
+            }
+        } else {
+            $compteCaisses = $compteCaisseRepository->findAll();
         }
         return $this->render('compte_caisse/index.html.twig', [
-            'compte_caisses' => $compteCaisseRepository->findAll(),
+            'compte_caisses' => $compteCaisses,
         ]);
     }
 

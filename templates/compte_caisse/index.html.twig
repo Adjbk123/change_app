@@ -23,9 +23,9 @@
             <tr>
                 <td>{{ loop.index }}</td>
                 <td>{{ compte_caisse.devise.codeIso }}</td>
-                <td>{{ compte_caisse.soldeInitial }}</td>
-                <td>{{ compte_caisse.soldeRestant }}</td>
-                <td>{{ compte_caisse.seuilAlerte }}</td>
+                <td>{{ compte_caisse.soldeInitial|number_format(0, ',', ' ') }}</td>
+                <td>{{ compte_caisse.soldeRestant|number_format(0, ',', ' ') }}</td>
+                <td>{{ compte_caisse.seuilAlerte|number_format(0, ',', ' ') }}</td>
                 <td>
                     <a href="{{ path('app_compte_caisse_show', {'id': compte_caisse.id}) }}" class="btn btn-outline-primary">Gérer</a>
                 </td>
