@@ -29,22 +29,24 @@ class AffectationCaisseForm extends AbstractType
         $builder
             ->add('caissier', EntityType::class, [
                 'class' => User::class,
-                'choice_label' => function($user) {
-                    return $user->getNomComplet();
-                },
+                'choice_label' => fn($user) => $user->getNomComplet(),
                 'query_builder' => function (UserRepository $ur) use ($agence) {
-                    $ids = array_map(function($u) { return $u->getId(); }, $ur->findCaissiersByAgence($agence));
                     $qb = $ur->createQueryBuilder('u');
-                    if (count($ids) > 0) {
-                        $qb->andWhere($qb->expr()->in('u.id', ':ids'));
-                        $qb->setParameter('ids', $ids);
+
+                    if ($agence) {
+                        $qb->andWhere('u.agence = :agence')
+                            ->setParameter('agence', $agence)
+                            ->andWhere('u.roles LIKE :role')
+                            ->setParameter('role', '%"ROLE_CAISSE"%');
                     } else {
-                        $qb->andWhere('1=0'); // Aucun résultat
+                        $qb->andWhere('1=0'); // Pas d'agence, pas de résultats
                     }
+
                     return $qb;
                 },
                 'placeholder' => '-- Sélectionner un caissier --',
             ])
+
             ->add('caisse', EntityType::class, [
                 'class' => Caisse::class,
                 'choice_label' => 'nom',
