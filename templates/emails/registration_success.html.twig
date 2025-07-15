@@ -1,0 +1,18 @@
+{% extends 'emails/_base_email.html.twig' %}
+
+{% block title %}Votre compte a été créé avec succès !{% endblock %}
+
+{% block body %}
+<p>Bonjour {{ user.prenoms }} {{ user.nom }},</p>
+<p>Votre compte utilisateur a été créé avec succès sur la plateforme MySwap.</p>
+<p>Voici vos informations de connexion :</p>
+<ul>
+    <li><strong>Email :</strong> {{ user.email }}</li>
+    <li><strong>Mot de passe :</strong> {{ plainPassword }}</li>
+    <li><strong>Rôle :</strong> {{ user.roles[0] }}</li>
+    {% if user.agence %}<li><strong>Agence :</strong> {{ user.agence.nom }}</li>{% endif %}
+    <li><strong>Date de création :</strong> {{ user.createdAt ? user.createdAt|date('d/m/Y H:i:s') : 'N/A' }}</li>
+</ul>
+<p>Nous vous recommandons de changer votre mot de passe dès votre première connexion.</p>
+<p>Si vous n'êtes pas à l'origine de cette inscription, merci de contacter immédiatement notre support.</p>
+{% endblock %} 

@@ -11,11 +11,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Mime\Address;
 
 class RegistrationController extends AbstractController
 {
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationForm::class, $user);
@@ -66,7 +69,19 @@ class RegistrationController extends AbstractController
 
             $entityManager->flush();
 
-            $this->addFlash('success', 'Le compte utilisateur a été créé avec succès et affecté à l\'agence.');
+            // Envoi de l'e-mail de confirmation de création de compte
+            $email = (new TemplatedEmail())
+                ->from(new Address('contact@retouralasource-fx.com', 'MySwap'))
+                ->to($user->getEmail())
+                ->subject('Votre compte a été créé sur MySwap')
+                ->htmlTemplate('emails/registration_success.html.twig')
+                ->context([
+                    'user' => $user,
+                    'plainPassword' => $plainPassword,
+                ]);
+            $mailer->send($email);
+
+            $this->addFlash('success', 'Le compte utilisateur a été créé avec succès et affecté à l\'agence. Un e-mail a été envoyé à l\'utilisateur.');
 
             return $this->redirectToRoute('app_user_index');
         }
