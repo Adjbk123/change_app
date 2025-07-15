@@ -39,8 +39,6 @@ final class PretController extends AbstractController
     {
         $pret = new Pret();
         $form = $this->createForm(PretForm::class, $pret);
-        $form->remove('agence');
-        $form->remove('caisse');
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -50,6 +48,7 @@ final class PretController extends AbstractController
 
             // Récupérer la caisse affectée au caissier connecté
             $caisse = $caisseService->getCaisseAffectee($user);
+            $pret->setAgentOctroi($user);
             if (!$caisse) {
                 $this->addFlash('danger', 'Aucune caisse affectée à votre profil.');
                 return $this->render('pret/new.html.twig', [

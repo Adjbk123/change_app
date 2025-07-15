@@ -18,33 +18,26 @@ class PretForm extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('montantPrincipal')
-            ->add('montantRestant')
-            ->add('tauxInteretAnnuel')
-            ->add('dureeMois')
-            ->add('montantTotalRembourse')
-            ->add('statut')
-            ->add('commentaire')
             ->add('profilClient', EntityType::class, [
                 'class' => ProfilClient::class,
-                'choice_label' => 'id',
+            ])
+            ->add('montantPrincipal', null, [
+                'label' => 'Montant du prêt ',
             ])
             ->add('devise', EntityType::class, [
                 'class' => Devise::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
             ])
-            ->add('agentOctroi', EntityType::class, [
-                'class' => User::class,
-                'choice_label' => 'id',
+
+            ->add('dureeMois', null, [
+                'label'=>'Durée en mois du pret',
             ])
-            ->add('agence', EntityType::class, [
-                'class' => Agence::class,
-                'choice_label' => 'id',
+            ->add('tauxInteretAnnuel', null, [
+                'label' => 'Taux annuel',
             ])
-            ->add('caisse', EntityType::class, [
-                'class' => Caisse::class,
-                'choice_label' => 'id',
-            ])
+
+            ->add('commentaire')
+
         ;
     }
 

@@ -121,7 +121,7 @@ final class ProfilClientController extends AbstractController
         $dompdf->render();
 
         return new Response(
-            $dompdf->stream('releve_compte_'.$profilClient->getNom().'.pdf', ["Attachment" => true]),
+            $dompdf->stream('releve_compte_'.$profilClient->getClient()->getNom().'.pdf', ["Attachment" => true]),
             200,
             [
                 'Content-Type' => 'application/pdf',

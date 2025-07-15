@@ -1,52 +1,64 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Relevé de compte PDF - {{ profil_client.nom }}{% endblock %}
+{% block title %}Relevé de compte PDF - {{ profil_client.client.nom }}{% endblock %}
 
 {% block body %}
-<h2 style="text-align:center;">Relevé de compte</h2>
-<p><strong>Client :</strong> {{ profil_client.nom }} {{ profil_client.prenoms }}</p>
-<p><strong>Email :</strong> {{ profil_client.email }}</p>
-<p><strong>Téléphone :</strong> {{ profil_client.telephone }}</p>
+<style>
+    .statement-header { text-align: center; border-bottom: 2px solid #175ca6; margin-bottom: 20px; padding-bottom: 10px; }
+    .statement-logo { float: left; font-size: 2em; color: #175ca6; font-weight: bold; }
+    .statement-title { float: right; font-size: 2em; color: #175ca6; font-weight: bold; }
+    .statement-clear { clear: both; }
+    .statement-company { font-size: 1em; color: #175ca6; }
+    .statement-date { float: right; background: #175ca6; color: #fff; padding: 4px 16px; border-radius: 4px; font-size: 1em; }
+    .statement-to { background: #175ca6; color: #fff; padding: 6px 12px; display: inline-block; margin: 20px 0 10px 0; font-weight: bold; }
+    .statement-client-box { border: 1px solid #175ca6; padding: 10px; margin-bottom: 20px; }
+    .statement-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .statement-table th, .statement-table td { border: 1px solid #175ca6; padding: 6px 8px; text-align: left; }
+    .statement-table th { background: #175ca6; color: #fff; }
+    .statement-table tr:nth-child(even) { background: #f2f6fa; }
+    .statement-summary th, .statement-summary td { font-size: 0.95em; text-align: center; }
+</style>
+<div class="statement-header">
+    <div class="statement-logo">MON ENTREPRISE</div>
+    <div class="statement-title">Relevé de compte</div>
+    <div class="statement-clear"></div>
+    <div class="statement-company">123 Rue Principale, Ville, Pays</div>
+    <div class="statement-date">Date : {{ "now"|date('d/m/Y') }}</div>
+</div>
 
-<h3>Comptes</h3>
-<table border="1" cellspacing="0" cellpadding="4" width="100%">
-    <thead>
-        <tr>
-            <th>Devise</th>
-            <th>Solde initial</th>
-            <th>Solde actuel</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for compte in comptes %}
-        <tr>
-            <td>{{ compte.devise.codeIso }}</td>
-            <td>{{ compte.soldeInitial }}</td>
-            <td>{{ compte.soldeActuel }}</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="statement-to">À :</div>
+<div class="statement-client-box">
+    <strong>{{ profil_client.client.nom }} {{ profil_client.client.prenoms }}</strong><br>
+    Email : {{ profil_client.client.email }}<br>
+    Contact : {{ profil_client.client.contact }}
+</div>
 
-<h3>Mouvements</h3>
 {% for compte in comptes %}
-    <h4>Compte {{ compte.devise.codeIso }}</h4>
-    <table border="1" cellspacing="0" cellpadding="4" width="100%">
+    <h3 style="color:#175ca6;">Compte {{ compte.devise.codeIso }}</h3>
+    <table class="statement-table">
         <thead>
             <tr>
                 <th>Date</th>
-                <th>Type</th>
-                <th>Sens</th>
+                <th>Transaction</th>
                 <th>Montant</th>
+                <th>Solde</th>
             </tr>
         </thead>
         <tbody>
+        {% set solde = compte.soldeInitial %}
         {% for mvt in mouvements[compte.id] %}
             <tr>
                 <td>{{ mvt.dateMouvement ? mvt.dateMouvement|date('d/m/Y H:i') : '' }}</td>
                 <td>{{ mvt.typeMouvement }}</td>
-                <td>{{ mvt.sens }}</td>
-                <td>{{ mvt.montant }}</td>
+                <td>{{ mvt.sens == 'CREDIT' ? '+' : '-' }}{{ mvt.montant|number_format(2, ',', ' ') }}</td>
+                <td>
+                    {% if mvt.sens == 'CREDIT' %}
+                        {% set solde = solde + mvt.montant %}
+                    {% else %}
+                        {% set solde = solde - mvt.montant %}
+                    {% endif %}
+                    {{ solde|number_format(2, ',', ' ') }}
+                </td>
             </tr>
         {% else %}
             <tr><td colspan="4">Aucun mouvement</td></tr>

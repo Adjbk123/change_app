@@ -35,15 +35,16 @@
                 <div class="card mt-3">
                     <div class="card-body">
                         <h4>Comptes Clients Liés ({{ profil_client.compteClients|length }})</h4>
+                        <a href="{{ path('app_profil_client_releve', {'id': profil_client.id}) }}" class="btn btn-outline-success mb-3" target="_blank">
+                            <i class="bi bi-download me-1"></i> Télécharger le relevé du profil
+                        </a>
                         {% if profil_client.compteClients is not empty %}
                             <table class="table">
                                 <thead>
                                 <tr>
                                     <th>ID Compte</th>
-                                    <th>Numéro de Compte</th>
+
                                     <th>Solde</th>
-                                    <th>Type de Compte</th>
-                                    <th>Statut</th>
                                     <th>Actions</th>
                                 </tr>
                                 </thead>
@@ -51,11 +52,11 @@
                                 {% for compteClient in profil_client.compteClients %}
                                     <tr>
                                         <td>{{ compteClient.id }}</td>
-                                        <td>{{ compteClient.numeroCompte }}</td>
-                                        <td>{{ compteClient.solde|number_format(2, ',', ' ') }} F CFA</td>
-                                        <td>{{ compteClient.typeCompte.libelle }}</td>
-                                        <td>{% if compteClient.isActif %} Actif {% else %} Inactif {% endif %}</td>
-                                        <td><a href="{{ path('app_compte_client_show', {'id': compteClient.id}) }}" class="btn btn-info">Voir</a></td>
+
+                                        <td>{{ compteClient.soldeActuel|number_format(2, ',', ' ') }} F CFA</td>
+                                        <td>
+                                            <a href="{{ path('app_compte_client_show', {'id': compteClient.id}) }}" class="btn btn-info">Voir</a>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>

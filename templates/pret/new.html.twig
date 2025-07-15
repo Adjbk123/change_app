@@ -1,11 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Pret{% endblock %}
+{% block title %}Enregistrer un prêt{% endblock %}
+{% block button %}
+    <a href="{{ path('app_pret_index') }}" class="btn btn-outline-primary">Retour à la liste</a>
+{% endblock %}
 
 {% block body %}
-    <h1>Create new Pret</h1>
+
 
     {{ include('pret/_form.html.twig') }}
 
-    <a href="{{ path('app_pret_index') }}">back to list</a>
+
 {% endblock %}

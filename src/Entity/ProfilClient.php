@@ -261,4 +261,8 @@ class ProfilClient
 
         return $this;
     }
+    public function __toString(): string
+    {
+        return  $this->client->getNom().' '. $this->client->getPrenoms().' | '.$this->getTypeClient()->getLibelle()." | ".$this->numeroProfilCompte;
+    }
 }
