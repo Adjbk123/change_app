@@ -4,6 +4,27 @@
 
 {% block body %}
 <div class="row g-gs">
+    <!-- Section pour les alertes -->
+    {% if data.alerts is defined and data.alerts|length > 0 %}
+        <div class="row g-gs mt-4">
+            <div class="col-lg-12">
+                <div class="card card-bordered">
+                    <div class="card-inner">
+                        <div class="card-title-group align-start mb-3">
+                            <div class="card-title">
+                                <h6 class="title">Alertes</h6>
+                            </div>
+                        </div>
+                        <ul class="list-group">
+                            {% for alert in data.alerts %}
+                                <li class="list-group-item text-danger">{{ alert.message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
     <!-- Carte Solde actuel par devise -->
     <div class="col-lg-4">
         <div class="card card-bordered h-100">
@@ -115,27 +136,7 @@
     </div>
 </div>
 
-<!-- Section pour les alertes -->
-{% if data.alerts is defined and data.alerts|length > 0 %}
-<div class="row g-gs mt-4">
-    <div class="col-lg-12">
-        <div class="card card-bordered">
-            <div class="card-inner">
-                <div class="card-title-group align-start mb-3">
-                    <div class="card-title">
-                        <h6 class="title">Alertes</h6>
-                    </div>
-                </div>
-                <ul class="list-group">
-                    {% for alert in data.alerts %}
-                        <li class="list-group-item text-danger">{{ alert.message }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
+
 {% endblock %}
 
 {% block javascripts %}
