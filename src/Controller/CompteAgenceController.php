@@ -40,6 +40,7 @@ final class CompteAgenceController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $compteAgence->setSoldeInitial(0);
             $compteAgence->setSoldeRestant(0);
+            $compteAgence->setAgence($this->getUser()->getAgence());
             $entityManager->persist($compteAgence);
             $entityManager->flush();
 
