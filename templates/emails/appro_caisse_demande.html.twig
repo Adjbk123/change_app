@@ -1,0 +1,14 @@
+{% extends 'emails/_base_email.html.twig' %}
+
+{% block title %}Nouvelle demande d'approvisionnement caisse{% endblock %}
+
+{% block body %}
+<p>Bonjour {{ responsable.prenoms }} {{ responsable.nom }},</p>
+<p>Une nouvelle demande d'approvisionnement a été soumise pour la caisse <strong>{{ approCaisse.caisse.nom }}</strong> de l'agence <strong>{{ approCaisse.caisse.agence.nom }}</strong>.</p>
+<ul>
+    <li><strong>Montant :</strong> {{ approCaisse.montant|number_format(0, ',', ' ') }} {{ approCaisse.devise.codeIso }}</li>
+    <li><strong>Demandeur :</strong> {{ approCaisse.demandeur.prenoms }} {{ approCaisse.demandeur.nom }}</li>
+    <li><strong>Date de la demande :</strong> {{ approCaisse.dateDemande ? approCaisse.dateDemande|date('d/m/Y H:i') : 'N/A' }}</li>
+</ul>
+<p>Merci de vous connecter à la plateforme pour traiter cette demande.</p>
+{% endblock %} 

@@ -40,4 +40,21 @@ class AffectationAgenceRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * Retourne le responsable actif d'une agence (AffectationAgence)
+     */
+    public function findActiveResponsableByAgence($agence)
+    {
+        $qb = $this->createQueryBuilder('a');
+        $qb->where('a.agence = :agence')
+            ->andWhere('a.roleInterne = :role')
+            ->andWhere('a.actif = true')
+            ->andWhere('a.dateDebut <= :now')
+            ->andWhere($qb->expr()->orX('a.dateFin IS NULL', 'a.dateFin >= :now'))
+            ->setParameter('agence', $agence)
+            ->setParameter('role', 'ROLE_RESPONSABLE')
+            ->setParameter('now', new \DateTime());
+        return $qb->getQuery()->getOneOrNullResult();
+    }
 }

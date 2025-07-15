@@ -6,6 +6,7 @@ use App\Entity\ApproCaisse;
 use App\Entity\MouvementCaisse;
 use App\Form\ApproCaisseForm;
 use App\Repository\ApproCaisseRepository;
+use App\Repository\AffectationAgenceRepository;
 use App\Service\CaisseService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,6 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Mime\Address;
 
 #[Route('/appro-caisse')]
 final class ApproCaisseController extends AbstractController
@@ -179,7 +183,7 @@ final class ApproCaisseController extends AbstractController
     }
 
     #[Route('/new', name: 'app_appro_caisse_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, AffectationAgenceRepository $affectationAgenceRepository, MailerInterface $mailer): Response
     {
         $approCaisse = new ApproCaisse();
         $form = $this->createForm(ApproCaisseForm::class, $approCaisse);
@@ -188,6 +192,25 @@ final class ApproCaisseController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($approCaisse);
             $entityManager->flush();
+
+            // Envoi d'un mail au responsable de l'agence
+            $agence = $approCaisse->getCaisse()?->getAgence();
+            if ($agence) {
+                $affectation = $affectationAgenceRepository->findActiveResponsableByAgence($agence);
+                $responsable = $affectation?->getUser();
+                if ($responsable && $responsable->getEmail()) {
+                    $email = (new TemplatedEmail())
+                        ->from(new Address('contact@retouralasource-fx.com', 'MySwap'))
+                        ->to($responsable->getEmail())
+                        ->subject('Nouvelle demande d\'approvisionnement caisse')
+                        ->htmlTemplate('emails/appro_caisse_demande.html.twig')
+                        ->context([
+                            'responsable' => $responsable,
+                            'approCaisse' => $approCaisse,
+                        ]);
+                    $mailer->send($email);
+                }
+            }
 
             return $this->redirectToRoute('app_appro_caisse_index', [], Response::HTTP_SEE_OTHER);
         }
