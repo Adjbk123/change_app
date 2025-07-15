@@ -41,7 +41,7 @@
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                 <tr>
-                    <th>Nom du compte</th>
+                    <th>Devise du compte</th>
                     <th>Solde initial</th>
                     <th>Solde restant</th>
                     <th>Seuil Alerte</th>
@@ -52,8 +52,8 @@
                 {% for compteCaisse in caisse.compteCaisses %}
                     <tr>
                         <td>{{ compteCaisse.devise.nom }}</td>
-                        <td>{{ compteCaisse.soldeInitial | number_format(0, '.', ' ') }} {{ compteCaisse.devise.codeIso }}</td>
-                        <td>{{ compteCaisse.soldeRestant | number_format(0, '.', ' ') }} {{ compteCaisse.devise.codeIso }}</td>
+                        <td>{{ compteCaisse.soldeInitial | number_format(0, '.', ' ') }} </td>
+                        <td>{{ compteCaisse.soldeRestant | number_format(0, '.', ' ') }}</td>
                         <td>{{ compteCaisse.seuilAlerte | number_format(0, '.', ' ') }} {{ compteCaisse.devise.codeIso }}</td>
                         <td>
                             <a href="{{ path('app_compte_caisse_show', {'id': compteCaisse.id}) }}"
