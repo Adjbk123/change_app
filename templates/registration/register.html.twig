@@ -33,9 +33,36 @@
     <fieldset>
         <legend class="border-primary border-start border-3 ps-2 h3">Mot de passe de connexion</legend>
         <hr>
-        {{ form_row(registrationForm.plainPassword) }}
+        <div id="password-fields-wrapper">
+            {{ form_row(registrationForm.plainPassword) }}
+            <button type="button" class="btn btn-outline-secondary mt-2" id="toggle-password-visibility">
+                <span id="toggle-password-icon" class="bi bi-eye"></span> Afficher/Masquer le mot de passe
+            </button>
+        </div>
     </fieldset>
 
     <button type="submit" class="btn btn-primary">Ajouter le compte</button>
     {{ form_end(registrationForm) }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleBtn = document.getElementById('toggle-password-visibility');
+            const icon = document.getElementById('toggle-password-icon');
+            // Sélectionne les deux champs password générés par le RepeatedType
+            const passwordFields = document.querySelectorAll('input[type="password"], input[type="text"]');
+            let shown = false;
+            toggleBtn.addEventListener('click', function () {
+                shown = !shown;
+                passwordFields.forEach(function (input) {
+                    if (input.name.includes('plainPassword')) {
+                        input.type = shown ? 'text' : 'password';
+                    }
+                });
+                icon.className = shown ? 'bi bi-eye-slash' : 'bi bi-eye';
+            });
+        });
+    </script>
 {% endblock %}
