@@ -234,8 +234,8 @@ final class OperationController extends AbstractController
                 return $this->redirectToRoute('app_operation_new', ['type' => 'achat_vente']);
             }
 
-            $compteCaisseSource->setSoldeRestant($compteCaisseSource->getSoldeRestant() + $montantSource);
-            $compteCaisseCible->setSoldeRestant($compteCaisseCible->getSoldeRestant() - $montantCible);
+            $compteCaisseSource->setSoldeRestant($compteCaisseSource->getSoldeRestant() - $montantSource);
+            $compteCaisseCible->setSoldeRestant($compteCaisseCible->getSoldeRestant() + $montantCible);
 
             $operation->setSens("ENTREE"); // Sens de l'opération du point de vue de l'agence (reçoit deviseSource)
 
@@ -253,8 +253,8 @@ final class OperationController extends AbstractController
                 return $this->redirectToRoute('app_operation_new', ['type' => 'achat_vente']);
             }
 
-            $compteCaisseSource->setSoldeRestant($compteCaisseSource->getSoldeRestant() - $montantSource);
-            $compteCaisseCible->setSoldeRestant($compteCaisseCible->getSoldeRestant() + $montantCible);
+            $compteCaisseSource->setSoldeRestant($compteCaisseSource->getSoldeRestant() + $montantSource);
+            $compteCaisseCible->setSoldeRestant($compteCaisseCible->getSoldeRestant() - $montantCible);
 
             $operation->setSens("SORTIE"); // Sens de l'opération du point de vue de l'agence (donne deviseCible)
         }
