@@ -45,7 +45,11 @@ final class AffectationCaisseController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $affectationCaisse = new AffectationCaisse();
-        $form = $this->createForm(AffectationCaisseForm::class, $affectationCaisse);
+        $user = $this->getUser();
+        $agence = method_exists($user, 'getAgence') ? $user->getAgence() : null;
+        $form = $this->createForm(AffectationCaisseForm::class, $affectationCaisse, [
+            'agence' => $agence
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

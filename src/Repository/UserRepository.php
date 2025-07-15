@@ -33,6 +33,20 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
+    /**
+     * Retourne les utilisateurs de l'agence ayant le rôle ROLE_CAISSE
+     */
+    public function findCaissiersByAgence($agence)
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.agence = :agence')
+            ->andWhere('u.roles LIKE :role')
+            ->setParameter('agence', $agence)
+            ->setParameter('role', '%ROLE_CAISSE%')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */

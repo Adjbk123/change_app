@@ -35,11 +35,15 @@ class AffectationAgenceForm extends AbstractType
                     return $user->getNomComplet();
                 },
                 'query_builder' => function (UserRepository $ur) use ($agence) {
-                    return $ur->createQueryBuilder('u')
-                        ->andWhere('u.agence = :agence')
-                        ->andWhere('JSON_CONTAINS(u.roles, :role) = 1')
-                        ->setParameter('agence', $agence)
-                        ->setParameter('role', '"ROLE_CAISSE"');
+                    $ids = array_map(function($u) { return $u->getId(); }, $ur->findCaissiersByAgence($agence));
+                    $qb = $ur->createQueryBuilder('u');
+                    if (count($ids) > 0) {
+                        $qb->andWhere($qb->expr()->in('u.id', ':ids'));
+                        $qb->setParameter('ids', $ids);
+                    } else {
+                        $qb->andWhere('1=0'); // Aucun résultat
+                    }
+                    return $qb;
                 },
                 'placeholder' => '-- Sélectionner un caissier --',
             ])
