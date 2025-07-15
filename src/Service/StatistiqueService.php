@@ -238,11 +238,14 @@ class StatistiqueService
 
         // 6. Alertes de seuils faibles (pour toutes les caisses de l'agence)
         $alerts = [];
-        foreach ($comptesCaisses as $compteCaisse) {
+        foreach (
+            $comptesCaisses as $compteCaisse) {
             if ($compteCaisse->getSoldeRestant() < $compteCaisse->getSeuilAlerte()) {
                 $alerts[] = [
                     'type' => 'danger',
-                    'message' => "Solde faible pour la caisse '{$compteCaisse->getCaisse()->getLibelle()}' en {$compteCaisse->getDevise()->getCodeIso()} : " . number_format((float)$compteCaisse->getSoldeRestant(), 2, ',', ' ') . " (seuil : " . number_format((float)$compteCaisse->getSeuilAlerte(), 2, ',', ' ') . ").",
+                    'message' => "Solde faible pour la caisse '{$compteCaisse->getCaisse()->getNom()}' en {$compteCaisse->getDevise()->getCodeIso()} : " . number_format((float)
+                        $compteCaisse->getSoldeRestant(), 2, ',', ' ') . " (seuil : " . number_format((float)
+                        $compteCaisse->getSeuilAlerte(), 2, ',', ' ') . ").",
                     'deviseCode' => $compteCaisse->getDevise()->getCodeIso()
                 ];
             }
