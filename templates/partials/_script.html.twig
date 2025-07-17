@@ -26,11 +26,10 @@
         });
     });
 </script>
-
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
+    OneSignalDeferred.push(async function (OneSignal) {
         await OneSignal.init({
             appId: "21bf691f-ee9d-4d3a-8c40-b15d1a98ebbd",
             safari_web_id: "web.onesignal.auto.5ccade99-0f35-4775-9ae0-5e2c3bfd110b",
@@ -38,39 +37,47 @@
                 enable: true,
             },
         });
-        console.log("OneSignal initialisé");
 
-        // Demande la permission d'envoyer des notifications
-        OneSignal.showSlidedownPrompt();
+        console.log("✅ OneSignal initialisé");
 
-        // Ecoute les changements d’abonnement
-        OneSignal.on('subscriptionChange', async (isSubscribed) => {
-            console.log('Subscription changed:', isSubscribed);
-            if (isSubscribed) {
-                const pushToken = await OneSignal.getUserId();
-                console.log('Push Token récupéré:', pushToken);
-                if (pushToken) {
-                    // Envoie le token à ton backend Symfony
-                    fetch('/user/api/save-push-token', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: JSON.stringify({ pushToken })
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                console.error('Erreur envoi token au backend');
-                            } else {
-                                console.log('Token envoyé au backend avec succès');
-                            }
-                        })
-                        .catch(err => {
-                            console.error('Erreur fetch:', err);
-                        });
-                }
+        // Vérifie si l'utilisateur est déjà abonné
+        const deviceState = await OneSignal.getDeviceState();
+        console.log("🔍 DeviceState:", deviceState);
+
+        if (deviceState.isSubscribed && deviceState.userId) {
+            console.log("🔑 Token déjà présent:", deviceState.userId);
+            sendTokenToBackend(deviceState.userId);
+        } else {
+            console.log("🔔 Demande de permission...");
+            await OneSignal.User.PushSubscription.request();
+
+            const newState = await OneSignal.getDeviceState();
+            console.log("🆕 Nouveau device state:", newState);
+
+            if (newState.isSubscribed && newState.userId) {
+                console.log("✅ Souscription ok, token:", newState.userId);
+                sendTokenToBackend(newState.userId);
+            } else {
+                console.warn("⚠️ L'utilisateur n'a pas accepté les notifs ou token indisponible");
             }
-        });
+        }
+
+        function sendTokenToBackend(token) {
+            fetch('/user/api/save-push-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ pushToken: token })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Erreur HTTP");
+                    console.log("📬 Token envoyé au backend !");
+                })
+                .catch(err => {
+                    console.error("❌ Erreur lors de l'envoi du token:", err);
+                });
+        }
     });
 </script>
