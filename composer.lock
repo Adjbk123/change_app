@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d326427f40cb2d87204134fd64aa6bf7",
+    "content-hash": "f77225bdc389bc097dd5cd310ff9cc66",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4202,6 +4202,73 @@
             "time": "2024-12-30T19:00:26+00:00"
         },
         {
+            "name": "symfony/firebase-notifier",
+            "version": "v7.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/firebase-notifier.git",
+                "reference": "b993cef339b685308a8427f463fe2a74ac90b98b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/firebase-notifier/zipball/b993cef339b685308a8427f463fe2a74ac90b98b",
+                "reference": "b993cef339b685308a8427f463fe2a74ac90b98b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2",
+                "symfony/http-client": "^6.4|^7.0",
+                "symfony/notifier": "^7.2"
+            },
+            "type": "symfony-notifier-bridge",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Notifier\\Bridge\\Firebase\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jeroen Spee",
+                    "homepage": "https://github.com/Jeroeny"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Firebase Notifier Bridge",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "firebase",
+                "notifier"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/firebase-notifier/tree/v7.3.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-09-27T08:38:14+00:00"
+        },
+        {
             "name": "symfony/flex",
             "version": "v2.7.1",
             "source": {
@@ -5628,73 +5695,6 @@
                 }
             ],
             "time": "2025-05-01T12:12:53+00:00"
-        },
-        {
-            "name": "symfony/one-signal-notifier",
-            "version": "v7.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/one-signal-notifier.git",
-                "reference": "76b4cb15b4857a09d2f7c0f138de4034a86630e4"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/one-signal-notifier/zipball/76b4cb15b4857a09d2f7c0f138de4034a86630e4",
-                "reference": "76b4cb15b4857a09d2f7c0f138de4034a86630e4",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=8.2",
-                "symfony/http-client": "^6.4|^7.0",
-                "symfony/notifier": "^7.2"
-            },
-            "type": "symfony-notifier-bridge",
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Component\\Notifier\\Bridge\\OneSignal\\": ""
-                },
-                "exclude-from-classmap": [
-                    "/Tests/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Tomas Norkūnas",
-                    "email": "norkunas.tom@gmail.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Symfony OneSignal Notifier Bridge",
-            "homepage": "https://symfony.com",
-            "keywords": [
-                "notifier",
-                "onesignal"
-            ],
-            "support": {
-                "source": "https://github.com/symfony/one-signal-notifier/tree/v7.3.0"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2024-09-27T08:38:14+00:00"
         },
         {
             "name": "symfony/options-resolver",

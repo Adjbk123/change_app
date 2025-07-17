@@ -26,58 +26,49 @@
         });
     });
 </script>
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function (OneSignal) {
-        await OneSignal.init({
-            appId: "812334c3-d694-4b79-ab77-11ee1bee458e",
-            safari_web_id: "web.onesignal.auto.14c8c5b3-a149-48e9-849f-677a5e5d7747",
-            notifyButton: { enable: true },
-        });
 
-        console.log("✅ OneSignal initialisé (v16+)");
 
-        // Vérifie si l'utilisateur est déjà abonné
-        const optedIn = OneSignal.User.PushSubscription.optedIn;
-        const pushToken = OneSignal.User.PushSubscription.token;
-        console.log("🔍 optedIn:", optedIn, "pushToken:", pushToken);
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-messaging.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
 
-        if (optedIn && pushToken) {
-            console.log("🔑 Token déjà présent:", pushToken);
-            sendTokenToBackend(pushToken);
-        } else {
-            console.log("🔔 Demande de permission...");
-            await OneSignal.Notifications.requestPermission();
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+        apiKey: "AIzaSyDbypnETo3JdYQXsQSuL3VVLMNI-FA_Epk",
+        authDomain: "myswap-466213.firebaseapp.com",
+        projectId: "myswap-466213",
+        storageBucket: "myswap-466213.firebasestorage.app",
+        messagingSenderId: "357745833295",
+        appId: "1:357745833295:web:fb2a44f72dd903a643813a",
+        measurementId: "G-NK6RJMXHES"
+    };
 
-            // Après la demande, relire les propriétés
-            const optedInNow = OneSignal.User.PushSubscription.optedIn;
-            const newToken = OneSignal.User.PushSubscription.token;
-            console.log("🆕 optedIn:", optedInNow, "pushToken:", newToken);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
 
-            if (optedInNow && newToken) {
-                console.log("✅ Souscription ok, token:", newToken);
-                sendTokenToBackend(newToken);
-            } else {
-                console.warn("⚠️ L'utilisateur n'a pas accepté les notifs ou token indisponible");
-            }
-        }
-
-        function sendTokenToBackend(token) {
-            fetch('/user/api/save-push-token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ pushToken: token })
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error("Erreur HTTP");
-                    console.log("📬 Token envoyé au backend !");
-                })
-                .catch(err => {
-                    console.error("❌ Erreur lors de l'envoi du token:", err);
+    Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+            getToken(messaging, { vapidKey: 'BMtXF--PCB8wU3GSMOImB9j90CWfujVX7UkGu5Nap-x-97Qki7WuQCsHkzMIfwzagv0rIJj3231eWw4jL-yWpac' })
+                .then((token) => {
+                    console.log("Token FCM : ", token);
+                    // Envoie le token à ton backend
+                    fetch('/user/api/save-push-token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ pushToken: token })
+                    }).then(() => {
+                        console.log('📬 Token FCM envoyé au backend !');
+                    });
+                }).catch((err) => {
+                    console.error("Erreur récupération token : ", err);
                 });
         }
     });

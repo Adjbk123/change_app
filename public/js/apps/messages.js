@@ -1,4 +1,4 @@
-!(function (NioApp, $) {
+Oui!(function (NioApp, $) {
     "use strict";
 
     var $win = $(window), $body = $('body'), breaks = NioApp.Break;

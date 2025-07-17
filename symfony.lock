@@ -126,6 +126,15 @@
             "./config/packages/debug.yaml"
         ]
     },
+    "symfony/firebase-notifier": {
+        "version": "7.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "5.1",
+            "ref": "653cce5c9e02ab91f9c0cf67ebff02c4a297f493"
+        }
+    },
     "symfony/flex": {
         "version": "2.7",
         "recipe": {
@@ -239,15 +248,6 @@
         "files": [
             "./config/packages/notifier.yaml"
         ]
-    },
-    "symfony/one-signal-notifier": {
-        "version": "7.3",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "5.4",
-            "ref": "75ad83b16ef1b68c7d54cf1502e4d9d958412640"
-        }
     },
     "symfony/property-info": {
         "version": "7.3",
