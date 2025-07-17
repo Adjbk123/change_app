@@ -13,7 +13,7 @@ class FcmNotificationService
     public function __construct(HttpClientInterface $httpClient)
     {
         $this->httpClient = $httpClient;
-        $this->projectId = 'ton-project-id'; // <-- À remplacer par ton vrai project_id
+        $this->projectId = 'myswap-466213'; // project_id corrigé
         $this->credentialsPath = __DIR__.'/../../config/myswap-466213-firebase-adminsdk-fbsvc-d6d3c85900.json'; // <-- Chemin adapté au nom réel du fichier
     }
 
