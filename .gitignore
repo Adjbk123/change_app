@@ -17,4 +17,5 @@
 
 ###> symfony/asset-mapper ###
 /assets/vendor/
+/config/myswap-466213-firebase-adminsdk-fbsvc-d6d3c85900.json
 ###< symfony/asset-mapper ###
