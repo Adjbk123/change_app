@@ -14,7 +14,7 @@ class FcmNotificationService
     {
         $this->httpClient = $httpClient;
         $this->projectId = 'ton-project-id'; // <-- À remplacer par ton vrai project_id
-        $this->credentialsPath = __DIR__.'/../../config/firebase-service-account.json'; // <-- À adapter si besoin
+        $this->credentialsPath = __DIR__.'/../../config/myswap-466213-firebase-adminsdk-fbsvc-d6d3c85900.json'; // <-- Chemin adapté au nom réel du fichier
     }
 
     private function getAccessToken(): string
