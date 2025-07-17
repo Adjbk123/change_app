@@ -144,6 +144,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
     #[ORM\OneToMany(targetEntity: Remboursement::class, mappedBy: 'agent')]
     private Collection $remboursements;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $pushToken = null;
+
     public function __construct()
     {
         $this->affectationAgences = new ArrayCollection();
@@ -783,6 +786,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Email2F
                 $remboursement->setAgent(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPushToken(): ?string
+    {
+        return $this->pushToken;
+    }
+
+    public function setPushToken(?string $pushToken): static
+    {
+        $this->pushToken = $pushToken;
 
         return $this;
     }

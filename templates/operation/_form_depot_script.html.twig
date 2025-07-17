@@ -157,30 +157,9 @@
                 }
                 feedbackDiv.innerHTML = `<div class="alert alert-info">${feedbackMsg}</div>`;
 
-                if (isConversion) {
-                    const balanceResponse = await fetch(checkBalanceUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                        body: JSON.stringify({ devise: deviseCibleCompteId, montant: montantFinal })
-                    });
-
-                    if (!balanceResponse.ok) {
-                        throw new Error(`Erreur HTTP ${balanceResponse.status} lors de la vérification du solde de caisse.`);
-                    }
-
-                    const balanceData = await balanceResponse.json();
-
-                    if (balanceData.sufficient) {
+                // SUPPRIMÉ : Vérification du solde caisse pour le dépôt classique ou conversion
                         submitButton.disabled = false;
-                        feedbackDiv.innerHTML += `<div class="alert alert-success mt-1 p-2"><i class="fas fa-check-circle me-1"></i>Solde caisse suffisant pour le crédit en ${deviseCibleCompteCode}.</div>`;
-                    } else {
-                        feedbackDiv.innerHTML += `<div class="alert alert-danger mt-1 p-2"><i class="fas fa-times-circle me-1"></i><strong>Attention :</strong> ${balanceData.message || `Solde caisse insuffisant pour créditer ${montantFinal.toFixed(2)} ${deviseCibleCompteCode}.`}</div>`;
-                        submitButton.disabled = true;
-                    }
-                } else {
-                    submitButton.disabled = false;
-                    feedbackDiv.innerHTML += `<div class="alert alert-success mt-1 p-2"><i class="fas fa-check-circle me-1"></i>Dépôt possible (entrée caisse).</div>`;
-                }
+                feedbackDiv.innerHTML += `<div class="alert alert-success mt-1 p-2"><i class="fas fa-check-circle me-1"></i>Dépôt possible.</div>`;
 
             } catch (error) {
                 console.error("Erreur dans updateDepotDetails:", error);

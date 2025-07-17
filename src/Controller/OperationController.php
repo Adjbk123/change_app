@@ -518,23 +518,7 @@ final class OperationController extends AbstractController
                 $compteCaisseApportee->setSoldeRestant($compteCaisseApportee->getSoldeRestant() + $montantApporte);
                 $entityManager->persist($compteCaisseApportee);
 
-                // Mouvement de caisse pour la devise cible (SORTIE)
-                $compteCaisseCible = $caisseService->getCompteCaisse($user, $deviseCibleCompte);
-                if (!$compteCaisseCible) {
-                    throw new \Exception("Aucun compte caisse disponible pour la devise cible " . $deviseCibleCompte->getCodeIso());
-                }
-                if ($compteCaisseCible->getSoldeRestant() < $montantConverti) {
-                    throw new \Exception("Solde caisse insuffisant en " . $deviseCibleCompte->getCodeIso() . " pour la conversion.");
-                }
-                $mouvementCibleCaisse = new MouvementCaisse();
-                $mouvementCibleCaisse->setCompteCaisse($compteCaisseCible);
-                $mouvementCibleCaisse->setTypeMouvement("SORTIE");
-                $mouvementCibleCaisse->setMontant($montantConverti);
-                $mouvementCibleCaisse->setDateMouvement(new DateTimeImmutable());
-                $entityManager->persist($mouvementCibleCaisse);
-
-                $compteCaisseCible->setSoldeRestant($compteCaisseCible->getSoldeRestant() - $montantConverti);
-                $entityManager->persist($compteCaisseCible);
+                // SUPPRIMÉ : Mouvement de caisse SORTIE et décrémentation de la caisse cible (inutile pour un dépôt)
 
                 $entityManager->persist($operationAchat);
 

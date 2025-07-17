@@ -36,8 +36,8 @@
             <tr>
                 <td>{{ loop.index }}</td>
                 <td>{{ operation.typeOperation }}</td>
-                <td>{{ operation.montantSource }} {{ operation.deviseSource.codeIso }}</td>
-                <td>{{ operation.montantCible }} {{ operation.deviseCible.codeIso }}</td>
+                <td>{{ operation.montantSource|number_format(0, ',', ' ') }} {{ operation.deviseSource.codeIso }}</td>
+                <td>{{ operation.montantCible|number_format(0, ',', ' ') }} {{ operation.deviseCible.codeIso }}</td>
                 <td>{{ operation.taux }}</td>
                 <td>{{ operation.sens }}</td>
                 <td>{{ operation.createdAt ? operation.createdAt|date('Y-m-d H:i:s') : '' }}</td>

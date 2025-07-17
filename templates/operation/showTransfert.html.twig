@@ -30,11 +30,11 @@
         </tr>
         <tr>
             <th>Montant Source</th>
-            <td>{{ operation.montantSource }} {{ operation.deviseSource.codeIso }}</td>
+            <td>{{ operation.montantSource|number_format(0, ',', ' ') }} {{ operation.deviseSource.codeIso }}</td>
         </tr>
         <tr>
             <th>Montant Cible</th>
-            <td>{{ operation.montantCible }} {{ operation.deviseCible.codeIso }}</td>
+            <td>{{ operation.montantCible|number_format(0, ',', ' ') }} {{ operation.deviseCible.codeIso }}</td>
         </tr>
         <tr>
             <th>Taux utilisé</th>

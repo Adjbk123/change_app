@@ -43,8 +43,8 @@
                 <td>{{ operation.typeOperation }}</td>
                 <td>{{ operation.profilClient ? operation.profilClient.client.nomComplet : 'N/A' }}</td>
                 <td>{{ operation.beneficiaire ? operation.beneficiaire.nomComplet : 'N/A' }}</td>
-                <td>{{ operation.montantSource }} {{ operation.deviseSource.codeIso }}</td>
-                <td>{{ operation.montantCible }} {{ operation.deviseCible.codeIso }}</td>
+                <td>{{ operation.montantSource|number_format(0, ',', ' ') }} {{ operation.deviseSource.codeIso }}</td>
+                <td>{{ operation.montantCible|number_format(0, ',', ' ') }} {{ operation.deviseCible.codeIso }}</td>
                 <td>{{ operation.deviseCible.codeIso }}</td> {# Afficher la devise cible pour le transfert #}
                 <td>{{ operation.createdAt ? operation.createdAt|date('Y-m-d H:i:s') : '' }}</td>
                 <td>

@@ -7,6 +7,8 @@ use App\Form\UserForm;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -22,6 +24,25 @@ final class UserController extends AbstractController
         return $this->render('user/index.html.twig', [
             'users' => $userRepository->findAll(),
         ]);
+    }
+    #[Route('/api/save-push-token', name: 'save_push_token', methods: ['POST'])]
+    public function savePushToken(Request $request, EntityManagerInterface $em, Security $security): JsonResponse
+    {
+        $user = $security->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'Non authentifié'], 401);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        if (!isset($data['pushToken'])) {
+            return $this->json(['error' => 'Token manquant'], 400);
+        }
+
+        $user->setPushToken($data['pushToken']);
+        $em->persist($user);
+        $em->flush();
+
+        return $this->json(['success' => true]);
     }
     #[Route('/user/{id}/toggle-status', name: 'app_user_toggle_status', methods: ['POST'])]
     public function toggleStatus(User $user, Request $request, EntityManagerInterface $entityManager, CsrfTokenManagerInterface $csrfTokenManager): Response
