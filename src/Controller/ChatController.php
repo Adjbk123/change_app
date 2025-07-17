@@ -17,6 +17,7 @@ use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 use Firebase\JWT\JWT;
 use App\Service\PushNotificationService;
+use App\Service\FcmNotificationService;
 
 #[Route('/chat')]
 class ChatController extends AbstractController
@@ -82,7 +83,7 @@ class ChatController extends AbstractController
     }
 
     #[Route('/discussion/{id}/message', name: 'chat_send_message', methods: ['POST'])]
-    public function sendMessage(Discussion $discussion, Request $request, EntityManagerInterface $em, HubInterface $hub, PushNotificationService $pushService): JsonResponse
+    public function sendMessage(Discussion $discussion, Request $request, EntityManagerInterface $em, FcmNotificationService $fcmService): JsonResponse
     {
         $user = $this->getUser();
         $data = json_decode($request->getContent(), true);
@@ -99,15 +100,14 @@ class ChatController extends AbstractController
         $em->persist($message);
         $em->flush();
 
-        // SUPPRIMÉ : Publication de l'événement Mercure
-
         // Déterminer le destinataire (l'autre utilisateur de la discussion)
         $destinataire = ($discussion->getUser1() && $discussion->getUser1()->getId() !== $user->getId()) ? $discussion->getUser1() : $discussion->getUser2();
         if ($destinataire && $destinataire->getPushToken()) {
-            $pushService->sendPush(
+            $fcmService->sendPush(
                 $destinataire->getPushToken(),
                 'Nouveau message',
-                'Vous avez reçu un message de ' . $user->getNomComplet()
+                'Vous avez reçu un message de ' . $user->getNomComplet(),
+                ['discussionId' => $discussion->getId()]
             );
         }
 
