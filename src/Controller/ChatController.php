@@ -16,6 +16,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 use Firebase\JWT\JWT;
+use App\Service\PushNotificationService;
 
 #[Route('/chat')]
 class ChatController extends AbstractController
@@ -81,7 +82,7 @@ class ChatController extends AbstractController
     }
 
     #[Route('/discussion/{id}/message', name: 'chat_send_message', methods: ['POST'])]
-    public function sendMessage(Discussion $discussion, Request $request, EntityManagerInterface $em, HubInterface $hub): JsonResponse
+    public function sendMessage(Discussion $discussion, Request $request, EntityManagerInterface $em, HubInterface $hub, PushNotificationService $pushService): JsonResponse
     {
         $user = $this->getUser();
         $data = json_decode($request->getContent(), true);
@@ -111,6 +112,17 @@ class ChatController extends AbstractController
             ])
         );
         $hub->publish($update);
+
+        // Déterminer le destinataire (l'autre utilisateur de la discussion)
+        $destinataire = ($discussion->getUser1() && $discussion->getUser1()->getId() !== $user->getId()) ? $discussion->getUser1() : $discussion->getUser2();
+        if ($destinataire && $destinataire->getPushToken()) {
+            $pushService->sendPush(
+                $destinataire->getPushToken(),
+                'Nouveau message',
+                'Vous avez reçu un message de ' . $user->getNomComplet()
+            );
+        }
+
         return $this->json(['success' => true]);
     }
 
