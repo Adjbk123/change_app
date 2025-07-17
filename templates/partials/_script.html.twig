@@ -33,30 +33,30 @@
         await OneSignal.init({
             appId: "21bf691f-ee9d-4d3a-8c40-b15d1a98ebbd",
             safari_web_id: "web.onesignal.auto.5ccade99-0f35-4775-9ae0-5e2c3bfd110b",
-            notifyButton: {
-                enable: true,
-            },
+            notifyButton: { enable: true },
         });
 
-        console.log("✅ OneSignal initialisé");
+        console.log("✅ OneSignal initialisé (v16+)");
 
         // Vérifie si l'utilisateur est déjà abonné
-        const deviceState = await OneSignal.getDeviceState();
-        console.log("🔍 DeviceState:", deviceState);
+        const isSubscribed = await OneSignal.User.PushSubscription.isSubscribed();
+        const pushToken = await OneSignal.User.PushSubscription.getToken();
+        console.log("🔍 isSubscribed:", isSubscribed, "pushToken:", pushToken);
 
-        if (deviceState.isSubscribed && deviceState.userId) {
-            console.log("🔑 Token déjà présent:", deviceState.userId);
-            sendTokenToBackend(deviceState.userId);
+        if (isSubscribed && pushToken) {
+            console.log("🔑 Token déjà présent:", pushToken);
+            sendTokenToBackend(pushToken);
         } else {
             console.log("🔔 Demande de permission...");
             await OneSignal.User.PushSubscription.request();
 
-            const newState = await OneSignal.getDeviceState();
-            console.log("🆕 Nouveau device state:", newState);
+            const isSubscribedNow = await OneSignal.User.PushSubscription.isSubscribed();
+            const newToken = await OneSignal.User.PushSubscription.getToken();
+            console.log("🆕 isSubscribed:", isSubscribedNow, "pushToken:", newToken);
 
-            if (newState.isSubscribed && newState.userId) {
-                console.log("✅ Souscription ok, token:", newState.userId);
-                sendTokenToBackend(newState.userId);
+            if (isSubscribedNow && newToken) {
+                console.log("✅ Souscription ok, token:", newToken);
+                sendTokenToBackend(newToken);
             } else {
                 console.warn("⚠️ L'utilisateur n'a pas accepté les notifs ou token indisponible");
             }
