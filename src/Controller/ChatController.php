@@ -99,19 +99,7 @@ class ChatController extends AbstractController
         $em->persist($message);
         $em->flush();
 
-        // Publier l'événement Mercure
-        $update = new Update(
-            sprintf('/chat/discussion/%d', $discussion->getId()),
-            json_encode([
-                'id' => $message->getId(),
-                'auteur' => $user ? $user->getNomComplet() : '',
-                'contenu' => $message->getContenu(),
-                'type' => $message->getType(),
-                'createdAt' => $message->getCreatedAt()->format('c'),
-                'isMe' => true,
-            ])
-        );
-        $hub->publish($update);
+        // SUPPRIMÉ : Publication de l'événement Mercure
 
         // Déterminer le destinataire (l'autre utilisateur de la discussion)
         $destinataire = ($discussion->getUser1() && $discussion->getUser1()->getId() !== $user->getId()) ? $discussion->getUser1() : $discussion->getUser2();
