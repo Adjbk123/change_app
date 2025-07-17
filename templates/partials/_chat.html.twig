@@ -293,68 +293,11 @@ function loadDiscussions(callback) {
     });
 }
 
-// === Mercure temps réel + notifications ===
-let mercureEventSource = null;
-let mercureJwt = null;
-
-// Récupère le JWT Mercure une seule fois
-function fetchMercureJwt(callback) {
-    if (mercureJwt) { callback(mercureJwt); return; }
-    fetch('/chat/token').then(r => r.json()).then(data => {
-        mercureJwt = data.token;
-        callback(mercureJwt);
-    });
-}
-
-function subscribeToDiscussion(discussionId) {
-    fetchMercureJwt(function(token) {
-        if(mercureEventSource) mercureEventSource.close();
-        const url = new URL('http://localhost:3000/.well-known/mercure');
-        url.searchParams.append('topic', `/chat/discussion/${discussionId}`);
-        url.searchParams.append('jwt', token);
-        mercureEventSource = new EventSource(url);
-        mercureEventSource.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            if(data && data.id && data.contenu) {
-                // Si la discussion est ouverte
-                if(currentDiscussionId == discussionId) {
-                    chatMessagesList.innerHTML += `
-                        <div style=\"margin-bottom:12px;\">
-                            <div style=\"font-size:12px;color:#888;\">${data.auteur} • ${humanDate(data.createdAt)}</div>
-                            <div style=\"display:inline-block;background:#e6ffe0;padding:8px 12px;border-radius:8px;max-width:70%;min-width:36px;word-break:break-word;\">${data.contenu}</div>
-                        </div>
-                    `;
-                    chatMessagesList.scrollTop = chatMessagesList.scrollHeight;
-                } else {
-                    // Badge bleu sur la discussion
-                    const div = chatDiscussionsList.querySelector(`div[data-id='${discussionId}']`);
-                    if(div && !div.querySelector('.chat-unread-badge')) {
-                        const badge = document.createElement('span');
-                        badge.className = 'chat-unread-badge';
-                        badge.style = 'position:absolute;top:-6px;right:-18px;background:#0d6efd;color:#fff;border-radius:12px;padding:2px 8px;font-size:12px;min-width:22px;display:inline-block;text-align:center;box-shadow:0 1px 4px #0002;';
-                        badge.textContent = '1';
-                        div.querySelector('div[style*="font-size:11px"]').appendChild(badge);
-                    }
-                    // Notification navigateur
-                    if (window.Notification && Notification.permission === 'granted') {
-                        const notif = new Notification(`${data.auteur} (Nouveau message)`, {
-                            body: data.contenu.length > 60 ? data.contenu.substring(0,60)+'…' : data.contenu,
-                            tag: 'chat-discussion-'+discussionId
-                        });
-                        notif.onclick = function() {
-                            window.focus();
-                            openChatPanel();
-                            selectDiscussion(discussionId);
-                            this.close();
-                        };
-                    } else if (window.Notification && Notification.permission !== 'denied') {
-                        Notification.requestPermission();
-                    }
-                }
-            }
-        };
-    });
-}
+// === SUPPRESSION DU CODE MERCURE ET /chat/token ===
+// Ancien code supprimé :
+// function fetchMercureJwt(callback) { ... }
+// function subscribeToDiscussion(discussionId) { ... }
+// et tout appel à fetch('/chat/token')
 
 function selectDiscussion(id) {
     currentDiscussionId = id;
@@ -398,7 +341,7 @@ function selectDiscussion(id) {
         const noDisc = document.getElementById('chat-no-discussion');
         if(noDisc) noDisc.style.display = 'none';
         // S'abonner à Mercure pour cette discussion
-        subscribeToDiscussion(id);
+        // subscribeToDiscussion(id); // Ancien code supprimé
     });
 }
 
