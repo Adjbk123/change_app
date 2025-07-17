@@ -13,10 +13,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\Mercure\HubInterface;
-use Symfony\Component\Mercure\Update;
-use Firebase\JWT\JWT;
-use App\Service\PushNotificationService;
 use App\Service\FcmNotificationService;
 
 #[Route('/chat')]
@@ -185,22 +181,6 @@ class ChatController extends AbstractController
             $em->flush();
         }
         return $this->json(['id' => $discussion->getId()]);
-    }
-
-    #[Route('/token', name: 'chat_mercure_token', methods: ['GET'])]
-    public function mercureToken(): JsonResponse
-    {
-        $secret ='ma-cle-secrete-super-longue-mais-sans-caracteres-bizarres-123456';
-        $payload = [
-            'mercure' => [
-                'subscribe' => ['*'], // Autorise tous les topics
-                "publish"=> ["*"]
-            ]
-        ];
-        $jwt = JWT::encode($payload, $secret, 'HS256');
-        // Log le token pour vérif (à enlever en prod)
-        error_log("JWT Mercure généré : " . $jwt);
-        return $this->json(['token' => $jwt]);
     }
 
 }
