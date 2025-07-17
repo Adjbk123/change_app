@@ -98,8 +98,10 @@ class ChatController extends AbstractController
 
         // Déterminer le destinataire (l'autre utilisateur de la discussion)
         $destinataire = ($discussion->getUser1() && $discussion->getUser1()->getId() !== $user->getId()) ? $discussion->getUser1() : $discussion->getUser2();
+        $fcmResult = null;
         if ($destinataire && $destinataire->getPushToken()) {
-            $fcmService->sendPush(
+            // On capture le résultat de l'envoi FCM pour le log
+            $fcmResult = $fcmService->sendPush(
                 $destinataire->getPushToken(),
                 'Nouveau message',
                 'Vous avez reçu un message de ' . $user->getNomComplet(),
@@ -107,7 +109,14 @@ class ChatController extends AbstractController
             );
         }
 
-        return $this->json(['success' => true]);
+        return $this->json([
+            'success' => true,
+            'fcm' => [
+                'sent' => $fcmResult,
+                'destinataire' => $destinataire ? $destinataire->getNomComplet() : null,
+                'pushToken' => $destinataire ? $destinataire->getPushToken() : null
+            ]
+        ]);
     }
 
     #[Route('/utilisateurs', name: 'chat_utilisateurs', methods: ['GET'])]
