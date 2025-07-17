@@ -112,7 +112,10 @@ class ChatController extends AbstractController
         return $this->json([
             'success' => true,
             'fcm' => [
-                'sent' => $fcmResult,
+                'sent' => $fcmResult['sent'] ?? null,
+                'status' => $fcmResult['status'] ?? null,
+                'response' => $fcmResult['response'] ?? null,
+                'error' => $fcmResult['error'] ?? null,
                 'destinataire' => $destinataire ? $destinataire->getNomComplet() : null,
                 'pushToken' => $destinataire ? $destinataire->getPushToken() : null
             ]

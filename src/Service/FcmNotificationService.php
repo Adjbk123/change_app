@@ -44,11 +44,10 @@ class FcmNotificationService
                     'title' => $title,
                     'body' => $body,
                 ],
-                'data' => $data,
+                'data' => array_map('strval', $data), // Correction : toutes les valeurs en string
             ]
         ];
 
-        // Log de debug : requête et réponse brute de l'API FCM
         $log = [
             'date' => date('c'),
             'to' => $fcmToken,
@@ -56,6 +55,12 @@ class FcmNotificationService
             'body' => $body,
             'data' => $data,
             'payload' => $message,
+        ];
+        $result = [
+            'sent' => false,
+            'status' => null,
+            'response' => null,
+            'error' => null
         ];
         try {
             $response = $this->httpClient->request('POST', $url, [
@@ -67,11 +72,15 @@ class FcmNotificationService
             ]);
             $log['status'] = $response->getStatusCode();
             $log['response'] = $response->getContent(false);
+            $result['status'] = $log['status'];
+            $result['response'] = $log['response'];
+            $result['sent'] = ($log['status'] === 200);
         } catch (\Throwable $e) {
             $log['error'] = $e->getMessage();
+            $result['error'] = $e->getMessage();
         }
         file_put_contents(__DIR__.'/../../var/log/fcm.log', json_encode($log, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE)."\n\n", FILE_APPEND);
 
-        return isset($log['status']) && $log['status'] === 200;
+        return $result;
     }
 }
