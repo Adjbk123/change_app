@@ -39,22 +39,23 @@
         console.log("✅ OneSignal initialisé (v16+)");
 
         // Vérifie si l'utilisateur est déjà abonné
-        const isSubscribed = await OneSignal.User.PushSubscription.isSubscribed();
-        const pushToken = await OneSignal.User.PushSubscription.getToken();
-        console.log("🔍 isSubscribed:", isSubscribed, "pushToken:", pushToken);
+        const optedIn = OneSignal.User.PushSubscription.optedIn;
+        const pushToken = OneSignal.User.PushSubscription.token;
+        console.log("🔍 optedIn:", optedIn, "pushToken:", pushToken);
 
-        if (isSubscribed && pushToken) {
+        if (optedIn && pushToken) {
             console.log("🔑 Token déjà présent:", pushToken);
             sendTokenToBackend(pushToken);
         } else {
             console.log("🔔 Demande de permission...");
-            await OneSignal.User.PushSubscription.request();
+            await OneSignal.Notifications.requestPermission();
 
-            const isSubscribedNow = await OneSignal.User.PushSubscription.isSubscribed();
-            const newToken = await OneSignal.User.PushSubscription.getToken();
-            console.log("🆕 isSubscribed:", isSubscribedNow, "pushToken:", newToken);
+            // Après la demande, relire les propriétés
+            const optedInNow = OneSignal.User.PushSubscription.optedIn;
+            const newToken = OneSignal.User.PushSubscription.token;
+            console.log("🆕 optedIn:", optedInNow, "pushToken:", newToken);
 
-            if (isSubscribedNow && newToken) {
+            if (optedInNow && newToken) {
                 console.log("✅ Souscription ok, token:", newToken);
                 sendTokenToBackend(newToken);
             } else {
