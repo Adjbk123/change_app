@@ -42,8 +42,31 @@ class RegistrationController extends AbstractController
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
             $entityManager->persist($user);
-            // Ne pas flusher ici, nous le ferons après la création de AffectationAgence et potentiellement la mise à jour de l'Agence
 
+            // --- NOUVELLE LOGIQUE ---
+            if ($roleInternal === 'ROLE_ADMIN') {
+                // Pas d'agence obligatoire, pas d'affectation créée
+                $entityManager->flush();
+                $email = (new TemplatedEmail())
+                    ->from(new Address('contact@retouralasource-fx.com', 'MySwap'))
+                    ->to($user->getEmail())
+                    ->subject('Votre compte administrateur a été créé sur MySwap')
+                    ->htmlTemplate('emails/registration_success.html.twig')
+                    ->context([
+                        'user' => $user,
+                        'plainPassword' => $plainPassword,
+                    ]);
+                $mailer->send($email);
+                $this->addFlash('success', 'Le compte administrateur a été créé avec succès. Un e-mail a été envoyé à l\'utilisateur.');
+                return $this->redirectToRoute('app_user_index');
+            }
+            // Pour les autres rôles, l'agence est obligatoire
+            if (!$agence) {
+                $this->addFlash('danger', 'Veuillez sélectionner une agence pour ce rôle.');
+                return $this->render('registration/register.html.twig', [
+                    'registrationForm' => $form,
+                ]);
+            }
             // Créer l'entité AffectationAgence
             $affectationAgence = new AffectationAgence();
             $affectationAgence->setUser($user);
@@ -51,25 +74,16 @@ class RegistrationController extends AbstractController
             $affectationAgence->setRoleInterne($roleInternal);
             $affectationAgence->setDateDebut($dateDebut);
             $affectationAgence->setActif(true);
-
             $entityManager->persist($affectationAgence);
 
-            // --- NOUVELLE LOGIQUE : Affecter l'utilisateur comme responsable de l'agence si le rôle est 'ROLE_USER' ---
-            // Assurez-vous que 'ROLE_USER' est bien le rôle que vous utilisez pour les responsables d'agence
+            // --- LOGIQUE RESPONSABLE ---
             if ($roleInternal === 'ROLE_RESPONSABLE') {
-                // Vérifier si l'agence existe et a une méthode setResponsable
                 if ($agence) {
-                    // Vous devez vous assurer que votre entité Agence a bien une relation avec User
-                    // et une méthode setResponsable() qui prend un User en paramètre.
                     $agence->setResponsable($user);
-                    $entityManager->persist($agence); // Persister l'agence modifiée
+                    $entityManager->persist($agence);
                 }
             }
-            // --- FIN NOUVELLE LOGIQUE ---
-
             $entityManager->flush();
-
-            // Envoi de l'e-mail de confirmation de création de compte
             $email = (new TemplatedEmail())
                 ->from(new Address('contact@retouralasource-fx.com', 'MySwap'))
                 ->to($user->getEmail())
@@ -80,9 +94,7 @@ class RegistrationController extends AbstractController
                     'plainPassword' => $plainPassword,
                 ]);
             $mailer->send($email);
-
             $this->addFlash('success', 'Le compte utilisateur a été créé avec succès et affecté à l\'agence. Un e-mail a été envoyé à l\'utilisateur.');
-
             return $this->redirectToRoute('app_user_index');
         }
 

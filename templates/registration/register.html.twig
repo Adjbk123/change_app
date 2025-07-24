@@ -24,8 +24,13 @@
     <fieldset>
         <legend class="border-primary border-start border-3 ps-2 h3">Affectation</legend>
         <hr>
-        {{ form_row(registrationForm.agence) }}
-        {{ form_row(registrationForm.role) }}
+        <div id="agence-field-wrapper">
+            {{ form_row(registrationForm.agence) }}
+        </div>
+        <div id="role-field-wrapper">
+            {{ form_row(registrationForm.role) }}
+            <small class="form-text text-muted" id="role-help-text">Si vous choisissez "Administrateur", l'agence n'est pas requise.</small>
+        </div>
         {{ form_row(registrationForm.date_debut) }}
 
     </fieldset>
@@ -34,10 +39,17 @@
         <legend class="border-primary border-start border-3 ps-2 h3">Mot de passe de connexion</legend>
         <hr>
         <div id="password-fields-wrapper">
-        {{ form_row(registrationForm.plainPassword) }}
-            <button type="button" class="btn btn-outline-secondary mt-2" id="toggle-password-visibility">
-                <span id="toggle-password-icon" class="bi bi-eye"></span> Afficher/Masquer le mot de passe
-            </button>
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-6">
+                    {{ form_row(registrationForm.plainPassword.first) }}
+                </div>
+                <div class="col-12 col-md-6 position-relative">
+                    {{ form_row(registrationForm.plainPassword.second) }}
+                    <button type="button" class="btn btn-outline-secondary position-absolute top-0 end-0 mt-2 me-2" id="toggle-password-visibility" style="z-index:2;">
+                        <span id="toggle-password-icon" class="bi bi-eye"></span> Afficher/Masquer
+                    </button>
+                </div>
+            </div>
         </div>
     </fieldset>
 
@@ -49,6 +61,7 @@
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Mot de passe toggle
             const toggleBtn = document.getElementById('toggle-password-visibility');
             const icon = document.getElementById('toggle-password-icon');
             // Sélectionne les deux champs password générés par le RepeatedType
@@ -63,6 +76,25 @@
                 });
                 icon.className = shown ? 'bi bi-eye-slash' : 'bi bi-eye';
             });
+
+            // Masquage dynamique du champ agence si admin
+            const roleSelect = document.getElementById('registration_form_role');
+            const agenceFieldWrapper = document.getElementById('agence-field-wrapper');
+            const agenceSelect = document.getElementById('registration_form_agence');
+            function toggleAgenceField() {
+                if (roleSelect.value === 'ROLE_ADMIN') {
+                    agenceFieldWrapper.style.display = 'none';
+                    agenceSelect.removeAttribute('required');
+                } else {
+                    agenceFieldWrapper.style.display = '';
+                    agenceSelect.setAttribute('required', 'required');
+                }
+            }
+            if (roleSelect && agenceFieldWrapper && agenceSelect) {
+                roleSelect.addEventListener('change', toggleAgenceField);
+                // Appel initial au chargement
+                toggleAgenceField();
+            }
         });
     </script>
 {% endblock %}
