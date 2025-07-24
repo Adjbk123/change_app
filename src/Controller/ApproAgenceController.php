@@ -107,8 +107,9 @@ final class ApproAgenceController extends AbstractController
 
             // Notification push au demandeur
             $demandeur = $approAgence->getDemandeur();
+            $fcmResult = null;
             if ($demandeur && $demandeur->getPushToken()) {
-                $this->fcmService->sendPush(
+                $fcmResult = $this->fcmService->sendPush(
                     $demandeur->getPushToken(),
                     'Demande d\'approvisionnement validée',
                     'Votre demande d\'approvisionnement agence a été validée.',
@@ -118,6 +119,23 @@ final class ApproAgenceController extends AbstractController
                         'statut' => 'approuve',
                     ]
                 );
+                file_put_contents(
+                    __DIR__.'/../../var/log/fcm.log',
+                    json_encode([
+                        'to' => $demandeur->getPushToken(),
+                        'title' => 'Demande d\'approvisionnement validée',
+                        'body' => 'Votre demande d\'approvisionnement agence a été validée.',
+                        'data' => [
+                            'type' => 'appro_agence',
+                            'approId' => $approAgence->getId(),
+                            'statut' => 'approuve',
+                        ],
+                        'fcmResult' => $fcmResult,
+                        'date' => date('c')
+                    ], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "\n\n",
+                    FILE_APPEND
+                );
+                $this->addFlash('info', 'Résultat FCM : ' . json_encode($fcmResult));
             }
 
             $this->addFlash('success', 'Demande d\'approvisionnement validée avec succès.');
@@ -158,8 +176,9 @@ final class ApproAgenceController extends AbstractController
 
         // Notification push au demandeur
         $demandeur = $approAgence->getDemandeur();
+        $fcmResult = null;
         if ($demandeur && $demandeur->getPushToken()) {
-            $this->fcmService->sendPush(
+            $fcmResult = $this->fcmService->sendPush(
                 $demandeur->getPushToken(),
                 'Demande d\'approvisionnement rejetée',
                 'Votre demande d\'approvisionnement agence a été rejetée.',
@@ -169,6 +188,23 @@ final class ApproAgenceController extends AbstractController
                     'statut' => 'rejete',
                 ]
             );
+            file_put_contents(
+                __DIR__.'/../../var/log/fcm.log',
+                json_encode([
+                    'to' => $demandeur->getPushToken(),
+                    'title' => 'Demande d\'approvisionnement rejetée',
+                    'body' => 'Votre demande d\'approvisionnement agence a été rejetée.',
+                    'data' => [
+                        'type' => 'appro_agence',
+                        'approId' => $approAgence->getId(),
+                        'statut' => 'rejete',
+                    ],
+                    'fcmResult' => $fcmResult,
+                    'date' => date('c')
+                ], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "\n\n",
+                FILE_APPEND
+            );
+            $this->addFlash('info', 'Résultat FCM : ' . json_encode($fcmResult));
         }
 
         $this->addFlash('success', 'Demande d\'approvisionnement rejetée avec succès.');
@@ -189,8 +225,9 @@ final class ApproAgenceController extends AbstractController
             // Notification push à tous les admins
             $admins = $this->userRepository->findAdmins();
             foreach ($admins as $admin) {
+                $fcmResult = null;
                 if ($admin->getPushToken()) {
-                    $this->fcmService->sendPush(
+                    $fcmResult = $this->fcmService->sendPush(
                         $admin->getPushToken(),
                         'Nouvelle demande d\'approvisionnement agence',
                         'Une nouvelle demande d\'approvisionnement agence a été créée.',
@@ -199,6 +236,22 @@ final class ApproAgenceController extends AbstractController
                             'approId' => $approAgence->getId(),
                         ]
                     );
+                    file_put_contents(
+                        __DIR__.'/../../var/log/fcm.log',
+                        json_encode([
+                            'to' => $admin->getPushToken(),
+                            'title' => 'Nouvelle demande d\'approvisionnement agence',
+                            'body' => 'Une nouvelle demande d\'approvisionnement agence a été créée.',
+                            'data' => [
+                                'type' => 'appro_agence',
+                                'approId' => $approAgence->getId(),
+                            ],
+                            'fcmResult' => $fcmResult,
+                            'date' => date('c')
+                        ], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "\n\n",
+                        FILE_APPEND
+                    );
+                    $this->addFlash('info', 'Résultat FCM : ' . json_encode($fcmResult));
                 }
             }
 

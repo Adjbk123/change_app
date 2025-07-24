@@ -154,8 +154,9 @@ final class ApproCaisseController extends AbstractController
 
         // Notification push au demandeur
         $demandeur = $approCaisse->getDemandeur();
+        $fcmResult = null;
         if ($demandeur && $demandeur->getPushToken()) {
-            $this->fcmService->sendPush(
+            $fcmResult = $this->fcmService->sendPush(
                 $demandeur->getPushToken(),
                 'Demande d\'approvisionnement validée',
                 'Votre demande d\'approvisionnement caisse a été validée.',
@@ -165,6 +166,23 @@ final class ApproCaisseController extends AbstractController
                     'statut' => 'approuve',
                 ]
             );
+            file_put_contents(
+                __DIR__.'/../../var/log/fcm.log',
+                json_encode([
+                    'to' => $demandeur->getPushToken(),
+                    'title' => 'Demande d\'approvisionnement validée',
+                    'body' => 'Votre demande d\'approvisionnement caisse a été validée.',
+                    'data' => [
+                        'type' => 'appro_caisse',
+                        'approId' => $approCaisse->getId(),
+                        'statut' => 'approuve',
+                    ],
+                    'fcmResult' => $fcmResult,
+                    'date' => date('c')
+                ], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "\n\n",
+                FILE_APPEND
+            );
+            $this->addFlash('info', 'Résultat FCM : ' . json_encode($fcmResult));
         }
 
         $this->addFlash('success', 'Demande d\'approvisionnement validée avec succès.');
@@ -202,8 +220,9 @@ final class ApproCaisseController extends AbstractController
 
         // Notification push au demandeur
         $demandeur = $approCaisse->getDemandeur();
+        $fcmResult = null;
         if ($demandeur && $demandeur->getPushToken()) {
-            $this->fcmService->sendPush(
+            $fcmResult = $this->fcmService->sendPush(
                 $demandeur->getPushToken(),
                 'Demande d\'approvisionnement rejetée',
                 'Votre demande d\'approvisionnement caisse a été rejetée.',
@@ -213,6 +232,23 @@ final class ApproCaisseController extends AbstractController
                     'statut' => 'rejete',
                 ]
             );
+            file_put_contents(
+                __DIR__.'/../../var/log/fcm.log',
+                json_encode([
+                    'to' => $demandeur->getPushToken(),
+                    'title' => 'Demande d\'approvisionnement rejetée',
+                    'body' => 'Votre demande d\'approvisionnement caisse a été rejetée.',
+                    'data' => [
+                        'type' => 'appro_caisse',
+                        'approId' => $approCaisse->getId(),
+                        'statut' => 'rejete',
+                    ],
+                    'fcmResult' => $fcmResult,
+                    'date' => date('c')
+                ], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "\n\n",
+                FILE_APPEND
+            );
+            $this->addFlash('info', 'Résultat FCM : ' . json_encode($fcmResult));
         }
 
         $this->addFlash('success', 'Demande d\'approvisionnement caisse rejetée avec succès.');
@@ -248,8 +284,9 @@ final class ApproCaisseController extends AbstractController
                     $mailer->send($email);
                 }
                 // Notification push au responsable
+                $fcmResult = null;
                 if ($responsable && $responsable->getPushToken()) {
-                    $this->fcmService->sendPush(
+                    $fcmResult = $this->fcmService->sendPush(
                         $responsable->getPushToken(),
                         'Nouvelle demande d\'approvisionnement caisse',
                         'Une nouvelle demande d\'approvisionnement caisse a été créée.',
@@ -258,6 +295,22 @@ final class ApproCaisseController extends AbstractController
                             'approId' => $approCaisse->getId(),
                         ]
                     );
+                    file_put_contents(
+                        __DIR__.'/../../var/log/fcm.log',
+                        json_encode([
+                            'to' => $responsable->getPushToken(),
+                            'title' => 'Nouvelle demande d\'approvisionnement caisse',
+                            'body' => 'Une nouvelle demande d\'approvisionnement caisse a été créée.',
+                            'data' => [
+                                'type' => 'appro_caisse',
+                                'approId' => $approCaisse->getId(),
+                            ],
+                            'fcmResult' => $fcmResult,
+                            'date' => date('c')
+                        ], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "\n\n",
+                        FILE_APPEND
+                    );
+                    $this->addFlash('info', 'Résultat FCM : ' . json_encode($fcmResult));
                 }
             }
 
