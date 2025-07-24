@@ -106,9 +106,11 @@ final class ApproAgenceController extends AbstractController
             $em->getConnection()->commit(); // Commit transaction
 
             // Notification push au demandeur
+            file_put_contents(__DIR__.'/../../var/log/debug_appro_agence.txt', 'TRY SEND PUSH ' . date('c') . "\n", FILE_APPEND);
             $demandeur = $approAgence->getDemandeur();
             $fcmResult = null;
             if ($demandeur && $demandeur->getPushToken()) {
+                file_put_contents(__DIR__.'/../../var/log/debug_appro_agence.txt', 'HAS TOKEN: ' . $demandeur->getPushToken() . "\n", FILE_APPEND);
                 $fcmResult = $this->fcmService->sendPush(
                     $demandeur->getPushToken(),
                     'Demande d\'approvisionnement validée',
@@ -175,9 +177,11 @@ final class ApproAgenceController extends AbstractController
         $em->flush();
 
         // Notification push au demandeur
+        file_put_contents(__DIR__.'/../../var/log/debug_appro_agence.txt', 'TRY SEND PUSH ' . date('c') . "\n", FILE_APPEND);
         $demandeur = $approAgence->getDemandeur();
         $fcmResult = null;
         if ($demandeur && $demandeur->getPushToken()) {
+            file_put_contents(__DIR__.'/../../var/log/debug_appro_agence.txt', 'HAS TOKEN: ' . $demandeur->getPushToken() . "\n", FILE_APPEND);
             $fcmResult = $this->fcmService->sendPush(
                 $demandeur->getPushToken(),
                 'Demande d\'approvisionnement rejetée',
@@ -225,8 +229,10 @@ final class ApproAgenceController extends AbstractController
             // Notification push à tous les admins
             $admins = $this->userRepository->findAdmins();
             foreach ($admins as $admin) {
+                file_put_contents(__DIR__.'/../../var/log/debug_appro_agence.txt', 'TRY SEND PUSH ' . date('c') . "\n", FILE_APPEND);
                 $fcmResult = null;
                 if ($admin->getPushToken()) {
+                    file_put_contents(__DIR__.'/../../var/log/debug_appro_agence.txt', 'HAS TOKEN: ' . $admin->getPushToken() . "\n", FILE_APPEND);
                     $fcmResult = $this->fcmService->sendPush(
                         $admin->getPushToken(),
                         'Nouvelle demande d\'approvisionnement agence',
