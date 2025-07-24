@@ -24,13 +24,15 @@
     <fieldset>
         <legend class="border-primary border-start border-3 ps-2 h3">Affectation</legend>
         <hr>
-        <div id="agence-field-wrapper">
-            {{ form_row(registrationForm.agence) }}
-        </div>
         <div id="role-field-wrapper">
             {{ form_row(registrationForm.role) }}
             <small class="form-text text-muted" id="role-help-text">Si vous choisissez "Administrateur", l'agence n'est pas requise.</small>
         </div>
+
+        <div id="agence-field-wrapper">
+            {{ form_row(registrationForm.agence) }}
+        </div>
+
         {{ form_row(registrationForm.date_debut) }}
 
     </fieldset>
@@ -45,13 +47,17 @@
                 </div>
                 <div class="col-12 col-md-6 position-relative">
                     {{ form_row(registrationForm.plainPassword.second) }}
-                    <button type="button" class="btn btn-outline-secondary position-absolute top-0 end-0 mt-2 me-2" id="toggle-password-visibility" style="z-index:2;">
-                        <span id="toggle-password-icon" class="bi bi-eye"></span> Afficher/Masquer
+                    <button type="button"
+                            class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2"
+                            id="toggle-password-visibility"
+                            style="z-index:2;">
+                        <span id="toggle-password-icon" class="bi bi-eye"></span>
                     </button>
                 </div>
             </div>
         </div>
     </fieldset>
+
 
     <button type="submit" class="btn btn-primary">Ajouter le compte</button>
     {{ form_end(registrationForm) }}

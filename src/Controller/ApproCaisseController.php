@@ -8,6 +8,7 @@ use App\Form\ApproCaisseForm;
 use App\Repository\ApproCaisseRepository;
 use App\Repository\AffectationAgenceRepository;
 use App\Service\CaisseService;
+use App\Service\FcmNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +23,12 @@ use Symfony\Component\Mime\Address;
 #[Route('/appro-caisse')]
 final class ApproCaisseController extends AbstractController
 {
+    private FcmNotificationService $fcmService;
+    public function __construct(FcmNotificationService $fcmService)
+    {
+        $this->fcmService = $fcmService;
+    }
+
     #[Route(name: 'app_appro_caisse_index', methods: ['GET'])]
     public function index(ApproCaisseRepository $approCaisseRepository, CaisseService $caisseService): Response
     {
@@ -145,6 +152,21 @@ final class ApproCaisseController extends AbstractController
         // Enregistrement
         $em->flush();
 
+        // Notification push au demandeur
+        $demandeur = $approCaisse->getDemandeur();
+        if ($demandeur && $demandeur->getPushToken()) {
+            $this->fcmService->sendPush(
+                $demandeur->getPushToken(),
+                'Demande d\'approvisionnement validée',
+                'Votre demande d\'approvisionnement caisse a été validée.',
+                [
+                    'type' => 'appro_caisse',
+                    'approId' => $approCaisse->getId(),
+                    'statut' => 'approuve',
+                ]
+            );
+        }
+
         $this->addFlash('success', 'Demande d\'approvisionnement validée avec succès.');
         return $this->redirectToRoute('app_compte_caisse_show', [
             'id' => $compteCaisse->getId()
@@ -178,6 +200,21 @@ final class ApproCaisseController extends AbstractController
 
         $em->flush();
 
+        // Notification push au demandeur
+        $demandeur = $approCaisse->getDemandeur();
+        if ($demandeur && $demandeur->getPushToken()) {
+            $this->fcmService->sendPush(
+                $demandeur->getPushToken(),
+                'Demande d\'approvisionnement rejetée',
+                'Votre demande d\'approvisionnement caisse a été rejetée.',
+                [
+                    'type' => 'appro_caisse',
+                    'approId' => $approCaisse->getId(),
+                    'statut' => 'rejete',
+                ]
+            );
+        }
+
         $this->addFlash('success', 'Demande d\'approvisionnement caisse rejetée avec succès.');
         return $this->redirectToRoute('app_compte_caisse_show', ['id' => $approCaisse->getCompteCaisse()->getId()]);
     }
@@ -209,6 +246,18 @@ final class ApproCaisseController extends AbstractController
                             'approCaisse' => $approCaisse,
                         ]);
                     $mailer->send($email);
+                }
+                // Notification push au responsable
+                if ($responsable && $responsable->getPushToken()) {
+                    $this->fcmService->sendPush(
+                        $responsable->getPushToken(),
+                        'Nouvelle demande d\'approvisionnement caisse',
+                        'Une nouvelle demande d\'approvisionnement caisse a été créée.',
+                        [
+                            'type' => 'appro_caisse',
+                            'approId' => $approCaisse->getId(),
+                        ]
+                    );
                 }
             }
 

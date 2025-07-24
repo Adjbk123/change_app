@@ -12,10 +12,20 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use App\Service\FcmNotificationService;
+use App\Repository\UserRepository;
 
 #[Route('/appro-agence')]
 final class ApproAgenceController extends AbstractController
 {
+    private FcmNotificationService $fcmService;
+    private UserRepository $userRepository;
+    public function __construct(FcmNotificationService $fcmService, UserRepository $userRepository)
+    {
+        $this->fcmService = $fcmService;
+        $this->userRepository = $userRepository;
+    }
+
     #[Route(name: 'app_appro_agence_index', methods: ['GET'])]
     public function index(ApproAgenceRepository $approAgenceRepository): Response
     {
@@ -95,6 +105,21 @@ final class ApproAgenceController extends AbstractController
 
             $em->getConnection()->commit(); // Commit transaction
 
+            // Notification push au demandeur
+            $demandeur = $approAgence->getDemandeur();
+            if ($demandeur && $demandeur->getPushToken()) {
+                $this->fcmService->sendPush(
+                    $demandeur->getPushToken(),
+                    'Demande d\'approvisionnement validée',
+                    'Votre demande d\'approvisionnement agence a été validée.',
+                    [
+                        'type' => 'appro_agence',
+                        'approId' => $approAgence->getId(),
+                        'statut' => 'approuve',
+                    ]
+                );
+            }
+
             $this->addFlash('success', 'Demande d\'approvisionnement validée avec succès.');
         } catch (\Exception $e) {
             $em->getConnection()->rollBack();
@@ -131,6 +156,21 @@ final class ApproAgenceController extends AbstractController
 
         $em->flush();
 
+        // Notification push au demandeur
+        $demandeur = $approAgence->getDemandeur();
+        if ($demandeur && $demandeur->getPushToken()) {
+            $this->fcmService->sendPush(
+                $demandeur->getPushToken(),
+                'Demande d\'approvisionnement rejetée',
+                'Votre demande d\'approvisionnement agence a été rejetée.',
+                [
+                    'type' => 'appro_agence',
+                    'approId' => $approAgence->getId(),
+                    'statut' => 'rejete',
+                ]
+            );
+        }
+
         $this->addFlash('success', 'Demande d\'approvisionnement rejetée avec succès.');
         return $this->redirectToRoute('app_compte_agence_show', ['id' => $approAgence->getCompteAgence()->getId()]);
     }
@@ -145,6 +185,22 @@ final class ApproAgenceController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($approAgence);
             $entityManager->flush();
+
+            // Notification push à tous les admins
+            $admins = $this->userRepository->findAdmins();
+            foreach ($admins as $admin) {
+                if ($admin->getPushToken()) {
+                    $this->fcmService->sendPush(
+                        $admin->getPushToken(),
+                        'Nouvelle demande d\'approvisionnement agence',
+                        'Une nouvelle demande d\'approvisionnement agence a été créée.',
+                        [
+                            'type' => 'appro_agence',
+                            'approId' => $approAgence->getId(),
+                        ]
+                    );
+                }
+            }
 
             return $this->redirectToRoute('app_appro_agence_index', [], Response::HTTP_SEE_OTHER);
         }
