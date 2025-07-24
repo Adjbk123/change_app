@@ -172,20 +172,28 @@
                                 });
 
                                 if (data.profilClients.length === 1) {
+                                    // Sélection automatique et synchronisation du champ caché
                                     profilClientSelect.value = data.profilClients[0].id;
                                     profilClientHiddenInput.value = data.profilClients[0].id;
                                     profilClientSelect.disabled = true; // Visuellement désactivé
                                     if (profilClientHelpText) profilClientHelpText.textContent = 'Un seul profil trouvé, sélectionné automatiquement.';
+                                    // Déclencher la mise à jour du formulaire spécifique
+                                    if ('{{ type }}' === 'depot') triggerDepotUpdate();
+                                    if ('{{ type }}' === 'retrait') triggerRetraitUpdate();
+                                    // Activer le bouton submit si tout est OK
+                                    if (submitButton) submitButton.disabled = false;
                                 } else {
                                     profilClientSelect.disabled = false;
-                                    profilClientSelect.value = ''; // S'assurer qu'aucune option n'est présélectionnée par défaut
-                                    profilClientHiddenInput.value = ''; // Laisser le champ caché vide jusqu'à sélection manuelle
+                                    profilClientSelect.value = '';
+                                    profilClientHiddenInput.value = '';
                                     if (profilClientHelpText) profilClientHelpText.textContent = 'Sélectionnez le profil client pour l\'opération.';
                                 }
                             }
-                            // Déclencher la mise à jour du formulaire spécifique après la sélection du profil
-                            if ('{{ type }}' === 'depot') triggerDepotUpdate();
-                            if ('{{ type }}' === 'retrait') triggerRetraitUpdate(); // Déclencher pour le retrait
+                            // Déclencher la mise à jour du formulaire spécifique après la sélection du profil (pour le cas >1 profil)
+                            if (data.profilClients.length > 1) {
+                                if ('{{ type }}' === 'depot') triggerDepotUpdate();
+                                if ('{{ type }}' === 'retrait') triggerRetraitUpdate();
+                            }
                         } else {
                             resetProfilClientSelect(true);
                             if (profilClientHelpText) profilClientHelpText.innerHTML = '<span class="text-danger">Aucun profil client trouvé pour ce client.</span>';
